@@ -1,4 +1,5 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis Vocabularies'
 
@@ -6,7 +7,18 @@ ext {
     moduleName = 'org.trellisldp.vocabulary'
 }
 
+javaModule.name = 'org.trellisldp.vocabulary'
+javaModule.extraTestModules = ['org.mockito']
+
+javaModule.patchModules 'org.apache.httpcomponents:httpclient-osgi':'commons-codec:commons-codec'
+javaModule.patchModules 'xerces:xercesImpl':'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces'
+javaModule.patchModules 'xml-apis:xml-apis':'xerces:xercesImpl'
+
 dependencies {
+    patch 'org.apache.httpcomponents:httpclient-osgi:4.5.3'
+    patch 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:2.11.0_1'
+    patch 'xml-apis:xml-apis:1.4.01'
+
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
 
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion

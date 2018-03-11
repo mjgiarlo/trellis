@@ -1,4 +1,5 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis File-based service implementations'
 
@@ -6,7 +7,16 @@ ext {
     moduleName = 'org.trellisldp.file'
 }
 
+javaModule.name = 'org.trellisldp.file'
+javaModule.extraTestModules = ['org.mockito', 'org.trellisldp.id']
+javaModule.patchModules 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject':'javax.inject:javax.inject'
+javaModule.patchModules 'org.apache.httpcomponents:httpclient-osgi':'commons-codec:commons-codec'
+
 dependencies {
+    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:$javaxInjectVersion"
+    patch 'org.apache.httpcomponents:httpclient-osgi:4.5.3'
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.javax-inject', version: javaxInjectVersion
     api project(':trellis-api')

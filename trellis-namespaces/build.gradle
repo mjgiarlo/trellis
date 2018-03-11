@@ -1,10 +1,14 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
-description = 'Trellis Namespace Manageer'
+description = 'Trellis Namespace Manager'
 
 ext {
     moduleName = 'org.trellisldp.namespaces'
 }
+
+javaModule.name = 'org.trellisldp.namespaces'
+javaModule.extraTestModules = ['tamaya.core']
 
 dependencies {
     api project(':trellis-api')

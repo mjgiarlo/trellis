@@ -1,12 +1,22 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis Notifications (AMQP)'
 
 ext {
     moduleName = 'org.trellisldp.amqp'
+
 }
 
+javaModule.name = 'org.trellisldp.amqp'
+javaModule.extraTestModules = ['org.junit.platform.runner', 'org.trellisldp.vocabulary']
+javaModule.patchModules 'javax.inject:javax.inject': 'org.apache.servicemix.bundles:org.apache.servicemix.bundles' +
+        '.javax-inject'
+
 dependencies {
+    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:$javaxInjectVersion"
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
     api group: 'com.rabbitmq', name: 'amqp-client', version: rabbitMqVersion
     api group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.javax-inject', version: javaxInjectVersion
     api project(':trellis-api')

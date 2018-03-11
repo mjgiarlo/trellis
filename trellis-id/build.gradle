@@ -1,10 +1,14 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis Id Generator'
 
 ext {
     moduleName = 'org.trellisldp.id'
 }
+
+javaModule.name = 'org.trellisldp.id'
+javaModule.extraTestModules = ['org.apache.commons.rdf.simple']
 
 dependencies {
     api project(':trellis-api')

@@ -1,4 +1,5 @@
 apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis Notifications (Kafka)'
 
@@ -6,7 +7,15 @@ ext {
     moduleName = 'org.trellisldp.kafka'
 }
 
+javaModule.name = 'org.trellisldp.kafka'
+javaModule.extraTestModules = ['org.trellisldp.vocabulary']
+javaModule.patchModules 'javax.inject:javax.inject': 'org.apache.servicemix.bundles:org.apache.servicemix.bundles' +
+        '.javax-inject'
+
 dependencies {
+    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:$javaxInjectVersion"
+    compile group: 'javax.inject', name: 'javax.inject', version: '1'
+
     api group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.kafka-clients', version: kafkaVersion
     api group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.javax-inject', version: javaxInjectVersion
     api project(':trellis-api')

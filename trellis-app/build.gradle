@@ -1,11 +1,37 @@
 apply plugin: 'java'
 apply plugin: 'distribution'
 apply plugin: 'application'
+apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis Application'
 mainClassName = 'org.trellisldp.app.TrellisApplication'
 
+javaModule.name = 'org.trellisldp.app'
+javaModule.extraTestModules = ['org.trellisldp.http']
+javaModule.patchModules 'org.apache.jena:jena-core': 'org.apache.jena:jena-osgi'
+javaModule.patchModules 'org.apache.activemq:activemq-broker': 'org.apache.activemq:activemq-client'
+javaModule.patchModules 'org.apache.httpcomponents:httpclient-osgi':'commons-codec:commons-codec'
+javaModule.patchModules 'org.apache.jena:jena-arq': 'org.apache.jena:jena-osgi'
+javaModule.patchModules 'com.google.code.findbugs:jsr305': 'javax.annotation:jsr250-api'
+javaModule.patchModules 'org.apache.geronimo.specs:geronimo-jms_1.1_spec': 'javax.jms:javax.jms-api'
+javaModule.patchModules 'javax.inject:javax.inject': 'org.apache.servicemix.bundles:org.apache.servicemix.bundles' +
+        '.javax-inject'
+javaModule.patchModules 'org.apache.httpcomponents:httpcore-osgi':'org.apache.httpcomponents:httpcore'
+javaModule.patchModules 'commons-logging:commons-logging':'org.slf4j:jcl-over-slf4j'
+javaModule.patchModules 'org.hamcrest:hamcrest.library':'org.hamcrest:hamcrest.core'
+
 dependencies {
+    patch 'org.hamcrest:hamcrest-library:1.3'
+    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:$javaxInjectVersion"
+    patch 'commons-logging:commons-logging:1.2'
+    patch "org.apache.jena:jena-core:$jenaVersion"
+    patch 'org.apache.httpcomponents:httpclient-osgi:4.5.3'
+    patch 'org.apache.httpcomponents:httpcore-osgi:4.4.6'
+    patch "org.apache.jena:jena-arq:$jenaVersion"
+    patch 'com.google.code.findbugs:jsr305:3.0.2'
+    patch 'org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1'
+    patch "org.apache.activemq:activemq-broker:$activeMqVersion"
+
     compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
     compile group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
     compile group: 'javax.jms', name: 'javax.jms-api', version: jmsApiVersion
@@ -40,7 +66,7 @@ dependencies {
 
     testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: dropwizardVersion
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: dropwizardVersion
-    testCompile group: 'org.apache.activemq', name: 'activemq-broker', version: activeMqVersion
+    testCompile group: 'org.apache.activemq', name: 'activemq-client', version: activeMqVersion
     testCompile group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
     testCompile group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
     testCompile group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
