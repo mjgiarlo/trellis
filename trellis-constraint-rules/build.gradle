@@ -7,8 +7,16 @@ ext {
     moduleName = 'org.trellisldp.constraint'
 }
 
-javaModule.name = 'org.trellisldp.constraint'
-javaModule.extraTestModules = ['org.mockito']
+javaModule {
+    name = 'org.trellisldp.constraint'
+    extraTestModules = ['org.mockito']
+}
+
+configurations {
+    all {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
+}
 
 dependencies {
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion

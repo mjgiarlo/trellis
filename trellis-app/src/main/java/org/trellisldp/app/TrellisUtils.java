@@ -19,13 +19,11 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.joining;
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static org.apache.jena.query.DatasetFactory.createTxnMem;
 import static org.apache.jena.query.DatasetFactory.wrap;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 import static org.apache.jena.tdb2.DatabaseMgr.connectDatasetGraph;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.trellisldp.app.config.NotificationsConfiguration.Type.JMS;
 import static org.trellisldp.app.config.NotificationsConfiguration.Type.KAFKA;
 import static org.trellisldp.io.JenaIOService.IO_HTML_CSS;
 import static org.trellisldp.io.JenaIOService.IO_HTML_ICON;
@@ -50,10 +48,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -69,7 +63,6 @@ import org.trellisldp.app.config.AuthConfiguration;
 import org.trellisldp.app.config.CORSConfiguration;
 import org.trellisldp.app.config.NotificationsConfiguration;
 import org.trellisldp.app.config.TrellisConfiguration;
-import org.trellisldp.jms.JmsPublisher;
 import org.trellisldp.kafka.KafkaPublisher;
 
 /**
@@ -175,16 +168,6 @@ final class TrellisUtils {
         return p;
     }
 
-    public static ActiveMQConnectionFactory getJmsFactory(final NotificationsConfiguration config) {
-        final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(
-                config.getConnectionString());
-        if (config.any().containsKey(PW_KEY) && config.any().containsKey(UN_KEY)) {
-            factory.setUserName(config.any().get(UN_KEY));
-            factory.setPassword(config.any().get(PW_KEY));
-        }
-        return factory;
-    }
-
     private static EventService buildKafkaPublisher(final NotificationsConfiguration config,
             final Environment environment) {
         LOGGER.info("Connecting to Kafka broker at {}", config.getConnectionString());
@@ -193,23 +176,12 @@ final class TrellisUtils {
         return new KafkaPublisher(kafkaProducer, config.getTopicName());
     }
 
-    private static EventService buildJmsPublisher(final NotificationsConfiguration config,
-            final Environment environment) throws JMSException {
-        LOGGER.info("Connecting to JMS broker at {}", config.getConnectionString());
-        final Connection jmsConnection = getJmsFactory(config).createConnection();
-        environment.lifecycle().manage(new AutoCloseableManager(jmsConnection));
-        return new JmsPublisher(jmsConnection.createSession(false, AUTO_ACKNOWLEDGE), config.getTopicName());
-    }
-
     public static EventService getNotificationService(final NotificationsConfiguration config,
-            final Environment environment) throws JMSException {
+            final Environment environment) {
 
         if (config.getEnabled()) {
             if (KAFKA.equals(config.getType())) {
                 return buildKafkaPublisher(config, environment);
-
-            } else if (JMS.equals(config.getType())) {
-                return buildJmsPublisher(config, environment);
             }
         }
         final String status = "notifications will be disabled";

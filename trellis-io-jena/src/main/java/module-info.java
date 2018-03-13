@@ -14,8 +14,9 @@
 module org.trellisldp.io {
     exports org.trellisldp.io;
     exports org.trellisldp.io.impl;
-    requires commons.io;
+    requires javax.inject;
     requires jena.osgi;
+    requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
     requires org.trellisldp.api;

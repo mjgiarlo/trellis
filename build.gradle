@@ -66,7 +66,6 @@ subprojects {
 
         /* Dependencies */
         activationApiVersion = '1.2.0'
-        activeMqVersion = '5.15.3'
         commonsCodecVersion = '1.11'
         commonsCollectionsVersion = '4.1'
         commonsIoVersion = '2.6'
@@ -75,10 +74,11 @@ subprojects {
         dropwizardVersion = '1.2.4'
         jacksonVersion = '2.9.4'
         javaxAnnotationsVersion = '1.3.2'
-        javaxInjectVersion = '1_2'
+        javaxInjectVersion = '2.5.0-b32'
         javaxJsonVersion = '1.1.2'
         jaxrsVersion = '2.1'
         jenaVersion = '3.6.0'
+        jettyAlpnServerVersion = '9.4.8.v20171121'
         jmsApiVersion = '2.0.1'
         kafkaVersion = '1.0.0_1'
         metricsVersion = '4.0.2'
@@ -91,6 +91,17 @@ subprojects {
 
         /* Transitive dependencies (for Karaf provisioning) */
         guavaVersion = '20.0' // via mustache 0.9.5
+
+        /* Transitive patched modules */
+        commonsLoggingVersion = '1.2'
+        geronimoJmsSpecVersion = '1.1.1'
+        geronimoAnnotationSpecVersion = '1.0-alpha-1'
+        hamcrestLibraryVersion = '1.3'
+        httpClientOsgiVersion = '4.5.3'
+        httpCoreOsgiVersion = '4.4.6'
+        jsr305Version = '3.0.2'
+        servicemixXercesVersion = '2.11.0_1'
+        xmlApisVersion = '1.4.01'
 
         /* Testing */
         apiguardianVersion = '1.0.0'

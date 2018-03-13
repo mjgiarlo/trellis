@@ -7,17 +7,23 @@ ext {
     moduleName = 'org.trellisldp.vocabulary'
 }
 
-javaModule.name = 'org.trellisldp.vocabulary'
-javaModule.extraTestModules = ['org.mockito']
+javaModule {
+    name = 'org.trellisldp.vocabulary'
+    extraTestModules = ['org.mockito']
 
-javaModule.patchModules 'org.apache.httpcomponents:httpclient-osgi':'commons-codec:commons-codec'
-javaModule.patchModules 'xerces:xercesImpl':'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces'
-javaModule.patchModules 'xml-apis:xml-apis':'xerces:xercesImpl'
+    patchModules 'org.apache.httpcomponents:httpclient-osgi': 'commons-codec:commons-codec'
+    patchModules 'xerces:xercesImpl': 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces'
+}
+
+configurations {
+    all {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
+}
 
 dependencies {
-    patch 'org.apache.httpcomponents:httpclient-osgi:4.5.3'
-    patch 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:2.11.0_1'
-    patch 'xml-apis:xml-apis:1.4.01'
+    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
+    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion"
 
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
 

@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 module org.trellisldp.event {
+    exports org.trellisldp.event;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.datatype.jsr310;
@@ -19,4 +20,5 @@ module org.trellisldp.event {
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
+    provides org.trellisldp.api.ActivityStreamService with org.trellisldp.event.EventSerializer;
 }

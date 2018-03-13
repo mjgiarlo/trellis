@@ -16,8 +16,6 @@ package org.trellisldp.app;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -38,9 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-import javax.jms.JMSException;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
@@ -206,37 +201,5 @@ public class TrellisUtilsTest {
         assertEquals("value", p.getProperty("some.other"));
         assertEquals("org.apache.kafka.common.serialization.StringSerializer", p.getProperty("key.serializer"));
         assertEquals("localhost:9092", p.getProperty("bootstrap.servers"));
-    }
-
-    @Test
-    public void testEventServiceJms() throws Exception {
-        final NotificationsConfiguration c = new NotificationsConfiguration();
-        c.setConnectionString("tcp://localhost:61616");
-        c.setEnabled(true);
-        c.setType(NotificationsConfiguration.Type.JMS);
-        assertThrows(JMSException.class, () -> TrellisUtils.getNotificationService(c, mockEnv));
-    }
-
-    @Test
-    public void testGetJmsFactory() {
-        final NotificationsConfiguration c = new NotificationsConfiguration();
-        c.setConnectionString("localhost:61616");
-
-        final ActiveMQConnectionFactory factory1 = TrellisUtils.getJmsFactory(c);
-        assertNull(factory1.getUserName());
-        assertNull(factory1.getPassword());
-        assertEquals("localhost:61616", factory1.getBrokerURL());
-
-        c.set("password", "pass");
-        final ActiveMQConnectionFactory factory2 = TrellisUtils.getJmsFactory(c);
-        assertNull(factory2.getUserName());
-        assertNull(factory2.getPassword());
-        assertEquals("localhost:61616", factory2.getBrokerURL());
-
-        c.set("username", "user");
-        final ActiveMQConnectionFactory factory3 = TrellisUtils.getJmsFactory(c);
-        assertEquals("user", factory3.getUserName());
-        assertEquals("pass", factory3.getPassword());
-        assertEquals("localhost:61616", factory3.getBrokerURL());
     }
 }

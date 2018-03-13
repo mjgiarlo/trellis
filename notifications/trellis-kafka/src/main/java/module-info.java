@@ -19,4 +19,5 @@ module org.trellisldp.kafka {
     requires org.trellisldp.api;
     requires slf4j.api;
     requires tamaya.api;
+    uses org.trellisldp.api.ActivityStreamService;
 }

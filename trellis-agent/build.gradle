@@ -7,14 +7,16 @@ ext {
     moduleName = 'org.trellisldp.agent'
 }
 
-javaModule.name = 'org.trellisldp.agent'
-javaModule.extraTestModules = ['org.junit.platform.runner']
+javaModule {
+    name = 'org.trellisldp.agent'
+    extraTestModules = ['org.junit.platform.runner']
+}
 
 dependencies {
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api project(':trellis-api')
 
-   // testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
     testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion

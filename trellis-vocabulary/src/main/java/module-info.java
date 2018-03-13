@@ -14,4 +14,5 @@
 module org.trellisldp.vocabulary {
     exports org.trellisldp.vocabulary;
     requires org.apache.commons.rdf.api;
+    uses org.apache.commons.rdf.api.RDF;
 }

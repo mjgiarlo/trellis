@@ -7,8 +7,10 @@ ext {
     moduleName = 'org.trellisldp.audit'
 }
 
-javaModule.name = 'org.trellisldp.audit'
-javaModule.extraTestModules = ['org.mockito']
+javaModule {
+    name = 'org.trellisldp.audit'
+    extraTestModules = ['org.mockito']
+}
 
 dependencies {
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion

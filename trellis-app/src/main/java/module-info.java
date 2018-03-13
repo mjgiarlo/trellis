@@ -12,6 +12,11 @@
  * limitations under the License.
  */
 module org.trellisldp.app {
+    exports org.trellisldp.app;
+    exports org.trellisldp.app.config;
+    opens org.trellisldp.app.config to hibernate.validator;
+    exports org.trellisldp.app.auth;
+    exports org.trellisldp.app.health;
     requires com.google.common;
     requires dropwizard.auth;
     requires dropwizard.core;
@@ -21,9 +26,12 @@ module org.trellisldp.app {
     requires java.naming;
     requires java.ws.rs;
     requires javax.jms.api;
+    requires java.xml.bind;
     requires jena.osgi;
     requires jena.tdb2;
     requires org.apache.commons.rdf.api;
+    requires httpclient;
+    requires httpcore;
     requires org.apache.servicemix.bundles.kafka.clients;
     requires org.trellisldp.agent;
     requires org.trellisldp.api;
@@ -37,6 +45,6 @@ module org.trellisldp.app {
     requires org.trellisldp.triplestore;
     requires org.trellisldp.vocabulary;
     requires org.trellisldp.webac;
+    requires slf4j.api;
     requires validation.api;
-    requires activemq.client;
 }

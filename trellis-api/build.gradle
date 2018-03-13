@@ -7,8 +7,16 @@ ext {
     moduleName = 'org.trellisldp.api'
 }
 
-javaModule.name = 'org.trellisldp.api'
-javaModule.extraTestModules = ['org.junit.platform.runner','org.trellisldp.vocabulary']
+javaModule {
+    name = 'org.trellisldp.api'
+    extraTestModules = ['org.mockito', 'org.trellisldp.vocabulary']
+}
+
+configurations {
+    all {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
+}
 
 dependencies {
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion

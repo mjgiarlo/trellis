@@ -15,6 +15,7 @@ module org.trellisldp.http {
     exports org.trellisldp.http;
     exports org.trellisldp.http.domain;
     exports org.trellisldp.http.impl;
+    opens org.trellisldp.http.domain to hk2.utils;
     requires java.annotation;
     requires java.json;
     requires java.ws.rs;
@@ -24,4 +25,6 @@ module org.trellisldp.http {
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    uses org.trellisldp.api.ConstraintService;
+    uses org.apache.commons.rdf.api.RDF;
 }

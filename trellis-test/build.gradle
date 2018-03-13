@@ -40,6 +40,12 @@ configurations {
     }
 }
 
+configurations {
+    all {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
+}
+
 dependencies {
     testCompile project(':trellis-agent')
     testCompile project(':trellis-amqp')

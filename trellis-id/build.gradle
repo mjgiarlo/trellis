@@ -7,8 +7,10 @@ ext {
     moduleName = 'org.trellisldp.id'
 }
 
-javaModule.name = 'org.trellisldp.id'
-javaModule.extraTestModules = ['org.apache.commons.rdf.simple']
+javaModule {
+    name = 'org.trellisldp.id'
+    extraTestModules = ['org.apache.commons.rdf.simple']
+}
 
 dependencies {
     api project(':trellis-api')
