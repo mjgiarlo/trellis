@@ -31,6 +31,7 @@ module org.trellisldp.app {
     requires jena.tdb2;
     requires org.apache.commons.rdf.api;
     requires httpclient;
+    requires httpclient.cache;
     requires httpcore;
     requires org.apache.servicemix.bundles.kafka.clients;
     requires org.trellisldp.agent;

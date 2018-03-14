@@ -8,7 +8,7 @@ mainClassName = 'org.trellisldp.app.TrellisApplication'
 
 javaModule {
     name = 'org.trellisldp.app'
-    extraTestModules = ['org.mockito']
+    extraTestModules = ['org.mockito', 'org.trellisldp.test']
     patchModules 'org.apache.jena:jena-core': 'org.apache.jena:jena-osgi'
     patchModules 'org.apache.httpcomponents:httpclient-osgi': 'commons-codec:commons-codec'
     patchModules 'org.apache.jena:jena-arq': 'org.apache.jena:jena-osgi'
@@ -51,6 +51,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
     compile group: 'org.apache.httpcomponents', name: 'httpcore', version: httpCoreOsgiVersion
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
+    compile group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: httpClientOsgiVersion
     compile group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
     compile group: 'org.apache.jena', name: 'jena-tdb2', version: jenaVersion
 
