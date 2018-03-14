@@ -66,6 +66,7 @@ subprojects {
 
         /* Dependencies */
         activationApiVersion = '1.2.0'
+        activeMqVersion = '5.15.3'
         commonsCodecVersion = '1.11'
         commonsCollectionsVersion = '4.1'
         commonsIoVersion = '2.6'
@@ -107,7 +108,7 @@ subprojects {
         apiguardianVersion = '1.0.0'
         awaitilityVersion = '3.0.0'
         commonsTextVersion = '1.2'
-        jerseyVersion = '2.26'
+        jerseyVersion = '2.25.1'
         jsonVersion = '1.1.2'
         junitVersion = '5.1.0'
         junitPlatformVersion = '1.1.0'
@@ -287,7 +288,7 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories =  files(subprojects.sourceSets.main.output)
-    executionData = files(subprojects.findAll { it.name != 'trellis-karaf' }.jacocoTestReport.executionData)
+    executionData = files(subprojects.findAll { it.name != 'trellis-karaf' && it.name != 'trellis-test' }.jacocoTestReport.executionData)
     reports {
         html.enabled = true
         xml.enabled = true
