@@ -17,6 +17,7 @@ javaModule {
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
         patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
         patches('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
+        //patches('io.dropwizard:dropwizard-logging', 'ch.qos.logback:logback-core')
     }
 }
 
@@ -28,11 +29,11 @@ configurations {
     all {
         exclude group: 'xml-apis', module: 'xml-apis'
         exclude group: 'commons-logging', module: 'commons-logging'
-        exclude group: 'io.dropwizard', module: 'dropwizard-logging'
     }
 }
 
 dependencies {
+    //patch "io.dropwizard:dropwizard-logging:$dropwizardVersion"
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.jena:jena-core:$jenaVersion"
     patch "org.apache.jena:jena-arq:$jenaVersion"
