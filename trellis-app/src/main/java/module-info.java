@@ -48,5 +48,4 @@ module org.trellisldp.app {
     requires org.trellisldp.vocabulary;
     requires org.trellisldp.webac;
     requires slf4j.api;
-    requires validation.api;
 }

@@ -263,6 +263,7 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
             svc.emit(new SimpleEvent(getUrl(identifier, baseUrl),
                         asList(session.getAgent()), asList(PROV.Activity, OperationType.asIRI(opType)),
                         targetTypes, inbox));
+            LOGGER.debug("Emitting SimpleEvent to EventService");
             getContainer(identifier).ifPresent(parent ->
                     emitEventsForAdjacentResources(svc, parent, session, opType, time));
         });
@@ -694,7 +695,7 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
 
     /**
      * Alias{@link org.apache.jena.graph.Triple#create(Node, Node, Node)} to
-     * avoid collision with {@link ResourceService#create(IRI, IRI, Dataset)}.
+     * avoid collision with {@link ResourceService#create(IRI, Session, Resource)}.
      *
      * @param subj the subject
      * @param pred the predicate
