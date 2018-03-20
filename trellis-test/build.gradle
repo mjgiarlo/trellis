@@ -21,14 +21,6 @@ def randomPort() {
     }
 }
 
-ext {
-    karafVersion = '4.1.5'
-    osgiVersion = '6.0.0'
-    osgiCompendiumVersion = '5.0.0'
-	paxExamVersion = '4.11.0'
-    hk2Version = '2.4.0'
-}
-
 repositories {
   jcenter()
   mavenLocal()
@@ -112,7 +104,7 @@ dependencies {
     testCompile group: 'org.ops4j.pax.exam', name: 'pax-exam-container-karaf', version: paxExamVersion
     testCompile group: 'org.osgi', name: 'org.osgi.core', version: osgiVersion
     testCompile group: 'org.osgi', name: 'org.osgi.compendium', version: osgiCompendiumVersion
-    testCompile group: 'org.glassfish.hk2.external', name: 'javax.inject', version: hk2Version
+    testCompile group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
 
     testCompile group: 'org.apache.karaf.features', name: 'standard', version: karafVersion, classifier:'features', ext: 'xml'
 
@@ -162,6 +154,9 @@ test {
     systemProperty 'karaf.ssh.port', randomPort()
     systemProperty 'karaf.rmiServer.port', randomPort()
     systemProperty 'karaf.rmiRegistry.port', randomPort()
+
+    // TODO - re-enable testing for JDK 10 once karaf support catches up
+    enabled = ! JavaVersion.current().isJava10Compatible()
 
     jacoco {
         enabled = false

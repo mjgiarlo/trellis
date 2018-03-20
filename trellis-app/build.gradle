@@ -28,6 +28,7 @@ configurations {
     all {
         exclude group: 'xml-apis', module: 'xml-apis'
         exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'io.dropwizard', module: 'dropwizard-logging'
     }
 }
 
