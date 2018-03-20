@@ -6,3 +6,5 @@ build
 .project
 .settings/
 .DS_Store
+out/
+.idea
