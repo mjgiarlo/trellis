@@ -9,14 +9,15 @@ mainClassName = 'org.trellisldp.app.TrellisApplication'
 javaModule {
     name = 'org.trellisldp.app'
     extraTestModules = ['org.mockito', 'org.trellisldp.test']
-    patchModules 'org.apache.jena:jena-core': 'org.apache.jena:jena-osgi'
-    patchModules 'org.apache.httpcomponents:httpclient-osgi': 'commons-codec:commons-codec'
-    patchModules 'org.apache.jena:jena-arq': 'org.apache.jena:jena-osgi'
-    patchModules 'com.google.code.findbugs:jsr305': 'javax.annotation:jsr250-api'
-    patchModules 'org.apache.geronimo.specs:geronimo-jms_1.1_spec': 'javax.jms:javax.jms-api'
-    patchModules 'org.apache.httpcomponents:httpcore-osgi': 'org.apache.httpcomponents:httpcore'
-    patchModules 'commons-logging:commons-logging': 'org.slf4j:jcl-over-slf4j'
-    patchModules 'org.hamcrest:hamcrest-library': 'org.hamcrest:hamcrest-core'
+    hacks {
+        patches('org.apache.jena:jena-core', 'org.apache.jena:jena-osgi')
+        patches('org.apache.jena:jena-arq', 'org.apache.jena:jena-osgi')
+        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
+        patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
+        patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
+        patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
+        patches('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
+    }
 }
 
 configurations {
@@ -26,18 +27,18 @@ configurations {
 
     all {
         exclude group: 'xml-apis', module: 'xml-apis'
+        exclude group: 'commons-logging', module: 'commons-logging'
     }
 }
 
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
-    patch "commons-logging:commons-logging:$commonsLoggingVersion"
     patch "org.apache.jena:jena-core:$jenaVersion"
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
     patch "org.apache.jena:jena-arq:$jenaVersion"
     patch "com.google.code.findbugs:jsr305:$jsr305Version"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
+    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
+    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
 
     compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
     compile group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
@@ -72,6 +73,7 @@ dependencies {
     compile project(':trellis-triplestore')
     compile project(':trellis-jms')
     compile project(':trellis-kafka')
+    compile project(':trellis-test')
 
     runtime group: 'javax.xml.bind', name: 'jaxb-api', version: jaxbVersion
 

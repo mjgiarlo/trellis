@@ -10,7 +10,9 @@ ext {
 javaModule {
     name = 'org.trellisldp.http'
     extraTestModules = ['org.mockito','org.trellisldp.audit','org.trellisldp.id','org.trellisldp.io']
-    patchModules 'javax.annotation:javax.annotation-api':'org.apache.geronimo.specs:geronimo-annotation_1.2_spec'
+    hacks {
+        patches('javax.annotation:javax.annotation-api', 'org.apache.geronimo.specs:geronimo-annotation_1.2_spec')
+    }
 }
 
 configurations {

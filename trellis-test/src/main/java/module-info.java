@@ -12,9 +12,7 @@
  * limitations under the License.
  */
 module org.trellisldp.test {
-    requires activemq.client;
     requires awaitility;
-    requires httpclient.osgi;
     requires java.ws.rs;
     requires java.naming;
     requires javax.jms.api;

@@ -10,7 +10,9 @@ ext {
 javaModule {
     name = 'org.trellisldp.jms'
     extraTestModules = ['org.trellisldp.vocabulary']
-    patchModules 'org.apache.geronimo.specs:geronimo-jms_1.1_spec': 'javax.jms:javax.jms-api'
+    hacks {
+        patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
+    }
 }
 
 dependencies {

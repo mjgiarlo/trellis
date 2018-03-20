@@ -10,14 +10,16 @@ ext {
 javaModule {
     name = 'org.trellisldp.vocabulary'
     extraTestModules = ['org.mockito']
-
-    patchModules 'org.apache.httpcomponents:httpclient-osgi': 'commons-codec:commons-codec'
-    patchModules 'xerces:xercesImpl': 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces'
+    hacks {
+        patches ('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
+        patches ('xerces:xercesImpl', 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces')
+    }
 }
 
 configurations {
     all {
         exclude group: 'xml-apis', module: 'xml-apis'
+        exclude group: 'commons-logging', module: 'commons-logging'
     }
 }
 

@@ -10,15 +10,24 @@ ext {
 javaModule {
     name = 'org.trellisldp.api'
     extraTestModules = ['org.mockito', 'org.trellisldp.vocabulary']
+    hacks {
+        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec')
+        patches('org.apache.httpcomponents:httpclient-osgi', 'httpcore')
+        patches('org.apache.httpcomponents:httpcore-osgi', 'httpclient')
+    }
 }
 
 configurations {
     all {
         exclude group: 'xml-apis', module: 'xml-apis'
+        exclude group: 'commons-logging', module: 'commons-logging'
     }
 }
 
 dependencies {
+    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
+    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
+
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 

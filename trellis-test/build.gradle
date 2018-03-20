@@ -53,13 +53,25 @@ sonarqube {
 javaModule {
     name = 'org.trellisldp.test'
     extraTestModules = ['org.mockito']
-    patchModules 'org.hamcrest:hamcrest-library': 'org.hamcrest:hamcrest-core'
-    patchModules 'org.apache.geronimo.specs:geronimo-jms_1.1_spec': 'javax.jms:javax.jms-api'
+    hacks {
+        patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
+        patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
+        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec:commons-codec')
+        patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
+    }
+}
+
+configurations {
+    all {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
 }
 
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
+    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
+    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
 
     api group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     api group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
@@ -70,7 +82,8 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
     implementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
-    implementation group: 'org.apache.activemq', name: 'activemq-client', version: activeMqVersion
+    //implementation group: 'org.apache.activemq', name: 'activemq-client', version: activeMqVersion
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
 
     implementation project(':trellis-api')
     implementation project(':trellis-http')

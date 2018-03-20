@@ -10,7 +10,9 @@ ext {
 javaModule {
     name = 'org.trellisldp.triplestore'
     extraTestModules = ['org.mockito','org.trellisldp.id']
-    patchModules 'org.hamcrest:hamcrest.library':'org.hamcrest:hamcrest.core'
+    hacks {
+        patches('org.hamcrest:hamcrest.library', 'org.hamcrest:hamcrest.core')
+    }
 }
 
 configurations {

@@ -43,6 +43,7 @@ module org.trellisldp.app {
     requires org.trellisldp.jms;
     requires org.trellisldp.kafka;
     requires org.trellisldp.namespaces;
+    requires org.trellisldp.test;
     requires org.trellisldp.triplestore;
     requires org.trellisldp.vocabulary;
     requires org.trellisldp.webac;

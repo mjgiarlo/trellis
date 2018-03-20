@@ -10,7 +10,9 @@ ext {
 javaModule {
     name = 'org.trellisldp.file'
     extraTestModules = ['org.mockito', 'org.trellisldp.id']
-    patchModules 'org.apache.httpcomponents:httpclient-osgi':'commons-codec:commons-codec'
+    hacks {
+        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec:commons-codec')
+    }
 }
 
 configurations {
