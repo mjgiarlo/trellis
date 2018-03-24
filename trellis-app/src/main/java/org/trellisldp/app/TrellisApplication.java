@@ -29,8 +29,6 @@ import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-import javax.jms.JMSException;
-
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.trellisldp.agent.SimpleAgent;
 import org.trellisldp.api.AuditService;
@@ -42,7 +40,6 @@ import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.ResourceService;
-import org.trellisldp.api.RuntimeTrellisException;
 import org.trellisldp.app.config.TrellisConfiguration;
 import org.trellisldp.app.health.RDFConnectionHealthCheck;
 import org.trellisldp.audit.DefaultAuditService;
@@ -193,10 +190,6 @@ public class TrellisApplication extends Application<TrellisConfiguration> {
     }
 
     protected EventService buildNotificationService(final Environment environment) {
-        try {
             return getNotificationService(config.getNotifications(), environment);
-        } catch (JMSException e) {
-            throw new RuntimeTrellisException(e);
-        }
     }
 }

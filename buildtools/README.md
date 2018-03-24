@@ -1,7 +1,7 @@
 ## JPMS
 
 ### Building
-Because of gradle not supporting multi-module interdependency builds, there is a build sequence:
+Because of gradle not yet supporting multi-module interdependency builds, there is a build sequence:
 1. `gradle trellis-vocabulary:build -x test`
 2. `gradle trellis-api:build -x test`
 3. `gradle trellis-id:build -x test`
@@ -15,3 +15,6 @@ Because of gradle not supporting multi-module interdependency builds, there is a
 11. `gradle trellis-triplestore:build -x test`
 12. `gradle build -x test`
 
+See `install-jpms.sh` script to execute.
+
+Note that tests are excluded because of an [open issue](https://github.com/gradle/gradle/issues/2657) with `gradle`
