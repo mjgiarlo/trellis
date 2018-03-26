@@ -29,5 +29,6 @@ module org.trellisldp.test {
     requires org.trellisldp.io;
     requires org.trellisldp.namespaces;
     requires slf4j.api;
+    requires commons.codec;
     exports org.trellisldp.test;
 }

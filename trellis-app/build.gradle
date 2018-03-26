@@ -17,6 +17,7 @@ javaModule {
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
         patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
         patches('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
+        patches('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
         //patches('io.dropwizard:dropwizard-logging', 'ch.qos.logback:logback-core')
     }
 }

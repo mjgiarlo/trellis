@@ -25,6 +25,10 @@ module org.trellisldp.http {
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    requires org.apache.commons.lang3;
+    requires metrics.annotation;
+    requires tamaya.api;
+    requires org.apache.commons.io;
     uses org.trellisldp.api.ConstraintService;
     uses org.apache.commons.rdf.api.RDF;
 }

@@ -17,4 +17,5 @@ module org.trellisldp.namespaces {
     requires org.trellisldp.api;
     requires slf4j.api;
     requires tamaya.api;
+    requires javax.inject;
 }

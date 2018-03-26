@@ -24,4 +24,5 @@ module org.trellisldp.file {
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
     requires tamaya.api;
+    requires org.apache.commons.codec;
 }

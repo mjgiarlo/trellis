@@ -49,4 +49,7 @@ module org.trellisldp.app {
     requires slf4j.api;
     requires org.trellisldp.audit;
     requires guava;
+    requires metrics.healthchecks;
+    requires validation.api;
+    requires jjwt;
 }

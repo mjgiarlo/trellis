@@ -17,4 +17,5 @@ module org.trellisldp.webac {
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    requires javax.inject;
 }
