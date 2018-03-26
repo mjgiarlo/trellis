@@ -12,18 +12,13 @@ addons:
 matrix:
   fast_finish: true
 
-  include:
-    # JDK 8
-    - jdk: oraclejdk8
-      env: JDK_RELEASE='JDK 1.8'
+install: true
 
-    # JDK 9
-    - jdk: oraclejdk9
-      env: JDK_RELEASE='JDK 9'
+script:
+- . ./buildtools/src/install/install-jdk-10.sh
+- . ./buildtools/src/install/install-jpms.sh
 
-    # JDK 10
-    - env: JDK_RELEASE='JDK 10'
-      install: . ./buildtools/src/install/install-jdk-10.sh
-
-after_success:
-    - ./gradlew jacocoRootReport coveralls sonarqube
+branches:
+  only:
+    - master
+    - jpms
