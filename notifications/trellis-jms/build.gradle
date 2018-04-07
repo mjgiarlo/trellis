@@ -26,6 +26,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
     testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion

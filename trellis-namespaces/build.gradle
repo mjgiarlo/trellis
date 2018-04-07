@@ -21,6 +21,7 @@ dependencies {
     implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
     testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
 

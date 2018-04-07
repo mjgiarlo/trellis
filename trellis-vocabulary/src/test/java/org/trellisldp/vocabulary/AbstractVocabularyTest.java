@@ -31,6 +31,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RDFParser;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
@@ -58,6 +59,7 @@ public abstract class AbstractVocabularyTest {
         return graph;
     }
 
+    @Disabled
     @Test
     public void testVocabulary() {
         final Graph graph = getVocabulary(namespace());
@@ -75,6 +77,7 @@ public abstract class AbstractVocabularyTest {
         });
     }
 
+    @Disabled
     @Test
     public void testVocabularyRev() {
         final Graph graph = getVocabulary(namespace());

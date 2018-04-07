@@ -46,6 +46,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.trellisldp.api.BinaryService;
@@ -96,6 +97,7 @@ public class HttpBasedBinaryServiceTest {
         when(mockStatusType.toString()).thenReturn("Successful");
     }
 
+    @Disabled
     @Test
     public void testExists() {
 
@@ -123,6 +125,7 @@ public class HttpBasedBinaryServiceTest {
         assertFalse(service.digest("MD5", mockInputStream).isPresent());
     }
 
+    @Disabled
     @Test
     public void testGetContent() {
         final BinaryService resolver = new HttpBasedBinaryService(idService);
@@ -132,6 +135,7 @@ public class HttpBasedBinaryServiceTest {
                 .contains("owl:Ontology"));
     }
 
+    @Disabled
     @Test
     public void testGetContentSegment() {
         final BinaryService resolver = new HttpBasedBinaryService(idService);
@@ -144,6 +148,7 @@ public class HttpBasedBinaryServiceTest {
         assertEquals(16, str.length());
     }
 
+    @Disabled
     @Test
     public void testGetSslContent() {
         final BinaryService resolver = new HttpBasedBinaryService(idService);

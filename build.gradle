@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
+    }
+}
+
 plugins {
     id 'com.github.hierynomus.license' version '0.14.0'
     id 'com.github.ben-manes.versions' version '0.17.0'
@@ -9,9 +18,10 @@ plugins {
 
 allprojects {
 
-    apply plugin: 'maven'
+    //apply plugin: 'maven'
     apply plugin: 'jacoco'
     apply plugin: 'com.zyxist.chainsaw'
+    apply plugin: 'org.junit.platform.gradle.plugin'
 
     ext {
         jacocoVersion = '0.8.1'
@@ -45,10 +55,20 @@ allprojects {
             signTag = true
         }
     }
+
+    dependencies {
+        testCompile(
+                'org.junit.jupiter:junit-jupiter-api:5.1.0'
+        )
+
+        testRuntime(
+                'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+        )
+    }
 }
 
 subprojects {
-
+    apply plugin: 'java'
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
@@ -143,6 +163,27 @@ subprojects {
         toolVersion = checkstyleVersion
     }
 
+    task javadocJar(type: Jar) {
+        classifier 'javadoc'
+        from ("$rootDir/LICENSE") {
+            into "META-INF"
+        }
+        from javadoc
+    }
+
+    task sourceJar(type: Jar) {
+        classifier 'sources'
+        from ("$rootDir/LICENSE") {
+            into "META-INF"
+        }
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourceJar
+    }
+
     license {
         include "**/*.java"
         header rootProject.file('buildtools/src/main/resources/license/HEADER.txt')
@@ -178,12 +219,12 @@ subprojects {
             expand project.properties
         }
     }
-
+/*
     signing {
         required { !version.endsWith("SNAPSHOT") && gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
     }
-
+/*
     uploadArchives {
         repositories.mavenDeployer {
             def sonatypeUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : ""
@@ -241,8 +282,22 @@ subprojects {
             }
         }
     }
+*/
+    task mappings {
+        doLast {
+            println conf2ScopeMappings.mappings
+        }
+    }
 
-    task docs(type: Javadoc) {
+    sonarqube {
+        skipProject = JavaVersion.current().isJava10Compatible()
+    }
+
+    javadoc {
+        doFirst {
+            options.addStringOption('-module-path', classpath.asPath)
+            options.addBooleanOption('html5', true)
+        }
         outputs.upToDateWhen { false }
         source sourceSets.main.allJava
         classpath = files(sourceSets.main.compileClasspath)
@@ -261,16 +316,9 @@ subprojects {
             links 'https://www.dropwizard.io/1.3.0/dropwizard-core/apidocs/'
         }
     }
-
-    sonarqube {
-        skipProject = JavaVersion.current().isJava10Compatible()
-    }
-
-    afterReleaseBuild.dependsOn docs
-    afterReleaseBuild.dependsOn uploadArchives
+    //afterReleaseBuild.dependsOn docs
+    //afterReleaseBuild.dependsOn uploadArchives
 }
-
-apply plugin: 'java'
 
 task apidocs(type: Javadoc, dependsOn: getTasksByName('docs', true)) {
     outputs.upToDateWhen { false }
