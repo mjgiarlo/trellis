@@ -48,8 +48,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.LDP;
@@ -61,7 +59,7 @@ import org.trellisldp.vocabulary.Trellis;
  *
  * @author acoburn
  */
-@RunWith(JUnitPlatform.class)
+
 public class EventTests extends BaseCommonTests implements MessageListener {
 
     private static final Logger LOGGER = getLogger(EventTests.class);

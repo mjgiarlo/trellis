@@ -38,8 +38,6 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.NoopEventService;
@@ -50,7 +48,7 @@ import org.trellisldp.kafka.KafkaPublisher;
 /**
  * @author acoburn
  */
-@RunWith(JUnitPlatform.class)
+
 public class TrellisUtilsTest {
 
     @Mock

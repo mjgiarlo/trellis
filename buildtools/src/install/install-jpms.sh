@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-./gradlew trellis-vocabulary:build -x test
-./gradlew trellis-api:build -x test
-./gradlew trellis-id:build -x test
-./gradlew trellis-io:build -x test
-./gradlew trellis-http:build -x test
-./gradlew trellis-file:build -x test
-./gradlew trellis-jms:build -x test
-./gradlew trellis-kafka:build -x test
-./gradlew trellis-namespaces:build -x test
-./gradlew trellis-test:build -x test
-./gradlew trellis-triplestore:build -x test
-./gradlew build -x test
+./gradlew trellis-vocabulary:build
+./gradlew trellis-api:build
+./gradlew trellis-id:build
+./gradlew trellis-io:build
+./gradlew trellis-http:build
+./gradlew trellis-file:build
+./gradlew trellis-jms:build
+./gradlew trellis-kafka:build
+./gradlew trellis-namespaces:build
+./gradlew trellis-test:build
+./gradlew trellis-triplestore:build
+./gradlew build

@@ -37,8 +37,6 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.trellisldp.vocabulary.LDP;
 import org.trellisldp.vocabulary.Trellis;
 
@@ -47,7 +45,7 @@ import org.trellisldp.vocabulary.Trellis;
  *
  * @author acoburn
  */
-@RunWith(JUnitPlatform.class)
+
 public class AuthorizationTests extends BaseCommonTests {
 
     private static final String JWT_SECRET = "secret";

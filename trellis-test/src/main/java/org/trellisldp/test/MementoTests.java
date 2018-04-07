@@ -62,8 +62,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.trellisldp.namespaces.NamespacesJsonContext;
 import org.trellisldp.vocabulary.DC;
 import org.trellisldp.vocabulary.LDP;
@@ -74,7 +72,7 @@ import org.trellisldp.vocabulary.Time;
 /**
  * Run Memento-related tests on a Trellis application.
  */
-@RunWith(JUnitPlatform.class)
+
 public class MementoTests extends BaseCommonTests {
 
     private static final String TIMEMAP_QUERY_ARG = "?ext=timemap";

@@ -62,8 +62,6 @@ import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -82,7 +80,7 @@ import org.trellisldp.vocabulary.LDP;
 /**
  * @author acoburn
  */
-@RunWith(JUnitPlatform.class)
+
 public class PostHandlerTest {
 
     private static final Instant time = ofEpochSecond(1496262729);

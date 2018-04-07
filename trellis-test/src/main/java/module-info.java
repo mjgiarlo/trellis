@@ -23,7 +23,6 @@ module org.trellisldp.test {
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
     requires org.junit.jupiter.api;
-    requires org.junit.platform.runner;
     requires org.trellisldp.api;
     requires org.trellisldp.http;
     requires org.trellisldp.io;

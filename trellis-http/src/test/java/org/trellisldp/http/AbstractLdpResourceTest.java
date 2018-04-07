@@ -119,8 +119,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
@@ -146,7 +144,7 @@ import org.trellisldp.vocabulary.XSD;
  * @author acoburn
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@RunWith(JUnitPlatform.class)
+
 abstract class AbstractLdpResourceTest extends JerseyTest {
 
     protected static final IOService ioService = new JenaIOService(null);

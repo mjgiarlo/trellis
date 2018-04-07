@@ -31,8 +31,6 @@ import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.Graph;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.LDP;
 import org.trellisldp.vocabulary.PROV;
@@ -43,7 +41,7 @@ import org.trellisldp.vocabulary.Trellis;
  *
  * @author acoburn
  */
-@RunWith(JUnitPlatform.class)
+
 public class AuditTests extends BaseCommonTests {
 
     private static String container;

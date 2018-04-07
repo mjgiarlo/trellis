@@ -14,8 +14,6 @@
 package org.trellisldp.api;
 
 import static java.util.Collections.newSetFromMap;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.EnumSet.of;
 import static java.util.stream.Collector.Characteristics.CONCURRENT;
 import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
 import static java.util.stream.Collector.Characteristics.UNORDERED;
@@ -130,7 +128,7 @@ public final class RDFUtils {
 
         @Override
         public Set<Characteristics> characteristics() {
-            return unmodifiableSet(of(UNORDERED, IDENTITY_FINISH));
+            return Set.of(UNORDERED, IDENTITY_FINISH);
         }
 
         /**
@@ -176,7 +174,7 @@ public final class RDFUtils {
 
         @Override
         public Set<Characteristics> characteristics() {
-            return unmodifiableSet(of(UNORDERED, CONCURRENT));
+            return Set.of(UNORDERED, CONCURRENT);
         }
     }
 

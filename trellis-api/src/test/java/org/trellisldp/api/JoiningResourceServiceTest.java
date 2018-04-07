@@ -43,12 +43,10 @@ import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.trellisldp.api.JoiningResourceService.RetrievableResource;
 import org.trellisldp.vocabulary.LDP;
 
-@RunWith(JUnitPlatform.class)
+
 public class JoiningResourceServiceTest {
 
     private static IRI createIRI(final String value) {

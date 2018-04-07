@@ -53,8 +53,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.trellisldp.vocabulary.DC;
 import org.trellisldp.vocabulary.LDP;
 import org.trellisldp.vocabulary.SKOS;
@@ -63,7 +61,7 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * Run LDP-related tests on a Trellis application.
  */
-@RunWith(JUnitPlatform.class)
+
 public class LdpTests extends BaseCommonTests {
 
     private static final String ENG = "eng";
