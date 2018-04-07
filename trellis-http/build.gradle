@@ -12,6 +12,7 @@ javaModule {
     extraTestModules = ['org.mockito','org.trellisldp.audit','org.trellisldp.id','org.trellisldp.io']
     hacks {
         patches('javax.annotation:javax.annotation-api', 'org.apache.geronimo.specs:geronimo-annotation_1.2_spec')
+        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
     }
 }
 
@@ -27,6 +28,7 @@ configurations {
 
 dependencies {
     patch "org.apache.geronimo.specs:geronimo-annotation_1.2_spec:$geronimoAnnotationSpecVersion"
+    patch "com.google.code.findbugs:jsr305:$jsr305Version"
 
     api group: 'io.dropwizard.metrics', name: 'metrics-annotation', version: metricsVersion
     api group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
@@ -44,6 +46,7 @@ dependencies {
 
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    testImplementation group: 'com.google.guava', name: 'guava', version: guavaVersion
     testImplementation group: 'org.apache.commons', name: 'commons-text', version: commonsTextVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion

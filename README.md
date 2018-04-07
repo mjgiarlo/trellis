@@ -8,6 +8,7 @@ A scalable platform for building [linked data](https://www.w3.org/TR/ldp/) appli
 [![Javadoc](https://javadoc-badge.appspot.com/org.trellisldp/trellis-api.svg?label=javadoc)](https://trellis-ldp.github.io/trellis/apidocs/)
 [![Maven Central](https://img.shields.io/maven-central/v/org.trellisldp/trellis-api.svg)](https://mvnrepository.com/artifact/org.trellisldp/trellis-api/0.6.0)
 
+
 General documentation for [Trellis](https://www.trellisldp.org) is available on the [project wiki](https://github.com/trellis-ldp/trellis/wiki).
 
 ## Mailing list

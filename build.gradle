@@ -25,8 +25,8 @@ allprojects {
     group = 'org.trellisldp'
 
     repositories {
-        jcenter()
         mavenCentral()
+        jcenter()
         mavenLocal()
         flatDir {
             dirs "$rootProject.projectDir/lib"
@@ -73,7 +73,7 @@ subprojects {
         commonsLangVersion = '3.7'
         commonsRdfVersion = '0.5.0'
         dropwizardVersion = '1.2.0'
-        jacksonVersion = '2.9.4'
+        jacksonVersion = '2.9.5'
         javaxAnnotationsVersion = '1.3.2'
         javaxInjectVersion = '2.4.0'
         javaxJsonVersion = '1.1.2'
@@ -91,7 +91,7 @@ subprojects {
         jaxbVersion = '2.3.0'
 
         /* Transitive dependencies (for Karaf provisioning) */
-        guavaVersion = '20.0' // via mustache 0.9.5
+        transitiveGuavaVersion = '20.0' // via mustache 0.9.5
 
         /* Transitive patched modules */
         commonsLoggingVersion = '1.2'
@@ -107,13 +107,14 @@ subprojects {
         /* Testing */
         apiguardianVersion = '1.0.0'
         awaitilityVersion = '3.1.0'
-        commonsTextVersion = '1.2'
+        commonsTextVersion = '1.3'
+        guavaVersion = '24.1-jre'
         jerseyVersion = '2.25.1'
         jsonVersion = '1.1.2'
         junitVersion = '5.1.0'
         junitPlatformVersion = '1.1.0'
         logbackVersion = '1.2.3'
-        mockitoVersion = '2.16.0'
+        mockitoVersion = '2.17.0'
         xercesVersion = '2.11.0'
 
         /* OSGi */
@@ -155,6 +156,11 @@ subprojects {
         reports {
             xml.enabled = true
             html.enabled = true
+        }
+        afterEvaluate {
+            classDirectories = files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: 'org/trellisldp/test/**')
+            })
         }
     }
 
@@ -307,6 +313,11 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
     classDirectories =  files(subprojects.sourceSets.main.output)
     executionData = files(subprojects.findAll { it.name != 'trellis-karaf' && it.name != 'trellis-test' }.jacocoTestReport.executionData)
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: 'org/trellisldp/test/**')
+        })
+    }
     reports {
         html.enabled = true
         xml.enabled = true

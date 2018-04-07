@@ -17,7 +17,6 @@ module org.trellisldp.test {
     requires java.naming;
     requires javax.jms.api;
     requires jjwt;
-    requires junit;
     requires org.trellisldp.vocabulary;
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
@@ -26,8 +25,6 @@ module org.trellisldp.test {
     requires org.trellisldp.api;
     requires org.trellisldp.http;
     requires org.trellisldp.io;
-    requires org.trellisldp.namespaces;
     requires slf4j.api;
-    requires commons.codec;
     exports org.trellisldp.test;
 }
