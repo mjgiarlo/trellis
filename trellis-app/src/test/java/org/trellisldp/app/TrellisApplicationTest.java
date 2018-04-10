@@ -23,7 +23,6 @@ import org.trellisldp.app.config.TrellisConfiguration;
 /**
  * LDP-related tests for Trellis.
  */
-
 public class TrellisApplicationTest {
 
     @Test

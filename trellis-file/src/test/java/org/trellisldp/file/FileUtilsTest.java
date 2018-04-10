@@ -31,7 +31,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * Test the file utilities.
  */
-
 public class FileUtilsTest {
 
     private static final RDF rdf = new JenaRDF();

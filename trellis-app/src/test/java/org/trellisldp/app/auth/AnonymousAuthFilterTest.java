@@ -43,7 +43,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class AnonymousAuthFilterTest {
 
     @Mock

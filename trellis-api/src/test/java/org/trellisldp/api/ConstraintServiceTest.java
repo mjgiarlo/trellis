@@ -40,7 +40,6 @@ import org.trellisldp.vocabulary.RDFS;
 /**
  * @author acoburn
  */
-
 public class ConstraintServiceTest {
 
     private static final RDF rdf = RDFUtils.getInstance();

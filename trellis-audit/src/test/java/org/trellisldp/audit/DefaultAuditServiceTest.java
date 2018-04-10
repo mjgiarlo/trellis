@@ -40,7 +40,6 @@ import org.trellisldp.vocabulary.XSD;
 /**
  * @author acoburn
  */
-
 public class DefaultAuditServiceTest {
 
     private static RDF rdf = new SimpleRDF();

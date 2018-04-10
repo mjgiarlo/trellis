@@ -33,12 +33,9 @@ import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.text.RandomStringGenerator;
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class RDFUtilsTest {
 
     private static final RDF rdf = getInstance();

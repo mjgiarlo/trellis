@@ -28,12 +28,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class BasicAuthenticatorTest {
 
     @Test

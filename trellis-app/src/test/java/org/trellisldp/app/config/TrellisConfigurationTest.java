@@ -29,12 +29,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class TrellisConfigurationTest {
 
     @Test

@@ -29,8 +29,6 @@ dependencies {
     testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
-    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
-
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation project(':trellis-event-serialization')
     testImplementation project(':trellis-vocabulary')

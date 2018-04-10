@@ -102,7 +102,6 @@ import org.trellisldp.vocabulary.SKOS;
 /**
  * @author acoburn
  */
-
 public class GetHandlerTest {
 
     private static final Instant time = ofEpochSecond(1496262729);

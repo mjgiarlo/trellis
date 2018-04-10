@@ -61,7 +61,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class RdfUtilsTest {
 
     private static final RDF rdf = getInstance();

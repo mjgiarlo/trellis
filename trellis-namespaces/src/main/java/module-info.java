@@ -14,8 +14,8 @@
 module org.trellisldp.namespaces {
     exports org.trellisldp.namespaces;
     requires com.fasterxml.jackson.databind;
+    requires javax.inject;
     requires org.trellisldp.api;
     requires slf4j.api;
     requires tamaya.api;
-    requires javax.inject;
 }

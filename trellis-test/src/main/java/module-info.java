@@ -12,12 +12,12 @@
  * limitations under the License.
  */
 module org.trellisldp.test {
+    exports org.trellisldp.test;
     requires awaitility;
     requires java.ws.rs;
     requires java.naming;
     requires javax.jms.api;
     requires jjwt;
-    requires org.trellisldp.vocabulary;
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
@@ -25,6 +25,6 @@ module org.trellisldp.test {
     requires org.trellisldp.api;
     requires org.trellisldp.http;
     requires org.trellisldp.io;
+    requires org.trellisldp.vocabulary;
     requires slf4j.api;
-    exports org.trellisldp.test;
 }

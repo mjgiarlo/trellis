@@ -91,7 +91,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class PatchHandlerTest {
 
     private static final Instant time = ofEpochSecond(1496262729);

@@ -48,7 +48,6 @@ import org.junit.jupiter.api.Test;
 import org.trellisldp.api.JoiningResourceService.RetrievableResource;
 import org.trellisldp.vocabulary.LDP;
 
-
 public class JoiningResourceServiceTest {
 
     private static IRI createIRI(final String value) {

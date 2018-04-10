@@ -26,7 +26,6 @@ import org.trellisldp.vocabulary.JSONLD;
 /**
  * @author acoburn
  */
-
 public class IOUtilsTest {
 
     private static final RDF rdf = new JenaRDF();

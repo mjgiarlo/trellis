@@ -21,12 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class PreferTest {
 
     @Test

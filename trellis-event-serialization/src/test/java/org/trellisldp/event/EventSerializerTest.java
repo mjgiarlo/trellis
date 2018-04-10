@@ -47,7 +47,6 @@ import org.trellisldp.vocabulary.AS;
 /**
  * @author acoburn
  */
-
 public class EventSerializerTest {
 
     private static final RDF rdf = new SimpleRDF();

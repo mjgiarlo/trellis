@@ -31,7 +31,6 @@ import org.mockito.Mock;
 /**
  * @author acoburn
  */
-
 public class TrellisCacheTest {
 
     @Mock

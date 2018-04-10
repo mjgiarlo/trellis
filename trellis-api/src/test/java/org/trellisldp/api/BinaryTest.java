@@ -25,12 +25,9 @@ import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class BinaryTest {
 
     private static final RDF rdf = new SimpleRDF();

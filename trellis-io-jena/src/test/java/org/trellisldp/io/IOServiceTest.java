@@ -84,7 +84,6 @@ import org.trellisldp.api.RuntimeTrellisException;
 /**
  * @author acoburn
  */
-
 public class IOServiceTest {
 
     private static final JenaRDF rdf = new JenaRDF();

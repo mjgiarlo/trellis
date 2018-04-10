@@ -57,7 +57,6 @@ import org.trellisldp.id.UUIDGenerator;
 /**
  * @author acoburn
  */
-
 public class HttpBasedBinaryServiceTest {
 
     private static final RDF rdf = new SimpleRDF();

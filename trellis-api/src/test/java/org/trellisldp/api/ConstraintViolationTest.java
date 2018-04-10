@@ -27,7 +27,6 @@ import org.trellisldp.vocabulary.LDP;
 /**
  * @author acoburn
  */
-
 public class ConstraintViolationTest {
 
     private static final RDF rdf = new SimpleRDF();

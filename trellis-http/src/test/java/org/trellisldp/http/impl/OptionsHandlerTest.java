@@ -60,7 +60,6 @@ import org.trellisldp.vocabulary.LDP;
 /**
  * @author acoburn
  */
-
 public class OptionsHandlerTest {
 
     private static final Instant time = ofEpochSecond(1496262729);

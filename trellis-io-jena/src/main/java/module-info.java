@@ -19,9 +19,9 @@ module org.trellisldp.io {
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
+    requires org.apache.servicemix.bundles.mustache.compiler;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
     requires tamaya.api;
-    requires org.apache.servicemix.bundles.mustache.compiler;
 }

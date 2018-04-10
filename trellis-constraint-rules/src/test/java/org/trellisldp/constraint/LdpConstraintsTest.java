@@ -40,7 +40,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class LdpConstraintsTest {
 
     private static final JenaRDF rdf = new JenaRDF();

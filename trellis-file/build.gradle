@@ -39,7 +39,6 @@ dependencies {
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
-    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
     testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation project(':trellis-id')

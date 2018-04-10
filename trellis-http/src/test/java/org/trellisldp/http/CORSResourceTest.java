@@ -83,7 +83,6 @@ import org.trellisldp.vocabulary.XSD;
  * @author acoburn
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class CORSResourceTest extends JerseyTest {
 
     protected static final IOService ioService = new JenaIOService(null);

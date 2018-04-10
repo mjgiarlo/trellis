@@ -14,9 +14,9 @@
 module org.trellisldp.app {
     exports org.trellisldp.app;
     exports org.trellisldp.app.config;
-    opens org.trellisldp.app.config to hibernate.validator;
     exports org.trellisldp.app.auth;
     exports org.trellisldp.app.health;
+    opens org.trellisldp.app.config to hibernate.validator;
     requires dropwizard.auth;
     requires dropwizard.core;
     requires dropwizard.lifecycle;

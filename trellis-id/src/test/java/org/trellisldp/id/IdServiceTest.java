@@ -25,7 +25,6 @@ import org.trellisldp.api.IdentifierService;
 /**
  * @author acoburn
  */
-
 public class IdServiceTest {
 
     @Test

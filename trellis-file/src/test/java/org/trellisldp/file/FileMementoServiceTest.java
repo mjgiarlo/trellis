@@ -38,7 +38,6 @@ import org.trellisldp.api.Resource;
 /**
  * Test a file-based memento service.
  */
-
 public class FileMementoServiceTest {
 
     private static final RDF rdf = new JenaRDF();

@@ -29,7 +29,6 @@ import org.mockito.Mock;
 /**
  * @author acoburn
  */
-
 public class TrellisDatasetTest {
 
     @Mock

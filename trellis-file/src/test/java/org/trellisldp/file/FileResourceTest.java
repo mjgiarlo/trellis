@@ -35,7 +35,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * Test a file-based resource.
  */
-
 public class FileResourceTest {
 
     private static final RDF rdf = new JenaRDF();

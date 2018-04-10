@@ -87,7 +87,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class PutHandlerTest {
 
     private static final Instant time = ofEpochSecond(1496262729);

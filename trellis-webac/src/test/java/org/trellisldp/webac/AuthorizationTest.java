@@ -28,7 +28,6 @@ import org.trellisldp.vocabulary.PROV;
 /**
  * @author acoburn
  */
-
 public class AuthorizationTest {
 
     private static final RDF rdf = new SimpleRDF();

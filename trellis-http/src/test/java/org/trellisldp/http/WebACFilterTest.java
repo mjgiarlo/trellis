@@ -42,7 +42,6 @@ import org.trellisldp.vocabulary.ACL;
  * @author acoburn
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class WebACFilterTest {
 
     private static final String REPO1 = "repo1";

@@ -34,7 +34,6 @@ dependencies {
     implementation project(':trellis-audit')
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
     testImplementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation project(':trellis-id');

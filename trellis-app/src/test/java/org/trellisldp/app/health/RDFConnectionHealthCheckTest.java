@@ -25,12 +25,9 @@ import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.junit.jupiter.api.Test;
 
-
-
 /**
  * @author acoburn
  */
-
 public class RDFConnectionHealthCheckTest {
 
     private static final JenaRDF rdf = new JenaRDF();

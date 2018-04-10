@@ -48,7 +48,6 @@ import org.trellisldp.kafka.KafkaPublisher;
 /**
  * @author acoburn
  */
-
 public class TrellisUtilsTest {
 
     @Mock

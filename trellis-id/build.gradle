@@ -16,9 +16,7 @@ dependencies {
     api project(':trellis-api')
 
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
-    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
-
-    }
+}
 
 jar {
     manifest {

@@ -42,7 +42,6 @@ import org.mockito.Mock;
 /**
  * @author acoburn
  */
-
 public class BinaryServiceTest {
 
     private static final RDF rdf = new SimpleRDF();

@@ -13,9 +13,9 @@
  */
 module org.trellisldp.webac {
     exports org.trellisldp.webac;
+    requires javax.inject;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
-    requires javax.inject;
 }

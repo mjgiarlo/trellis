@@ -23,7 +23,6 @@ import org.mockito.Mock;
 /**
  * Test the no-op event service.
  */
-
 public class NoopEventServiceTest {
 
     @Mock

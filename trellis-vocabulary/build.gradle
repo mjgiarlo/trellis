@@ -33,7 +33,6 @@ dependencies {
 
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
     testImplementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
-    testImplementation group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
     testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
     testImplementation group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: httpClientOsgiVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion

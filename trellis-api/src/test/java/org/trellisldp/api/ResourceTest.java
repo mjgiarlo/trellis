@@ -36,7 +36,6 @@ import org.trellisldp.vocabulary.DC;
 /**
  * @author acoburn
  */
-
 public class ResourceTest {
 
     private static final RDF rdf = new SimpleRDF();

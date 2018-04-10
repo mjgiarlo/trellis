@@ -74,7 +74,6 @@ import org.trellisldp.vocabulary.XSD;
 /**
  * @author acoburn
  */
-
 public class DeleteHandlerTest {
 
     private static final RDF rdf = getInstance();

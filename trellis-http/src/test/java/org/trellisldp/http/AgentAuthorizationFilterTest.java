@@ -41,7 +41,6 @@ import org.trellisldp.vocabulary.Trellis;
  * @author acoburn
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class AgentAuthorizationFilterTest {
 
     @Mock

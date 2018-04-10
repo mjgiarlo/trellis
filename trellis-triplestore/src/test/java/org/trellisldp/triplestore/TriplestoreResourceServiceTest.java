@@ -70,7 +70,6 @@ import org.trellisldp.vocabulary.XSD;
 /**
  * Test the TriplestoreResourceService class.
  */
-
 public class TriplestoreResourceServiceTest {
 
     private static final JenaRDF rdf = new JenaRDF();

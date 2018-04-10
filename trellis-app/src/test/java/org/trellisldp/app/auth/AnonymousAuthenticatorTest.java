@@ -28,7 +28,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class AnonymousAuthenticatorTest {
 
     @Test

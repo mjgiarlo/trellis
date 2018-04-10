@@ -25,7 +25,6 @@ import org.trellisldp.vocabulary.DC;
 /**
  * @author acoburn
  */
-
 public class LabelledTripleTest {
 
     private static final RDF rdf = new JenaRDF();

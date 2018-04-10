@@ -76,7 +76,6 @@ import org.trellisldp.vocabulary.Trellis;
  * @author acoburn
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class LdpForbiddenResourceTest extends JerseyTest {
 
     private static final IOService ioService = new JenaIOService(null);

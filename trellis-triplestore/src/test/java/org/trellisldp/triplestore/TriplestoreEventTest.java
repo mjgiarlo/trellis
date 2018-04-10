@@ -40,7 +40,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class TriplestoreEventTest {
 
     private static final RDF rdf = new JenaRDF();

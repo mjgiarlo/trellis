@@ -53,7 +53,6 @@ import org.trellisldp.id.UUIDGenerator;
 /**
  * Test the file-based binary service.
  */
-
 public class FileBinaryServiceTest {
 
     private static final String testDoc = "test.txt";

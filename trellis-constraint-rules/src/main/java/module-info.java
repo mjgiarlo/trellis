@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 module org.trellisldp.constraint {
+    provides org.trellisldp.api.ConstraintService with org.trellisldp.constraint.LdpConstraints;
     requires slf4j.api;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
-    provides org.trellisldp.api.ConstraintService with org.trellisldp.constraint.LdpConstraints;
 }

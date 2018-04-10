@@ -51,7 +51,6 @@ import org.trellisldp.vocabulary.Trellis;
 /**
  * @author acoburn
  */
-
 public class ResourceServiceTest {
 
     private static final RDF rdf = new JenaRDF();

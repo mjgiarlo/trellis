@@ -51,7 +51,6 @@ import org.trellisldp.vocabulary.VCARD;
 /**
  * @author acoburn
  */
-
 public class WebACServiceTest {
 
     private static final RDF rdf = new JenaRDF();
