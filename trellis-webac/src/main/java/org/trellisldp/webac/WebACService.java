@@ -111,15 +111,17 @@ public class WebACService implements AccessControlService {
                     getAuthz(identifier, session.getAgent()));
             final Optional<IRI> delegate = session.getDelegatedBy();
             if (delegate.isPresent()) {
-                cachedModes.retainAll(cache.get(getCacheKey(identifier, delegate.get()), k ->
+                final Set<IRI> delegatedModes = new HashSet<>(cache.get(getCacheKey(identifier, delegate.get()), k ->
                             getAuthz(identifier, delegate.get())));
+                delegatedModes.retainAll(cachedModes);
+                return unmodifiableSet(delegatedModes);
             }
-            return cachedModes;
+            return unmodifiableSet(cachedModes);
         }
 
         final Set<IRI> modes = getAuthz(identifier, session.getAgent());
         session.getDelegatedBy().ifPresent(delegate -> modes.retainAll(getAuthz(identifier, delegate)));
-        return modes;
+        return unmodifiableSet(modes);
     }
 
     private String getCacheKey(final IRI identifier, final IRI agent) {

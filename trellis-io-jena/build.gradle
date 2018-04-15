@@ -9,32 +9,29 @@ ext {
 
 javaModule {
     name = 'org.trellisldp.io'
-    extraTestModules = ['org.mockito']
-}
-
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
+    extraTestModules = ['jsonld.java']
 }
 
 dependencies {
-
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
-    api group: 'commons-io', name: 'commons-io', version: commonsIoVersion
+    api ("commons-io:commons-io:$commonsIoVersion") {force = true}
 
     api project(':trellis-api')
 
     implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
     implementation group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.mustache-compiler', version: mustacheVersion
     implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation project(':trellis-vocabulary')
 
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 }
 

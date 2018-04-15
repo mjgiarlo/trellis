@@ -1,98 +1,55 @@
-apply plugin: 'java'
-apply plugin: 'distribution'
-apply plugin: 'application'
-apply plugin: 'com.zyxist.chainsaw'
-
 description = 'Trellis Application'
-mainClassName = 'org.trellisldp.app.TrellisApplication'
+
+ext {
+    moduleName = 'org.trellisldp.app'
+}
 
 javaModule {
     name = 'org.trellisldp.app'
-    extraTestModules = ['org.mockito', 'org.trellisldp.test']
+    extraTestModules = ['org.trellisldp.file','org.trellisldp.id','org.trellisldp.io',
+                        'org.trellisldp.triplestore', 'org.apache.jena.rdfconnection']
     hacks {
-        patches('org.apache.jena:jena-core', 'org.apache.jena:jena-osgi')
-        patches('org.apache.jena:jena-arq', 'org.apache.jena:jena-osgi')
         patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
-        patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
-        patches('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
         //patches('io.dropwizard:dropwizard-logging', 'ch.qos.logback:logback-core')
     }
 }
 
-configurations {
-    compile {
-        exclude group: 'javax.inject', module: 'javax.inject'
-    }
-
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-        exclude group: 'commons-logging', module: 'commons-logging'
-    }
-}
-
 dependencies {
-    //patch "io.dropwizard:dropwizard-logging:$dropwizardVersion"
+
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
-    patch "org.apache.jena:jena-core:$jenaVersion"
-    patch "org.apache.jena:jena-arq:$jenaVersion"
     patch "com.google.code.findbugs:jsr305:$jsr305Version"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
 
-    compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
-    compile group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
-    compile group: 'javax.jms', name: 'javax.jms-api', version: jmsApiVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-auth', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-metrics', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-http2', version: dropwizardVersion
-    compile group: 'org.eclipse.jetty', name: 'jetty-alpn-java-server', version: jettyAlpnServerVersion
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
-    compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: httpCoreOsgiVersion
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
-    compile group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: httpClientOsgiVersion
-    compile group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
-    compile group: 'org.apache.jena', name: 'jena-tdb2', version: jenaVersion
+    api group: 'io.dropwizard', name: 'dropwizard-auth', version: dropwizardVersion
+    api group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
+    api project(':trellis-api')
 
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation project(':trellis-http')
+    implementation project(':trellis-vocabulary')
+    implementation project(':trellis-agent')
+    implementation project(':trellis-webac')
 
-    compile project(':trellis-constraint-rules')
-    compile project(':trellis-io-jena')
-    compile project(':trellis-id')
-    compile project(':trellis-api')
-    compile project(':trellis-http')
-    compile project(':trellis-vocabulary')
-    compile project(':trellis-file')
-    compile project(':trellis-namespaces')
-    compile project(':trellis-agent')
-    compile project(':trellis-audit')
-    compile project(':trellis-event-serialization')
-    compile project(':trellis-webac')
-    compile project(':trellis-triplestore')
-    compile project(':trellis-jms')
-    compile project(':trellis-kafka')
-    compile project(':trellis-test')
+    testRuntime group: 'javax.xml.bind', name: 'jaxb-api', version: jaxbVersion
+    testRuntime group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
 
-    runtime group: 'javax.xml.bind', name: 'jaxb-api', version: jaxbVersion
-
-    testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: dropwizardVersion
-    testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: dropwizardVersion
-    testCompile group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
-    testCompile group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
-    testCompile group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testCompile project(':trellis-test')
+    testImplementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
+    testImplementation group: 'io.dropwizard', name: 'dropwizard-client', version: dropwizardVersion
+    testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: dropwizardVersion
+    testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-rdfconnection', version: jenaRdfConnectionVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-tdb2', version: jenaVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
+    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation project(':trellis-triplestore')
+    testImplementation project(':trellis-io-jena')
+    testImplementation project(':trellis-file')
+    testImplementation project(':trellis-id')
 }
-
-task copyDistTask(type: Copy) {
-    from 'LICENSE'
-    into 'src/dist'
-}
-
-assembleDist.dependsOn copyDistTask
 

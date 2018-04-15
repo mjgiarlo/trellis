@@ -15,7 +15,6 @@ module org.trellisldp.file {
     exports org.trellisldp.file;
     requires commons.collections4;
     requires javax.inject;
-    requires jena.osgi;
     requires org.apache.commons.codec;
     requires org.apache.commons.lang3;
     requires org.apache.commons.io;
@@ -25,4 +24,5 @@ module org.trellisldp.file {
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
     requires tamaya.api;
+    requires jena.core;
 }

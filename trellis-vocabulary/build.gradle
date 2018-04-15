@@ -9,34 +9,22 @@ ext {
 
 javaModule {
     name = 'org.trellisldp.vocabulary'
-    extraTestModules = ['org.mockito']
-    hacks {
-        patches ('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
-        patches ('org.apache.httpcomponents:httpcore-osgi', 'org.apache.httpcomponents:httpcore')
-        patches ('xerces:xercesImpl', 'org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces')
-    }
-}
-
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-        exclude group: 'commons-logging', module: 'commons-logging'
-    }
+    extraTestModules = ['org.mockito', 'jena.core', 'org.apache.jena.arq', 'jsonld.java']
 }
 
 dependencies {
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
-    patch "org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion"
-
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
 
+    testImplementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
+    testImplementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    testImplementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
-    testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
-    testImplementation group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: httpClientOsgiVersion
+    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
+    testImplementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testImplementation group: 'xerces', name: 'xercesImpl', version: xercesVersion
+    testImplementation "org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion"
 
     testRuntimeClasspath group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
 }

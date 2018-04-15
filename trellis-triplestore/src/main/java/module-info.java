@@ -14,7 +14,6 @@
 module org.trellisldp.triplestore {
     exports org.trellisldp.triplestore;
     requires javax.inject;
-    requires jena.osgi;
     requires org.apache.commons.lang3;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
@@ -22,4 +21,7 @@ module org.trellisldp.triplestore {
     requires org.trellisldp.audit;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    requires jena.core;
+    requires org.apache.jena.arq;
+    requires org.apache.jena.rdfconnection;
 }

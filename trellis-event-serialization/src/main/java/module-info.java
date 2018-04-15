@@ -18,9 +18,9 @@ module org.trellisldp.event {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.datatype.jsr310;
-    requires jackson.annotations;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    requires com.fasterxml.jackson.annotation;
 }

@@ -15,7 +15,6 @@ module org.trellisldp.io {
     exports org.trellisldp.io;
     exports org.trellisldp.io.impl;
     requires javax.inject;
-    requires jena.osgi;
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
@@ -24,4 +23,7 @@ module org.trellisldp.io {
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
     requires tamaya.api;
+    requires org.apache.jena.arq;
+    requires jena.base;
+    requires jena.core;
 }

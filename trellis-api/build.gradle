@@ -9,25 +9,10 @@ ext {
 
 javaModule {
     name = 'org.trellisldp.api'
-    extraTestModules = ['org.mockito', 'org.trellisldp.vocabulary']
-    hacks {
-        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec')
-        patches('org.apache.httpcomponents:httpclient-osgi', 'httpcore')
-        patches('org.apache.httpcomponents:httpcore-osgi', 'httpclient')
-    }
-}
-
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-        exclude group: 'commons-logging', module: 'commons-logging'
-    }
+    extraTestModules = ['org.mockito', 'org.trellisldp.vocabulary', 'jena.core', 'org.apache.jena.arq']
 }
 
 dependencies {
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
-
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 
@@ -36,7 +21,9 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
     testImplementation group: 'org.apache.commons', name: 'commons-text', version: commonsTextVersion
-    testImplementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
 }
 
 jar {

@@ -31,7 +31,7 @@ import static java.util.stream.Stream.builder;
 import static java.util.stream.Stream.empty;
 import static org.apache.commons.lang3.Range.between;
 import static org.apache.jena.graph.NodeFactory.createURI;
-import static org.apache.jena.system.Txn.executeWrite;
+import static org.apache.jena.sys.Txn.executeWrite;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.RDFUtils.TRELLIS_SESSION_BASE_URL;

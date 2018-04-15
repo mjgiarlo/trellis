@@ -15,23 +15,20 @@ javaModule {
     }
 }
 
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
-}
-
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
 
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
     api project(':trellis-api')
+    api project(':trellis-audit');
 
+    implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
+    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-rdfconnection', version: jenaRdfConnectionVersion
     implementation project(':trellis-vocabulary')
-    implementation project(':trellis-audit')
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     testImplementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion

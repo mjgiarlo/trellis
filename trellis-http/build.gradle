@@ -20,10 +20,6 @@ configurations {
     api {
         exclude group: 'javax.inject', module: 'javax.inject'
     }
-
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
 }
 
 dependencies {
@@ -37,19 +33,20 @@ dependencies {
     api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
     api project(':trellis-api')
 
-    implementation group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
-    implementation group: 'commons-io', name: 'commons-io', version: commonsIoVersion
+    implementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
+    implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation group: 'javax.json', name: 'javax.json-api', version: javaxJsonVersion
     implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation project(':trellis-vocabulary')
 
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     testImplementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation group: 'org.apache.commons', name: 'commons-text', version: commonsTextVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-simple', version: commonsRdfVersion
+    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
     testImplementation group: 'org.glassfish', name: 'javax.json', version: jsonVersion
     testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-server', version: jerseyVersion
     testImplementation group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-inmemory', version: jerseyVersion

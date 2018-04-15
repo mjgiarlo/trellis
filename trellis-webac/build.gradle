@@ -9,13 +9,7 @@ ext {
 
 javaModule {
     name = 'org.trellisldp.webac'
-    extraTestModules = ['org.mockito']
-}
-
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
+    extraTestModules = ['org.mockito', 'org.apache.jena.arq']
 }
 
 dependencies {
@@ -26,7 +20,11 @@ dependencies {
 
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation project(':trellis-vocabulary')
-
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    testImplementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
+    testImplementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
+    testImplementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion

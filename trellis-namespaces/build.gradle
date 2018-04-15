@@ -16,7 +16,6 @@ dependencies {
     api project(':trellis-api')
     api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
 
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
 

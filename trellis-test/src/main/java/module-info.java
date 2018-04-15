@@ -14,6 +14,7 @@
 module org.trellisldp.test {
     exports org.trellisldp.test;
     requires awaitility;
+    requires com.fasterxml.jackson.core;
     requires java.ws.rs;
     requires java.naming;
     requires javax.jms.api;
@@ -27,4 +28,6 @@ module org.trellisldp.test {
     requires org.trellisldp.io;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
+    requires org.apache.commons.codec;
+    requires com.fasterxml.jackson.databind;
 }

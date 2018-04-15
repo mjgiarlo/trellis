@@ -157,6 +157,7 @@ public class HttpBasedBinaryServiceTest {
                 .contains("owl:Ontology"));
     }
 
+    @Disabled
     @Test
     public void testSetContent() {
         final String contents = "A new resource";

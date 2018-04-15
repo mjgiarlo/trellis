@@ -50,33 +50,25 @@ javaModule {
     hacks {
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
-        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec:commons-codec')
-        patches('org.apache.httpcomponents:httpclient-osgi', 'org.apache.httpcomponents:httpclient')
-    }
-}
-
-configurations {
-    all {
-        exclude group: 'commons-logging', module: 'commons-logging'
     }
 }
 
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-    patch "org.apache.httpcomponents:httpcore-osgi:$httpCoreOsgiVersion"
 
+    implementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
+    implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
     implementation group: 'javax.jms', name: 'javax.jms-api', version: jmsApiVersion
     implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: jaxrsVersion
     implementation group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
+    implementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
     implementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
     //implementation group: 'org.apache.activemq', name: 'activemq-client', version: activeMqVersion
-    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: httpClientOsgiVersion
-    implementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-    runtime("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     implementation project(':trellis-api')
     implementation project(':trellis-http')

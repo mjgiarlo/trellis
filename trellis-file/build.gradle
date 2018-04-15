@@ -10,36 +10,28 @@ ext {
 javaModule {
     name = 'org.trellisldp.file'
     extraTestModules = ['org.mockito', 'org.trellisldp.id']
-    hacks {
-        patches('org.apache.httpcomponents:httpclient-osgi', 'commons-codec:commons-codec')
-    }
-}
-
-configurations {
-    all {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
 }
 
 dependencies {
-    patch "org.apache.httpcomponents:httpclient-osgi:$httpClientOsgiVersion"
-
     api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
     api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
     api project(':trellis-api')
 
     implementation group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
-    implementation group: 'commons-io', name: 'commons-io', version: commonsIoVersion
+    implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVersion
     implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.jena', name: 'jena-osgi', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
+    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
     implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
     implementation project(':trellis-vocabulary')
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
     testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
+    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation project(':trellis-id')
 }
