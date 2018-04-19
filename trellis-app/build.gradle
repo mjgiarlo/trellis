@@ -35,6 +35,7 @@ dependencies {
 
     testRuntime("javax.xml.bind:jaxb-api:$jaxbVersion")
     testRuntime("javax.activation:javax.activation-api:$activationApiVersion")
+    testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
 
     testImplementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
