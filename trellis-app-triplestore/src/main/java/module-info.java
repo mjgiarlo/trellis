@@ -12,11 +12,15 @@
  * limitations under the License.
  */
 module org.trellisldp.app.triplestore {
+    exports org.trellisldp.app.triplestore;
     requires dropwizard.lifecycle;
     requires dropwizard.core;
     requires guava;
     requires javax.jms.api;
     requires jena.tdb2;
+    requires metrics.healthchecks;
+    requires org.apache.jena.rdfconnection;
+    requires org.apache.jena.arq;
     requires org.apache.servicemix.bundles.kafka.clients;
     requires org.trellisldp.api;
     requires org.trellisldp.app;
@@ -27,7 +31,4 @@ module org.trellisldp.app.triplestore {
     requires org.trellisldp.kafka;
     requires org.trellisldp.triplestore;
     requires slf4j.api;
-    requires metrics.healthchecks;
-    requires org.apache.jena.rdfconnection;
-    requires org.apache.jena.arq;
 }

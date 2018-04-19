@@ -16,13 +16,17 @@ module org.trellisldp.app {
     exports org.trellisldp.app.config;
     exports org.trellisldp.app.auth;
     opens org.trellisldp.app.config to hibernate.validator;
+    requires com.fasterxml.jackson.annotation;
     requires dropwizard.auth;
     requires dropwizard.core;
     requires dropwizard.lifecycle;
+    requires guava;
     requires java.annotation;
     requires java.naming;
     requires java.ws.rs;
     requires java.xml.bind;
+    requires jjwt;
+    requires metrics.healthchecks;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.agent;
     requires org.trellisldp.api;
@@ -30,9 +34,5 @@ module org.trellisldp.app {
     requires org.trellisldp.vocabulary;
     requires org.trellisldp.webac;
     requires slf4j.api;
-    requires guava;
-    requires metrics.healthchecks;
     requires validation.api;
-    requires jjwt;
-    requires com.fasterxml.jackson.annotation;
 }

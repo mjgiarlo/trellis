@@ -15,12 +15,12 @@ module org.trellisldp.event {
     exports org.trellisldp.event;
     opens org.trellisldp.event to com.fasterxml.jackson.databind;
     provides org.trellisldp.api.ActivityStreamService with org.trellisldp.event.EventSerializer;
-    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.datatype.jsr310;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.api;
     requires org.trellisldp.vocabulary;
     requires slf4j.api;
-    requires com.fasterxml.jackson.annotation;
 }

@@ -22,51 +22,55 @@ dependencies {
     patch "com.google.code.findbugs:jsr305:$jsr305Version"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
-    compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
-    compile group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
-    compile group: 'javax.jms', name: 'javax.jms-api', version: jmsApiVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-auth', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-metrics', version: dropwizardVersion
-    compile group: 'io.dropwizard', name: 'dropwizard-http2', version: dropwizardVersion
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
-    compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    compile group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
-    compile group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
-    compile group: 'org.apache.jena', name: 'jena-rdfconnection', version: jenaRdfConnectionVersion
-    compile group: 'org.apache.jena', name: 'jena-tdb2', version: jenaVersion
-    compile group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
-    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    implementation("io.dropwizard:dropwizard-auth:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-core:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
+    implementation("io.dropwizard:dropwizard-http2:$dropwizardVersion")
+    implementation("io.jsonwebtoken:jjwt:$jwtVersion")
+    implementation("javax.activation:javax.activation-api:$activationApiVersion")
+    implementation("javax.jms:javax.jms-api:$jmsApiVersion")
+    implementation("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
+    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.httpcomponents:httpclient:$httpclientVersion")
+    implementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
+    implementation("org.apache.jena:jena-arq:$jenaArqVersion")
+    implementation("org.apache.jena:jena-core:$jenaVersion")
+    implementation("org.apache.jena:jena-rdfconnection:$jenaRdfConnectionVersion")
+    implementation("org.apache.jena:jena-tdb2:$jenaVersion")
+    implementation("org.apache.thrift:libthrift:$thriftVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compile project(':trellis-constraint-rules')
-    compile project(':trellis-io-jena')
-    compile project(':trellis-id')
-    compile project(':trellis-api')
-    compile project(':trellis-http')
-    compile project(':trellis-vocabulary')
-    compile project(':trellis-file')
-    compile project(':trellis-namespaces')
-    compile project(':trellis-agent')
-    compile project(':trellis-audit')
-    compile project(':trellis-event-serialization')
-    compile project(':trellis-webac')
-    compile project(':trellis-triplestore')
-    compile project(':trellis-jms')
-    compile project(':trellis-kafka')
-    compile project(':trellis-app')
+    implementation project(':trellis-constraint-rules')
+    implementation project(':trellis-io-jena')
+    implementation project(':trellis-id')
+    implementation project(':trellis-api')
+    implementation project(':trellis-http')
+    implementation project(':trellis-vocabulary')
+    implementation project(':trellis-file')
+    implementation project(':trellis-namespaces')
+    implementation project(':trellis-agent')
+    implementation project(':trellis-audit')
+    implementation project(':trellis-event-serialization')
+    implementation project(':trellis-webac')
+    implementation project(':trellis-triplestore')
+    implementation project(':trellis-jms')
+    implementation project(':trellis-kafka')
+    implementation project(':trellis-app')
 
-    runtime group: 'javax.xml.bind', name: 'jaxb-api', version: jaxbVersion
+    runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
 
-    testCompile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: dropwizardVersion
-    testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: dropwizardVersion
-    testCompile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
-    testCompile group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
-    testCompile group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
-    testCompile project(':trellis-test')
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    testImplementation ("io.dropwizard:dropwizard-client:$dropwizardVersion")
+    testImplementation ("io.dropwizard:dropwizard-testing:$dropwizardVersion")
+    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
+    testImplementation ("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation ("org.awaitility:awaitility:$awaitilityVersion")
+    testImplementation ("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation ("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation ("org.apache.thrift:libthrift:$thriftVersion")
+    testImplementation project(':trellis-test')
 }
 
 uploadArchives {
