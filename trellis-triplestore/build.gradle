@@ -18,21 +18,21 @@ javaModule {
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
 
-    api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
-    api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api project(':trellis-api')
     api project(':trellis-audit');
 
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
-    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
-    implementation group: 'org.apache.jena', name: 'jena-rdfconnection', version: jenaRdfConnectionVersion
+    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.jena:jena-arq:$jenaArqVersion")
+    implementation("org.apache.jena:jena-core:$jenaVersion")
+    implementation("org.apache.jena:jena-rdfconnection:$jenaRdfConnectionVersion")
     implementation project(':trellis-vocabulary')
 
-    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testImplementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation project(':trellis-id');
     testImplementation project(':trellis-test');
 

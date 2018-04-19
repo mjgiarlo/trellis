@@ -13,26 +13,26 @@ javaModule {
 }
 
 dependencies {
-    api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
-    api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api project(':trellis-api')
 
-    implementation group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVersion
-    implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
-    implementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
-    implementation group: 'org.apache.tamaya', name: 'tamaya-api', version: tamayaVersion
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
+    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.jena:jena-core:$jenaVersion")
+    implementation("org.apache.jena:jena-arq:$jenaArqVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation project(':trellis-vocabulary')
 
-    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testImplementation group: 'org.apache.tamaya', name: 'tamaya-core', version: tamayaVersion
-    testImplementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationsVersion
-    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
+    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation project(':trellis-id')
 }
 

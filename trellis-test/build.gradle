@@ -57,16 +57,16 @@ dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
-    implementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
+    implementation("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
-    implementation group: 'javax.jms', name: 'javax.jms-api', version: jmsApiVersion
-    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: jaxrsVersion
-    implementation group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
-    implementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    implementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
-    implementation group: 'org.awaitility', name: 'awaitility', version: awaitilityVersion
-    //implementation group: 'org.apache.activemq', name: 'activemq-client', version: activeMqVersion
+    implementation("io.jsonwebtoken:jjwt:$jwtVersion")
+    implementation("javax.jms:javax.jms-api:$jmsApiVersion")
+    implementation("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
+    implementation("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.thrift:libthrift:$thriftVersion")
+    implementation("org.awaitility:awaitility:$awaitilityVersion")
+    //implementation("org.apache.activemq:activemq-client:$activeMqVersion
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
@@ -75,8 +75,8 @@ dependencies {
     implementation project(':trellis-io-jena')
     implementation project(':trellis-vocabulary')
 
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
+    testCompile("org.mockito:mockito-core:$mockitoVersion")
 }
 
 

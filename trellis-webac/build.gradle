@@ -14,20 +14,20 @@ javaModule {
 
 dependencies {
 
-    api group: 'org.apache.commons', name: 'commons-rdf-api', version: commonsRdfVersion
-    api group: 'org.glassfish.hk2.external', name: 'javax.inject', version: javaxInjectVersion
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api project(':trellis-api')
 
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation project(':trellis-vocabulary')
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testImplementation group: 'org.apache.jena', name: 'jena-arq', version: jenaArqVersion
-    testImplementation group: 'org.apache.jena', name: 'jena-core', version: jenaVersion
-    testImplementation group: 'org.apache.thrift', name: 'libthrift', version: thriftVersion
+    testImplementation("org.apache.jena:jena-arq:$jenaArqVersion")
+    testImplementation("org.apache.jena:jena-core:$jenaVersion")
+    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-    testImplementation group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
 
 jar {
