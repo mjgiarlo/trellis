@@ -37,7 +37,6 @@ dependencies {
     testRuntime("javax.activation:javax.activation-api:$activationApiVersion")
     testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
 
-    testImplementation ("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
     testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
@@ -54,3 +53,6 @@ dependencies {
     testImplementation project(':trellis-id')
 }
 
+jar {
+    appendix 'jpms'
+}

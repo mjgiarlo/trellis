@@ -82,5 +82,6 @@ jar {
                 resolution:=optional; cardinality:=multiple
             '''
     }
+    appendix 'jpms'
 }
 

@@ -41,5 +41,6 @@ jar {
             osgi.serviceloader;
                 osgi.serviceloader=org.trellisldp.api.ActivityStreamService'''
     }
+    appendix 'jpms'
 }
 

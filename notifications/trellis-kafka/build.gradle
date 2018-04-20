@@ -47,5 +47,6 @@ jar {
                 resolution:=mandatory; cardinality:=mandatory
             '''
     }
+    appendix 'jpms'
 }
 

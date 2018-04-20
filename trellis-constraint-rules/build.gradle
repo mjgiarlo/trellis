@@ -44,5 +44,6 @@ jar {
             osgi.serviceloader;
                 osgi.serviceloader=org.trellisldp.api.ConstraintService'''
     }
+    appendix 'jpms'
 }
 

@@ -40,6 +40,7 @@ jar {
             osgi.serviceloader;
                 osgi.serviceloader=org.trellisldp.api.AuditService'''
     }
+    appendix 'jpms'
 }
 
 javadoc {

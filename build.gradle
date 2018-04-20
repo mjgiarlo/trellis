@@ -126,13 +126,13 @@ allprojects { subproj ->
     apply plugin: 'signing'
     apply plugin: 'checkstyle'
     apply plugin: 'com.github.hierynomus.license'
+    apply plugin: 'idea'
 
     ext {
         vendor = 'Trellis LDP'
         homepage = 'https://www.trellisldp.org'
         docURL = 'https://trellis-ldp.github.io/trellis/apidocs/'
         license = 'Apache 2'
-
         jacocoVersion = '0.8.1'
         checkstyleVersion = '8.8'
     }
@@ -279,7 +279,6 @@ subprojects { subproj ->
                 inceptionYear '2017'
                 name 'Trellis Linked Data Server'
                 description 'The core components for a Trellis linked data server'
-
                 organization {
                     name project.vendor
                     url project.homepage
