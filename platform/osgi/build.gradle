@@ -1,0 +1,142 @@
+apply plugin: 'java'
+
+buildscript {
+    repositories {
+      jcenter()
+    }
+}
+
+description = """Integration tests for Trellis components"""
+
+def randomPort() {
+    try {
+        ServerSocket server = new ServerSocket()
+        server.setReuseAddress(true)
+        server.bind(new InetSocketAddress(0))
+        int port = server.getLocalPort()
+        server.close()
+        return port
+    } catch (IOException e) {
+        throw new IOException('Failed to find random free port', e)
+    }
+}
+
+repositories {
+  jcenter()
+  mavenLocal()
+  mavenCentral()
+}
+
+configurations {
+    karafDistro {
+        description = 'Configuration used to isolate the dependency on the Karaf distro'
+        transitive = false
+    }
+}
+
+sonarqube {
+    skipProject = true
+}
+
+uploadArchives {
+    // This should be enabled once this module is more than just a test case
+    enabled = false
+}
+
+dependencies {
+    implementation project(':trellis-api')
+    implementation project(':trellis-http')
+    implementation project(':trellis-io-jena')
+    implementation project(':trellis-namespaces')
+    implementation project(':trellis-vocabulary')
+
+    testCompile project(':trellis-agent')
+    testCompile project(':trellis-amqp')
+    testCompile project(':trellis-audit')
+    testCompile project(':trellis-constraint-rules')
+    testCompile project(':trellis-event-serialization')
+    testCompile project(':trellis-file')
+    testCompile project(':trellis-id')
+    testCompile project(':trellis-jms')
+    testCompile project(':trellis-kafka')
+    testCompile project(':trellis-triplestore')
+    testCompile project(':trellis-webac')
+    testCompile project(':trellis-karaf')
+
+    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
+    testCompile("org.apache.jena:jena-osgi:$jenaVersion")
+    testCompile("org.apache.karaf.features:standard:$karafVersion")
+    testCompile("org.apache.karaf.features:org.apache.karaf.features.core:$karafVersion")
+    testCompile("org.ops4j.pax.exam:pax-exam:$paxExamVersion")
+    testCompile("org.ops4j.pax.exam:pax-exam-junit4:$paxExamVersion")
+    testCompile("org.ops4j.pax.exam:pax-exam-container-karaf:$paxExamVersion")
+    testCompile("org.osgi:org.osgi.core:$osgiVersion")
+    testCompile("org.osgi:org.osgi.compendium:$osgiCompendiumVersion")
+    testCompile("org.mockito:mockito-core:$mockitoVersion")
+    testCompile("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    testCompile group: 'org.apache.karaf.features', name: 'standard', version: karafVersion, classifier:'features', ext: 'xml'
+    testRuntime("org.junit.vintage:junit-vintage-engine:${junitVersion}")
+    karafDistro group: 'org.apache.karaf', name: 'apache-karaf', version: karafVersion, ext: 'zip'
+}
+
+
+task generateDependsFile {
+    // This is useful for the org.ops4j.pax.exam.CoreOptions.maven() stuff
+    File outputFileDir = project.file( "${project.buildDir}/classes/java/test/META-INF/maven/" )
+    File outputFile = new File( outputFileDir, 'dependencies.properties' )
+    outputs.file outputFile
+
+    doFirst {
+        outputFileDir.mkdirs()
+        Properties properties = new Properties();
+
+        // first we add our GAV info
+        properties.setProperty( "groupId", "${project.group}" );
+        properties.setProperty( "artifactId", project.name );
+        properties.setProperty( "version", "${project.version}" );
+        properties.setProperty( "${project.group}/${project.name}/version", "${project.version}" );
+
+        // then for all our deps
+        project.configurations.testRuntime.resolvedConfiguration.resolvedArtifacts.each {
+            final String keyBase = it.moduleVersion.id.group + '/' + it.moduleVersion.id.name;
+            properties.setProperty( "${keyBase}/scope", "compile" )
+            properties.setProperty( "${keyBase}/type", it.extension )
+            properties.setProperty( "${keyBase}/version", it.moduleVersion.id.version )
+        }
+
+        FileOutputStream outputStream = new FileOutputStream( outputFile );
+        try {
+            properties.store( outputStream, "Generated from Gradle for PaxExam testing" )
+        }
+        finally {
+            outputStream.close()
+        }
+    }
+}
+
+test {
+    systemProperty 'karaf.version', karafVersion
+    systemProperty 'karaf.commonsIo.version', commonsIoVersion
+    systemProperty 'jena.version', jenaVersion
+    systemProperty 'activemq.version', activeMqVersion
+    systemProperty 'spring.version', springFeatureVersion
+
+    systemProperty 'karaf.ssh.port', randomPort()
+    systemProperty 'karaf.rmiServer.port', randomPort()
+    systemProperty 'karaf.rmiRegistry.port', randomPort()
+
+    // TODO - re-enable testing for JDK 10 once karaf support catches up
+    enabled = ! JavaVersion.current().isJava10Compatible()
+
+    jacoco {
+        enabled = true
+    }
+}
+
+tasks.test.dependsOn tasks.generateDependsFile
+
+/*
+rootProject.childProjects.findAll { n, p -> p != project }.each { n, p ->
+    tasks.test.dependsOn p.tasks.install
+}
+*/

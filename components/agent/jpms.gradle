@@ -1,0 +1,36 @@
+apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
+
+description = 'Trellis Agent'
+
+ext {
+    moduleName = 'org.trellisldp.jpms.agent'
+}
+
+javaModule {
+    name = moduleName
+    extraTestModules = ['org.apache.commons.rdf.api']
+}
+
+dependencies {
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api project(':trellis-api')
+
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+    }
+    appendix 'jpms'
+}
+

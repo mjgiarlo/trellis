@@ -1,0 +1,40 @@
+apply plugin: 'osgi'
+apply plugin: 'com.zyxist.chainsaw'
+
+description = 'Trellis Namespace Manager'
+
+ext {
+    moduleName = 'org.trellisldp.jpms.namespaces'
+}
+
+javaModule {
+    name = moduleName
+    extraTestModules = ['tamaya.core']
+}
+
+dependencies {
+    api project(':trellis-api')
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+    }
+    appendix 'jpms'
+}
+
