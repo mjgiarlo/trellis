@@ -16,7 +16,7 @@ package org.trellisldp.app;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
-import static org.apache.jena.query.DatasetFactory.createTxnMem;
+import static org.apache.jena.arq.query.DatasetFactory.createTxnMem;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 
 import io.dropwizard.setup.Environment;

@@ -15,8 +15,8 @@ package org.trellisldp.vocabulary;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.jena.graph.Factory.createDefaultGraph;
-import static org.apache.jena.graph.Node.ANY;
+import static org.apache.jena.core.graph.Factory.createDefaultGraph;
+import static org.apache.jena.core.graph.Node.ANY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -27,10 +27,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.riot.RDFParser;
+import org.apache.jena.arq.riot.RDFParser;
+import org.apache.jena.core.graph.Graph;
+import org.apache.jena.core.graph.Node;
+import org.apache.jena.core.graph.Triple;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 

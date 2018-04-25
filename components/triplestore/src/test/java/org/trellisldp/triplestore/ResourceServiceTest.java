@@ -13,7 +13,7 @@
  */
 package org.trellisldp.triplestore;
 
-import static org.apache.jena.query.DatasetFactory.wrap;
+import static org.apache.jena.arq.query.DatasetFactory.wrap;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 
 import org.apache.commons.rdf.jena.JenaDataset;

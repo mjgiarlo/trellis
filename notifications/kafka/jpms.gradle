@@ -9,7 +9,7 @@ ext {
 
 javaModule {
     name = moduleName
-    extraTestModules = ['org.trellisldp.vocabulary']
+    extraTestModules = ['org.trellisldp.jpms.vocabulary']
 }
 
 dependencies {

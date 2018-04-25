@@ -11,17 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.triplestore {
+module org.trellisldp.jpms.triplestore {
     exports org.trellisldp.triplestore;
     requires javax.inject;
     requires org.apache.commons.lang3;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
-    requires org.trellisldp.api;
-    requires org.trellisldp.audit;
-    requires org.trellisldp.vocabulary;
-    requires slf4j.api;
-    requires jena.core;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.audit;
+    requires org.trellisldp.jpms.vocabulary;
+    requires org.apache.jena.core;
     requires org.apache.jena.arq;
     requires org.apache.jena.rdfconnection;
+    requires slf4j.api;
 }

@@ -6,7 +6,7 @@
 
     <!-- TODO make this more flexible with a reference -->
     <!--<reference id="rdfConnectionRef" interface="org.apache.jena.rdfconnection.RDFConnection"/>-->
-    <bean id="dataset" class="org.apache.jena.query.DatasetFactory" factory-method="create"/>
+    <bean id="dataset" class="org.apache.jena.arq.query.DatasetFactory" factory-method="create"/>
 
     <bean id="rdfConnection" class="org.apache.jena.rdfconnection.RDFConnectionFactory" factory-method="connect">
         <argument ref="dataset"/>

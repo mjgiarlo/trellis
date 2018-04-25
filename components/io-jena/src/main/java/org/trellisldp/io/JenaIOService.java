@@ -20,13 +20,13 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.rdf.api.RDFSyntax.RDFA;
-import static org.apache.jena.graph.Factory.createDefaultGraph;
-import static org.apache.jena.riot.Lang.JSONLD;
-import static org.apache.jena.riot.RDFFormat.JSONLD_COMPACT_FLAT;
-import static org.apache.jena.riot.system.StreamRDFWriter.defaultSerialization;
-import static org.apache.jena.riot.system.StreamRDFWriter.getWriterStream;
-import static org.apache.jena.update.UpdateAction.execute;
-import static org.apache.jena.update.UpdateFactory.create;
+import static org.apache.jena.arq.riot.Lang.JSONLD;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_COMPACT_FLAT;
+import static org.apache.jena.arq.riot.system.StreamRDFWriter.defaultSerialization;
+import static org.apache.jena.arq.riot.system.StreamRDFWriter.getWriterStream;
+import static org.apache.jena.arq.update.UpdateAction.execute;
+import static org.apache.jena.arq.update.UpdateFactory.create;
+import static org.apache.jena.core.graph.Factory.createDefaultGraph;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.io.impl.IOUtils.getJsonLdProfile;
 import static org.trellisldp.vocabulary.JSONLD.URI;
@@ -47,24 +47,24 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFSyntax;
 import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.atlas.AtlasException;
-import org.apache.jena.atlas.web.HttpException;
-import org.apache.jena.atlas.web.TypedInputStream;
-import org.apache.jena.query.QueryParseException;
-import org.apache.jena.riot.JsonLDWriteContext;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.RDFParser;
-import org.apache.jena.riot.RiotException;
-import org.apache.jena.riot.WriterDatasetRIOT;
-import org.apache.jena.riot.system.PrefixMap;
-import org.apache.jena.riot.system.RiotLib;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.web.HttpOp;
-import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.update.UpdateException;
+import org.apache.jena.arq.atlas.web.HttpException;
+import org.apache.jena.arq.atlas.web.TypedInputStream;
+import org.apache.jena.arq.query.QueryParseException;
+import org.apache.jena.arq.riot.JsonLDWriteContext;
+import org.apache.jena.arq.riot.Lang;
+import org.apache.jena.arq.riot.RDFDataMgr;
+import org.apache.jena.arq.riot.RDFFormat;
+import org.apache.jena.arq.riot.RDFParser;
+import org.apache.jena.arq.riot.RiotException;
+import org.apache.jena.arq.riot.WriterDatasetRIOT;
+import org.apache.jena.arq.riot.system.PrefixMap;
+import org.apache.jena.arq.riot.system.RiotLib;
+import org.apache.jena.arq.riot.system.StreamRDF;
+import org.apache.jena.arq.riot.web.HttpOp;
+import org.apache.jena.arq.sparql.core.DatasetGraph;
+import org.apache.jena.arq.sparql.core.DatasetGraphFactory;
+import org.apache.jena.arq.update.UpdateException;
+import org.apache.jena.base.atlas.AtlasException;
 import org.apache.tamaya.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.trellisldp.api.CacheService;
@@ -163,7 +163,7 @@ public class JenaIOService implements IOService {
                     stream.finish();
                 } else {
                     LOGGER.debug("Writing buffered RDF: {}", lang);
-                    final org.apache.jena.graph.Graph graph = createDefaultGraph();
+                    final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
                     ofNullable(nsService).map(NamespaceService::getNamespaces)
                         .ifPresent(graph.getPrefixMapping()::setNsPrefixes);
                     triples.map(rdf::asJenaTriple).forEachOrdered(graph::add);
@@ -227,7 +227,7 @@ public class JenaIOService implements IOService {
         requireNonNull(syntax, "The syntax value may not be null!");
 
         try {
-            final org.apache.jena.graph.Graph graph = createDefaultGraph();
+            final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
             final Lang lang = rdf.asJenaLang(syntax).orElseThrow(() ->
                     new RuntimeTrellisException("Unsupported RDF Syntax: " + syntax.mediaType()));
 

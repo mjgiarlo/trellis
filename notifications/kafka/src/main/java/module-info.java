@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.kafka {
+module org.trellisldp.jpms.kafka {
     exports org.trellisldp.kafka;
     requires javax.inject;
     requires org.apache.commons.rdf.api;
     requires org.apache.servicemix.bundles.kafka.clients;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
     requires slf4j.api;
     requires tamaya.api;
     uses org.trellisldp.api.ActivityStreamService;

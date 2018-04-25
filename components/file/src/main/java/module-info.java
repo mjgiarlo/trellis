@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.file {
+module org.trellisldp.jpms.file {
     exports org.trellisldp.file;
     requires commons.collections4;
     requires javax.inject;
@@ -20,9 +20,10 @@ module org.trellisldp.file {
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
-    requires org.trellisldp.api;
-    requires org.trellisldp.vocabulary;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
     requires tamaya.api;
-    requires jena.core;
+    requires org.apache.jena.core;
+    requires org.apache.jena.arq;
 }

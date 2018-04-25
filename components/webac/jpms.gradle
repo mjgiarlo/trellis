@@ -20,13 +20,19 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation project(':trellis-vocabulary')
+
+    testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testImplementation("org.apache.jena:jena-arq:$jenaVersion")
-    testImplementation("org.apache.jena:jena-core:$jenaVersion")
-    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
-    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    testImplementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.base-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.core-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
+    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
 

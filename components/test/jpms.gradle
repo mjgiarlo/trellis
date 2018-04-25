@@ -45,7 +45,7 @@ sonarqube {
 }
 
 javaModule {
-    name = 'org.trellisldp.test'
+    name = 'org.trellisldp.jpms.test'
     extraTestModules = ['org.mockito']
     hacks {
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
@@ -57,15 +57,17 @@ dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
+    implementation("com.google.guava:guava:$guavaVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
     implementation("javax.jms:javax.jms-api:$jmsApiVersion")
     implementation("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
     implementation("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
-    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.thrift:libthrift:$thriftVersion")
     implementation("org.awaitility:awaitility:$awaitilityVersion")
+    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     //implementation("org.apache.activemq:activemq-client:$activeMqVersion
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")

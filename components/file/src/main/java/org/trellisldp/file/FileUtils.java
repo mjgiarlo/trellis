@@ -21,9 +21,9 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
-import static org.apache.jena.riot.tokens.TokenizerFactory.makeTokenizerString;
-import static org.apache.jena.sparql.core.Quad.create;
-import static org.apache.jena.sparql.core.Quad.defaultGraphIRI;
+import static org.apache.jena.arq.riot.tokens.TokenizerFactory.makeTokenizerString;
+import static org.apache.jena.arq.sparql.core.Quad.create;
+import static org.apache.jena.arq.sparql.core.Quad.defaultGraphIRI;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
@@ -37,8 +37,8 @@ import java.util.zip.CRC32;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Node;
-import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.arq.riot.tokens.Token;
+import org.apache.jena.core.graph.Node;
 import org.slf4j.Logger;
 
 /**

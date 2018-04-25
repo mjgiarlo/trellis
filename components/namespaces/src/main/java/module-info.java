@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.namespaces {
+module org.trellisldp.jpms.namespaces {
     exports org.trellisldp.namespaces;
     requires com.fasterxml.jackson.databind;
     requires javax.inject;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
     requires slf4j.api;
     requires tamaya.api;
 }

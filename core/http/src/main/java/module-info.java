@@ -25,7 +25,7 @@ module org.trellisldp.jpms.http {
     requires org.apache.commons.io;
     requires org.apache.commons.lang3;
     requires org.apache.commons.rdf.api;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
     requires tamaya.api;

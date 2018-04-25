@@ -30,8 +30,8 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.builder;
 import static java.util.stream.Stream.empty;
 import static org.apache.commons.lang3.Range.between;
-import static org.apache.jena.graph.NodeFactory.createURI;
-import static org.apache.jena.sys.Txn.executeWrite;
+import static org.apache.jena.arq.system.Txn.executeWrite;
+import static org.apache.jena.core.graph.NodeFactory.createURI;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.RDFUtils.TRELLIS_SESSION_BASE_URL;
@@ -69,26 +69,26 @@ import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Node;
-import org.apache.jena.query.Query;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.arq.query.Query;
+import org.apache.jena.arq.sparql.core.DatasetGraph;
+import org.apache.jena.arq.sparql.core.DatasetGraphFactory;
+import org.apache.jena.arq.sparql.core.Quad;
+import org.apache.jena.arq.sparql.core.Var;
+import org.apache.jena.arq.sparql.modify.request.QuadAcc;
+import org.apache.jena.arq.sparql.modify.request.QuadDataAcc;
+import org.apache.jena.arq.sparql.modify.request.UpdateDataInsert;
+import org.apache.jena.arq.sparql.modify.request.UpdateDeleteInsert;
+import org.apache.jena.arq.sparql.modify.request.UpdateDeleteWhere;
+import org.apache.jena.arq.sparql.syntax.ElementGroup;
+import org.apache.jena.arq.sparql.syntax.ElementMinus;
+import org.apache.jena.arq.sparql.syntax.ElementNamedGraph;
+import org.apache.jena.arq.sparql.syntax.ElementOptional;
+import org.apache.jena.arq.sparql.syntax.ElementPathBlock;
+import org.apache.jena.arq.update.Update;
+import org.apache.jena.arq.update.UpdateRequest;
+import org.apache.jena.core.graph.Node;
+import org.apache.jena.core.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.modify.request.QuadAcc;
-import org.apache.jena.sparql.modify.request.QuadDataAcc;
-import org.apache.jena.sparql.modify.request.UpdateDataInsert;
-import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
-import org.apache.jena.sparql.modify.request.UpdateDeleteWhere;
-import org.apache.jena.sparql.syntax.ElementGroup;
-import org.apache.jena.sparql.syntax.ElementMinus;
-import org.apache.jena.sparql.syntax.ElementNamedGraph;
-import org.apache.jena.sparql.syntax.ElementOptional;
-import org.apache.jena.sparql.syntax.ElementPathBlock;
-import org.apache.jena.update.Update;
-import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.IdentifierService;
@@ -700,9 +700,9 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
      * TODO Replace when COMMONSRDF-74 is released.
      *
      * @param dataset a Commons RDF {@link Dataset}
-     * @return a Jena {@link org.apache.jena.query.Dataset}
+     * @return a Jena {@link org.apache.jena.arq.query.Dataset}
      */
-    private org.apache.jena.query.Dataset asJenaDataset(final Dataset dataset) {
+    private org.apache.jena.arq.query.Dataset asJenaDataset(final Dataset dataset) {
         final DatasetGraph dsg;
         if (dataset instanceof JenaDataset) {
             dsg = ((JenaDataset) dataset).asJenaDatasetGraph();
@@ -710,19 +710,19 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
             dsg = DatasetGraphFactory.createGeneral();
             dataset.stream().map(rdf::asJenaQuad).forEach(dsg::add);
         }
-        return org.apache.jena.query.DatasetFactory.wrap(dsg);
+        return org.apache.jena.arq.query.DatasetFactory.wrap(dsg);
     }
 
     /**
-     * Alias{@link org.apache.jena.graph.Triple#create(Node, Node, Node)} to
+     * Alias{@link org.apache.jena.core.graph.Triple#create(Node, Node, Node)} to
      * avoid collision with {@link ResourceService#create(IRI, Session, Resource)}.
      *
      * @param subj the subject
      * @param pred the predicate
      * @param obj the object
-     * @return a {@link org.apache.jena.graph.Triple}
+     * @return a {@link org.apache.jena.core.graph.Triple}
      */
-    private static org.apache.jena.graph.Triple triple(final Node subj, final Node pred, final Node obj) {
-        return org.apache.jena.graph.Triple.create(subj, pred, obj);
+    private static org.apache.jena.core.graph.Triple triple(final Node subj, final Node pred, final Node obj) {
+        return org.apache.jena.core.graph.Triple.create(subj, pred, obj);
     }
 }

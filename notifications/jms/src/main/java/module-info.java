@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.jms {
+module org.trellisldp.jpms.jms {
     exports org.trellisldp.jms;
     requires javax.inject;
     requires javax.jms.api;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
     requires slf4j.api;
     requires tamaya.api;
 }

@@ -15,4 +15,5 @@ module org.trellisldp.jpms.agent {
     exports org.trellisldp.agent;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.vocabulary;
 }

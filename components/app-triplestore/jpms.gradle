@@ -8,7 +8,7 @@ ext {
 
 javaModule {
     name = moduleName
-    extraTestModules = ['org.trellisldp.test','org.apache.jena.rdfconnection']
+    extraTestModules = ['org.trellisldp.jpms.test','org.apache.jena.rdfconnection']
     hacks {
         patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
@@ -23,6 +23,7 @@ dependencies {
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
     compile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    compile("com.google.guava:guava:$guavaVersion")
     compile("commons-codec:commons-codec:$commonsCodecVersion")
     compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-core:$dropwizardVersion")
@@ -31,15 +32,16 @@ dependencies {
     compile("io.jsonwebtoken:jjwt:$jwtVersion")
     compile("javax.activation:javax.activation-api:$activationApiVersion")
     compile("javax.jms:javax.jms-api:$jmsApiVersion")
-    compile("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
-    compile("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    compile("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     compile("org.apache.httpcomponents:httpclient:$httpclientVersion")
     compile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
-    compile("org.apache.jena:jena-arq:$jenaVersion")
-    compile("org.apache.jena:jena-core:$jenaVersion")
-    compile("org.apache.jena:jena-rdfconnection:$jenaVersion")
-    compile("org.apache.jena:jena-tdb2:$jenaVersion")
+    compile("org.apache.jena:jena.arq-jpms:$jenaVersion")
+    compile("org.apache.jena:jena.base-jpms:$jenaVersion")
+    compile("org.apache.jena:jena.core-jpms:$jenaVersion")
+    compile("org.apache.jena:jena.dboe-jpms:$jenaVersion")
+    compile("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
     compile("org.apache.thrift:libthrift:$thriftVersion")
+    compile("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
     compile project(':trellis-constraint-rules')
@@ -58,9 +60,9 @@ dependencies {
     compile project(':trellis-jms')
     compile project(':trellis-kafka')
     compile project(':trellis-app')
+    compile ("javax.xml.bind:jaxb-api:$jaxbVersion")
 
-    runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
-
+    testCompile("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
     testCompile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")

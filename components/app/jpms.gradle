@@ -6,10 +6,9 @@ ext {
 
 javaModule {
     name = moduleName
-    extraTestModules = ['org.trellisldp.file','org.trellisldp.id','org.trellisldp.io',
-                        'org.trellisldp.triplestore', 'org.apache.jena.rdfconnection']
+    extraTestModules = ['org.trellisldp.jpms.file','org.trellisldp.jpms.id','org.trellisldp.jpms.io',
+                        'org.trellisldp.jpms.triplestore', 'org.apache.jena.rdfconnection']
     hacks {
-        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
         //patches('io.dropwizard:dropwizard-logging', 'ch.qos.logback:logback-core')
@@ -19,7 +18,6 @@ javaModule {
 dependencies {
 
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
-    patch "com.google.code.findbugs:jsr305:$jsr305Version"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
     api("io.dropwizard:dropwizard-auth:$dropwizardVersion")
@@ -33,20 +31,24 @@ dependencies {
     implementation project(':trellis-agent')
     implementation project(':trellis-webac')
 
-    testRuntime("javax.xml.bind:jaxb-api:$jaxbVersion")
-    testRuntime("javax.activation:javax.activation-api:$activationApiVersion")
-    testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
-
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
+    testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
-    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
-    testImplementation("org.apache.jena:jena-arq:$jenaVersion")
-    testImplementation("org.apache.jena:jena-rdfconnection:$jenaVersion")
-    testImplementation("org.apache.jena:jena-tdb2:$jenaVersion")
+    testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
+    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    testImplementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.base-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.core-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
+    testImplementation("org.apache.jena:jena.dboe-jpms:$jenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     testImplementation project(':trellis-triplestore')
     testImplementation project(':trellis-io-jena')
     testImplementation project(':trellis-file')

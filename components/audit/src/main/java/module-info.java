@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.audit {
+module org.trellisldp.jpms.audit {
     exports org.trellisldp.audit;
     requires org.apache.commons.rdf.api;
-    requires org.trellisldp.api;
-    requires org.trellisldp.vocabulary;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.vocabulary;
 }

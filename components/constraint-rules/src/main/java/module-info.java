@@ -11,10 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.constraint {
+module org.trellisldp.jpms.constraint {
     provides org.trellisldp.api.ConstraintService with org.trellisldp.constraint.LdpConstraints;
     requires slf4j.api;
     requires org.apache.commons.rdf.api;
-    requires org.trellisldp.api;
-    requires org.trellisldp.vocabulary;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.vocabulary;
 }

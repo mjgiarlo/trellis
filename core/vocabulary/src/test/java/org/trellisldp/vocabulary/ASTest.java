@@ -13,11 +13,11 @@
  */
 package org.trellisldp.vocabulary;
 
-import static org.apache.jena.graph.Factory.createDefaultGraph;
+import static org.apache.jena.core.graph.Factory.createDefaultGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.jena.graph.Graph;
-import org.apache.jena.riot.RDFParser;
+import org.apache.jena.arq.riot.RDFParser;
+import org.apache.jena.core.graph.Graph;
 import org.junit.jupiter.api.Test;
 
 /**

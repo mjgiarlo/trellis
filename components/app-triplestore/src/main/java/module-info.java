@@ -18,10 +18,22 @@ module org.trellisldp.jpms.app.triplestore {
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
     requires org.trellisldp.jpms.api;
-    requires org.trellisldp.audit;
+    requires org.trellisldp.jpms.audit;
     requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
     requires org.apache.jena.core;
     requires org.apache.jena.arq;
     requires org.apache.jena.rdfconnection;
+    requires com.google.common;
+    requires dropwizard.core;
+    requires org.trellisldp.jpms.app;
+    requires org.trellisldp.jpms.file;
+    requires org.trellisldp.jpms.id;
+    requires org.trellisldp.jpms.namespaces;
+    requires org.trellisldp.jpms.io;
+    requires org.trellisldp.jpms.triplestore;
+    requires org.apache.jena.dboe;
+    requires dropwizard.lifecycle;
+    requires org.apache.servicemix.bundles.kafka.clients;
+    requires org.trellisldp.jpms.kafka;
 }

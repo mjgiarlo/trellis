@@ -9,10 +9,15 @@ ext {
 
 javaModule {
     name = moduleName
-    extraTestModules = ['org.mockito', 'org.trellisldp.id']
+    extraTestModules = ['org.mockito', 'org.trellisldp.jpms.id']
+    hacks {
+        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
+    }
 }
 
 dependencies {
+    patch "com.google.code.findbugs:jsr305:$jsr305Version"
+
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api project(':trellis-api')
@@ -20,19 +25,24 @@ dependencies {
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
-    implementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
-    implementation("org.apache.jena:jena-core:$jenaVersion")
-    implementation("org.apache.jena:jena-arq:$jenaVersion")
+    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    implementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
+    implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
+    implementation("org.apache.jena:jena.base-jpms:$jenaVersion")
+    implementation("org.apache.jena:jena.core-jpms:$jenaVersion")
+    implementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation project(':trellis-vocabulary')
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     testImplementation project(':trellis-id')
 }
 

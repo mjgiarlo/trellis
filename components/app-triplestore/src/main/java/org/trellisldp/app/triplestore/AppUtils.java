@@ -15,10 +15,10 @@ package org.trellisldp.app.triplestore;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
-import static org.apache.jena.query.DatasetFactory.createTxnMem;
-import static org.apache.jena.query.DatasetFactory.wrap;
+import static org.apache.jena.arq.query.DatasetFactory.createTxnMem;
+import static org.apache.jena.arq.query.DatasetFactory.wrap;
+import static org.apache.jena.dboe.tdb2.DatabaseMgr.connectDatasetGraph;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
-import static org.apache.jena.tdb2.DatabaseMgr.connectDatasetGraph;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.app.config.NotificationsConfiguration.Type.KAFKA;
 import static org.trellisldp.io.JenaIOService.IO_HTML_CSS;

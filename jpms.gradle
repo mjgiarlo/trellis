@@ -34,6 +34,7 @@ ext {
     commonsIoVersion = '2.6'
     commonsLangVersion = '3.7'
     commonsRdfVersion = '0.5.0'
+    commonsRdfJenaVersion = '0.6.0-SNAPSHOT'
     dropwizardVersion = '1.2.0'
     jacksonVersion = '2.9.5'
     javaxAnnotationsVersion = '1.3.2'
@@ -72,6 +73,7 @@ ext {
     awaitilityVersion = '3.1.0'
     bouncycastleVersion = '1.59'
     commonsTextVersion = '1.3'
+    dexxCollectionVersion = '0.7'
     guavaVersion = '24.1-jre'
     httpclientVersion = '4.5.3'
     jerseyVersion = '2.25.1'
@@ -155,10 +157,10 @@ allprojects { subproj ->
     configurations {
         all {
             exclude group: 'xml-apis', module: 'xml-apis'
+            exclude group: 'com.google.code.findbugs', module: 'jsr305'
+            exclude group: 'org.apache.geronimo.specs', module: 'geronimo-annotation_1.2_spec'
             exclude group: 'commons-logging', module: 'commons-logging'
-            exclude group: 'org.apache.jena', module: 'jena-osgi'
             exclude group: 'javax.inject', module: 'javax.inject'
-            exclude group: 'xerces', module: 'xercesImpl'
             exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
             exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
         }

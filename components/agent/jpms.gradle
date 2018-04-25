@@ -9,13 +9,15 @@ ext {
 
 javaModule {
     name = moduleName
-    extraTestModules = ['org.apache.commons.rdf.api']
+    extraTestModules = ['org.trellisldp.jpms.vocabulary','org.apache.commons.rdf.api']
 }
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api project(':trellis-api')
+    api project(':trellis-vocabulary')
 
+    testImplementation project(':trellis-vocabulary')
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
 }

@@ -17,8 +17,8 @@ import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.sparql.core.Var;
+import org.apache.jena.arq.query.QuerySolution;
+import org.apache.jena.arq.sparql.core.Var;
 
 /**
  * Utilities for the Triplestore resource service.

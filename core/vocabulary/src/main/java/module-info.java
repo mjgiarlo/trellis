@@ -14,5 +14,8 @@
 module org.trellisldp.jpms.vocabulary {
     exports org.trellisldp.vocabulary;
     requires org.apache.commons.rdf.api;
+    requires org.apache.jena.arq;
+    requires org.apache.jena.base;
+    requires org.apache.jena.core;
     uses org.apache.commons.rdf.api.RDF;
 }

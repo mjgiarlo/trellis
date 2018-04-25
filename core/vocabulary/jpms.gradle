@@ -15,18 +15,20 @@ javaModule {
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
 
+    implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
+    implementation("org.apache.jena:jena.base-jpms:$jenaVersion")
+    implementation("org.apache.jena:jena.core-jpms:$jenaVersion")
+
+    testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     testImplementation("commons-io:commons-io:$commonsIoVersion") {force = true}
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
-    testImplementation("org.apache.jena:jena-arq:$jenaVersion")
-    testImplementation("org.apache.jena:jena-base:$jenaVersion")
-    testImplementation("org.apache.jena:jena-core:$jenaVersion")
-    testImplementation("org.apache.jena:jena-iri:$jenaVersion")
+    testImplementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
 
     testRuntimeClasspath("ch.qos.logback:logback-classic:$logbackVersion")
 }

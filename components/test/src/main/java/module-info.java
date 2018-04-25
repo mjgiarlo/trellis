@@ -11,23 +11,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.test {
+module org.trellisldp.jpms.test {
     exports org.trellisldp.test;
     requires awaitility;
     requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
     requires java.ws.rs;
     requires java.naming;
     requires javax.jms.api;
     requires jjwt;
+    requires org.apache.commons.codec;
     requires org.apache.commons.io;
     requires org.apache.commons.rdf.api;
     requires org.apache.commons.rdf.jena;
     requires org.junit.jupiter.api;
-    requires org.trellisldp.api;
-    requires org.trellisldp.http;
-    requires org.trellisldp.io;
-    requires org.trellisldp.vocabulary;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.http;
+    requires org.trellisldp.jpms.io;
+    requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
-    requires org.apache.commons.codec;
-    requires com.fasterxml.jackson.databind;
 }

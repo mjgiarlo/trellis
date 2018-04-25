@@ -13,9 +13,9 @@
  */
 package org.trellisldp.io.impl;
 
-import static org.apache.jena.riot.RDFFormat.JSONLD_COMPACT_FLAT;
-import static org.apache.jena.riot.RDFFormat.JSONLD_EXPAND_FLAT;
-import static org.apache.jena.riot.RDFFormat.JSONLD_FLATTEN_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_COMPACT_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_EXPAND_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_FLATTEN_FLAT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.rdf.api.RDF;

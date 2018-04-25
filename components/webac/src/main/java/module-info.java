@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.webac {
+module org.trellisldp.jpms.webac {
     exports org.trellisldp.webac;
     requires javax.inject;
     requires org.apache.commons.rdf.api;
-    requires org.trellisldp.api;
-    requires org.trellisldp.vocabulary;
+    requires org.trellisldp.jpms.api;
+    requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
 }

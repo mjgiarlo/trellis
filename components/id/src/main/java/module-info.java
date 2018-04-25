@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.id {
+module org.trellisldp.jpms.id {
     exports org.trellisldp.id;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
 }

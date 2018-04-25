@@ -16,9 +16,9 @@ package org.trellisldp.io.impl;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.jena.riot.RDFFormat.JSONLD_COMPACT_FLAT;
-import static org.apache.jena.riot.RDFFormat.JSONLD_EXPAND_FLAT;
-import static org.apache.jena.riot.RDFFormat.JSONLD_FLATTEN_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_COMPACT_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_EXPAND_FLAT;
+import static org.apache.jena.arq.riot.RDFFormat.JSONLD_FLATTEN_FLAT;
 import static org.trellisldp.vocabulary.JSONLD.compacted;
 import static org.trellisldp.vocabulary.JSONLD.compacted_flattened;
 import static org.trellisldp.vocabulary.JSONLD.expanded;
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
-import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.arq.riot.RDFFormat;
 
 /**
  * Utilities used with the Jena-IO package.

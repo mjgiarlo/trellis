@@ -20,7 +20,6 @@ module org.trellisldp.jpms.app {
     requires dropwizard.auth;
     requires dropwizard.core;
     requires dropwizard.lifecycle;
-    requires guava;
     requires java.annotation;
     requires java.naming;
     requires java.ws.rs;
@@ -32,7 +31,7 @@ module org.trellisldp.jpms.app {
     requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.http;
     requires org.trellisldp.jpms.vocabulary;
-    requires org.trellisldp.webac;
+    requires org.trellisldp.jpms.webac;
     requires slf4j.api;
     requires validation.api;
 }

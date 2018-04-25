@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.commons.lang3.Range.between;
-import static org.apache.jena.query.DatasetFactory.wrap;
+import static org.apache.jena.arq.query.DatasetFactory.wrap;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,8 +46,8 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.arq.update.UpdateRequest;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.update.UpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -233,7 +233,7 @@ public class TriplestoreResourceServiceTest {
                 mockMementoService, mockEventService);
         doThrow(new RuntimeException("Expected exception")).when(mockRdfConnection).update(any(UpdateRequest.class));
         doThrow(new RuntimeException("Expected exception")).when(mockRdfConnection)
-            .loadDataset(any(org.apache.jena.query.Dataset.class));
+            .loadDataset(any(org.apache.jena.arq.query.Dataset.class));
 
         final IRI resource = rdf.createIRI(TRELLIS_DATA_PREFIX + "resource");
         assertThrows(ExecutionException.class, () ->

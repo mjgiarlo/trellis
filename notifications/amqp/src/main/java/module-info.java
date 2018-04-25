@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.amqp {
+module org.trellisldp.jpms.amqp {
     exports org.trellisldp.amqp;
     requires com.rabbitmq.client;
     requires javax.inject;
-    requires org.trellisldp.api;
+    requires org.trellisldp.jpms.api;
     requires slf4j.api;
     requires tamaya.api;
 }
