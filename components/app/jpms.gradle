@@ -1,11 +1,14 @@
+apply plugin: 'osgi'
+
 description = 'Trellis Application'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.app'
+    javaModuleName = 'org.trellisldp.jpms.app'
+    osgiModuleName = 'org.trellisldp.app'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.trellisldp.jpms.file','org.trellisldp.jpms.id','org.trellisldp.jpms.io',
                         'org.trellisldp.jpms.triplestore', 'org.apache.jena.rdfconnection']
     hacks {
@@ -56,5 +59,14 @@ dependencies {
 }
 
 jar {
+    manifest {
+        description project.description
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', javaModuleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+    }
     appendix 'jpms'
 }

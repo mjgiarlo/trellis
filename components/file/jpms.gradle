@@ -4,20 +4,16 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis File-based service implementations'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.file'
+    javaModuleName = 'org.trellisldp.jpms.file'
+    osgiModuleName = 'org.trellisldp.file'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.mockito', 'org.trellisldp.jpms.id']
-    hacks {
-        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
-    }
 }
 
 dependencies {
-    patch "com.google.code.findbugs:jsr305:$jsr305Version"
-
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api project(':trellis-api')
@@ -53,9 +49,9 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
     }
     appendix 'jpms'
 }

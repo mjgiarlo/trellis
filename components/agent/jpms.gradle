@@ -4,12 +4,13 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis Agent'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.agent'
+    osgiModuleName = 'org.trellisldp.agent'
+    javaModuleName = 'org.trellisldp.jpms.agent'
 }
 
 javaModule {
-    name = moduleName
-    extraTestModules = ['org.trellisldp.jpms.vocabulary','org.apache.commons.rdf.api']
+    name = javaModuleName
+    extraTestModules = ['org.trellisldp.jpms.vocabulary', 'org.apache.commons.rdf.api']
 }
 
 dependencies {
@@ -29,9 +30,12 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"; 
+                resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
+        instruction 'Provide-Capability', '''osgi.serviceloader; osgi.serviceloader=org.trellisldp.api.AgentService'''
     }
     appendix 'jpms'
 }

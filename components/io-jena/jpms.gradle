@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis IO Module (Jena)'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.io'
+    javaModuleName = 'org.trellisldp.jpms.io'
+    osgiModuleName = 'org.trellisldp.io'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['jsonld.java']
 }
 
@@ -46,9 +47,9 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
     }
     appendix 'jpms'
 }

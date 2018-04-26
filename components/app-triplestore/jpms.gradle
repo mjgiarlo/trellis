@@ -1,16 +1,17 @@
+apply plugin: 'osgi'
 apply plugin: 'com.zyxist.chainsaw'
 
 description = 'Trellis App Triplestore'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.app.triplestore'
+    javaModuleName = 'org.trellisldp.jpms.app.triplestore'
+    osgiModuleName = 'org.trellisldp.app.triplestore'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.trellisldp.jpms.test','org.apache.jena.rdfconnection']
     hacks {
-        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
         //patches('io.dropwizard:dropwizard-logging', 'ch.qos.logback:logback-core')
@@ -19,7 +20,6 @@ javaModule {
 
 dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
-    patch "com.google.code.findbugs:jsr305:$jsr305Version"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
     compile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
@@ -32,6 +32,7 @@ dependencies {
     compile("io.jsonwebtoken:jjwt:$jwtVersion")
     compile("javax.activation:javax.activation-api:$activationApiVersion")
     compile("javax.jms:javax.jms-api:$jmsApiVersion")
+    compile ("javax.xml.bind:jaxb-api:$jaxbVersion")
     compile("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     compile("org.apache.httpcomponents:httpclient:$httpclientVersion")
     compile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
@@ -41,6 +42,7 @@ dependencies {
     compile("org.apache.jena:jena.dboe-jpms:$jenaVersion")
     compile("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
     compile("org.apache.thrift:libthrift:$thriftVersion")
+    compile("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     compile("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
@@ -60,7 +62,6 @@ dependencies {
     compile project(':trellis-jms')
     compile project(':trellis-kafka')
     compile project(':trellis-app')
-    compile ("javax.xml.bind:jaxb-api:$jaxbVersion")
 
     testCompile("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
     testCompile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
@@ -76,5 +77,14 @@ dependencies {
 }
 
 jar {
+    manifest {
+        description project.description
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', javaModuleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+    }
     appendix 'jpms'
 }

@@ -17,4 +17,3 @@
 ./gradlew --stacktrace --warning-mode=all trellis-audit:build
 ./gradlew --stacktrace --warning-mode=all trellis-app:build
 ./gradlew --stacktrace --warning-mode=all trellis-app-triplestore:build
-./gradlew --stacktrace --warning-mode=all trellis-osgi:build

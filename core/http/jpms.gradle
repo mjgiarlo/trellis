@@ -4,16 +4,14 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis HTTP API'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.http'
+    javaModuleName = 'org.trellisldp.jpms.http'
+    osgiModuleName = 'org.trellisldp.http'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.trellisldp.jpms.agent', 'org.trellisldp.jpms.audit', 'org.trellisldp.jpms.id', 'org' +
             '.trellisldp.jpms.io']
-    hacks {
-        patches('com.google.code.findbugs:jsr305', 'javax.annotation:jsr250-api')
-    }
 }
 
 configurations {
@@ -23,8 +21,6 @@ configurations {
 }
 
 dependencies {
-    patch "com.google.code.findbugs:jsr305:$jsr305Version"
-
     api("io.dropwizard.metrics:metrics-annotation:$metricsVersion")
     api("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     api("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
@@ -71,18 +67,12 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
-        instruction 'Require-Capability', '''\
-            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
-            osgi.serviceloader;
-                filter:="(osgi.serviceloader=org.trellisldp.api.AuditService)";
-                resolution:=optional; cardinality:=optional,
-            osgi.serviceloader;
-                filter:="(osgi.serviceloader=org.trellisldp.api.ConstraintService)";
-                resolution:=optional; cardinality:=multiple
-            '''
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;
+                filter:="(osgi.serviceloader=org.trellisldp.api.AuditService)";resolution:=optional; cardinality:=optional,
+                osgi.serviceloader;filter:="(osgi.serviceloader=org.trellisldp.api.ConstraintService)"; resolution:=optional; cardinality:=multiple, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
     appendix 'jpms'
 }
