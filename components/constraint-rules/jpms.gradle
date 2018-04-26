@@ -15,10 +15,10 @@ javaModule {
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("commons-io:commons-io:$commonsIoVersion") { force = true }
     testImplementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
@@ -40,6 +40,5 @@ jar {
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)";resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
         instruction 'Provide-Capability', '''osgi.serviceloader; osgi.serviceloader=org.trellisldp.api.ConstraintService'''
     }
-    appendix 'jpms'
 }
 

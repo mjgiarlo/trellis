@@ -21,8 +21,8 @@ dependencies {
 
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api project(':trellis-api')
-    api project(':trellis-audit');
+    api("org.trellisldp:trellis-api-jpms:$version")
+    api("org.trellisldp:trellis-audit-jpms:$version")
 
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
@@ -32,13 +32,13 @@ dependencies {
     implementation("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation project(':trellis-id');
-    testImplementation project(':trellis-test');
+    testImplementation("org.trellisldp:trellis-id-jpms:$version")
+    testImplementation project(':trellis-test-jpms')
 
 }
 
@@ -54,6 +54,5 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }
 

@@ -47,5 +47,4 @@ jar {
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;
                 filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";resolution:=mandatory; cardinality:=at_least_one,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
-    appendix 'jpms'
-}
+    }

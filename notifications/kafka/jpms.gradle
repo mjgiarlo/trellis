@@ -16,7 +16,7 @@ javaModule {
 dependencies {
     api("org.apache.servicemix.bundles:org.apache.servicemix.bundles.kafka-clients:$kafkaVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -26,8 +26,8 @@ dependencies {
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation project(':trellis-event-serialization')
-    testImplementation project(':trellis-vocabulary')
+    testImplementation("org.trellisldp:trellis-event-serialization-jpms:$version")
+    testImplementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 }
 
 jar {
@@ -43,7 +43,6 @@ jar {
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;filter:="(osgi.serviceloader=org.trellisldp.api.ActivityStreamService)";
                 resolution:=mandatory; cardinality:=mandatory, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
-    appendix 'jpms'
 }
 
 artifacts {

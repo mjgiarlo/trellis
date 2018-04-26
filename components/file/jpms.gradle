@@ -16,7 +16,7 @@ javaModule {
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
@@ -29,7 +29,7 @@ dependencies {
     implementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
@@ -39,7 +39,7 @@ dependencies {
     testImplementation("org.apache.thrift:libthrift:$thriftVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
-    testImplementation project(':trellis-id')
+    testImplementation("org.trellisldp:trellis-id-jpms:$version")
 }
 
 jar {
@@ -54,5 +54,4 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }

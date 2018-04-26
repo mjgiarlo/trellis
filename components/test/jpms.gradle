@@ -72,10 +72,10 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-    implementation project(':trellis-api')
-    implementation project(':trellis-http')
-    implementation project(':trellis-io-jena')
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-api-jpms:$version")
+    implementation("org.trellisldp:trellis-http-jpms:$version")
+    implementation("org.trellisldp:trellis-io-jena-jpms:$version")
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("org.mockito:mockito-core:$mockitoVersion")

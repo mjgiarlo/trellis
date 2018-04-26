@@ -46,22 +46,22 @@ dependencies {
     compile("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compile project(':trellis-constraint-rules')
-    compile project(':trellis-io-jena')
-    compile project(':trellis-id')
-    compile project(':trellis-api')
-    compile project(':trellis-http')
-    compile project(':trellis-vocabulary')
-    compile project(':trellis-file')
-    compile project(':trellis-namespaces')
-    compile project(':trellis-agent')
-    compile project(':trellis-audit')
-    compile project(':trellis-event-serialization')
-    compile project(':trellis-webac')
-    compile project(':trellis-triplestore')
-    compile project(':trellis-jms')
-    compile project(':trellis-kafka')
-    compile project(':trellis-app')
+    compile("org.trellisldp:trellis-agent-jpms:$version")
+    compile("org.trellisldp:trellis-api-jpms:$version")
+    compile("org.trellisldp:trellis-app-jpms:$version")
+    compile("org.trellisldp:trellis-audit-jpms:$version")
+    compile("org.trellisldp:trellis-constraint-rules-jpms:$version")
+    compile("org.trellisldp:trellis-event-serialization-jpms:$version")
+    compile("org.trellisldp:trellis-file-jpms:$version")
+    compile("org.trellisldp:trellis-http-jpms:$version")
+    compile("org.trellisldp:trellis-id-jpms:$version")
+    compile("org.trellisldp:trellis-io-jena-jpms:$version")
+    //compile("org.trellisldp:trellis-jms-jpms:$version")
+    compile("org.trellisldp:trellis-kafka-jpms:$version")
+    compile("org.trellisldp:trellis-namespaces-jpms:$version")
+    compile("org.trellisldp:trellis-triplestore-jpms:$version")
+    compile("org.trellisldp:trellis-vocabulary-jpms:$version")
+    compile("org.trellisldp:trellis-webac-jpms:$version")
 
     testCompile("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
     testCompile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
@@ -73,7 +73,7 @@ dependencies {
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("org.mockito:mockito-core:$mockitoVersion")
     testCompile("org.apache.thrift:libthrift:$thriftVersion")
-    testCompile project(':trellis-test')
+    testCompile project(':trellis-test-jpms')
 }
 
 jar {
@@ -87,5 +87,4 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }

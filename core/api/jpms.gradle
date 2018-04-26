@@ -10,14 +10,14 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.mockito', 'org.trellisldp.jpms.vocabulary', 'org.apache.jena.core', 'org.apache.jena.arq']
+    extraTestModules = ['org.trellisldp.jpms.vocabulary', 'org.apache.jena.core', 'org.apache.jena.arq']
 }
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.apache.commons:commons-lang3:$commonsLangVersion")
 
-    testImplementation project(':trellis-vocabulary')
+    testImplementation("org.trellisldp:trellis-vocabulary-jpms:$version")
     testImplementation("commons-io:commons-io:$commonsIoVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
@@ -45,6 +45,5 @@ jar {
                 filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)"; resolution:=mandatory; cardinality:=at_least_one,
                 osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
-    appendix 'jpms'
 }
 

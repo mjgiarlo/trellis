@@ -25,14 +25,14 @@ dependencies {
 
     api("io.dropwizard:dropwizard-auth:$dropwizardVersion")
     api("io.dropwizard:dropwizard-core:$dropwizardVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation project(':trellis-http')
-    implementation project(':trellis-vocabulary')
-    implementation project(':trellis-agent')
-    implementation project(':trellis-webac')
+    implementation("org.trellisldp:trellis-http-jpms:$version")
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
+    implementation("org.trellisldp:trellis-agent-jpms:$version")
+    implementation("org.trellisldp:trellis-webac-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
@@ -52,10 +52,11 @@ dependencies {
     testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
-    testImplementation project(':trellis-triplestore')
-    testImplementation project(':trellis-io-jena')
-    testImplementation project(':trellis-file')
-    testImplementation project(':trellis-id')
+    testImplementation("org.trellisldp:trellis-triplestore-jpms:$version")
+    testImplementation("org.trellisldp:trellis-io-jena-jpms:$version")
+    testImplementation("org.trellisldp:trellis-file-jpms:$version")
+    testImplementation("org.trellisldp:trellis-id-jpms:$version")
+    testImplementation("org.trellisldp:trellis-audit-jpms:$version")
 }
 
 jar {
@@ -69,5 +70,4 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }

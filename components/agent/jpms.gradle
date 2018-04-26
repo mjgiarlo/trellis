@@ -15,10 +15,10 @@ javaModule {
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
-    api project(':trellis-api')
-    api project(':trellis-vocabulary')
+    api("org.trellisldp:trellis-api-jpms:$version")
+    api("org.trellisldp:trellis-vocabulary-jpms:$version")
 
-    testImplementation project(':trellis-vocabulary')
+    testImplementation("org.trellisldp:trellis-vocabulary-jpms:$version")
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
 }
@@ -37,6 +37,5 @@ jar {
                 resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
         instruction 'Provide-Capability', '''osgi.serviceloader; osgi.serviceloader=org.trellisldp.api.AgentService'''
     }
-    appendix 'jpms'
 }
 

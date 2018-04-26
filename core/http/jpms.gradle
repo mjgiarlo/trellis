@@ -26,14 +26,14 @@ dependencies {
     api("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("commons-codec:commons-codec:$commonsCodecVersion") { force = true }
     implementation("commons-io:commons-io:$commonsIoVersion") { force = true }
     implementation("javax.json:javax.json-api:$javaxJsonVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") { force = true }
@@ -48,12 +48,12 @@ dependencies {
             ".providers:jersey-test-framework-provider-inmemory:$jerseyVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
-    testImplementation project(':trellis-agent')
-    testImplementation project(':trellis-audit')
-    testImplementation project(':trellis-constraint-rules')
-    testImplementation project(':trellis-event-serialization')
-    testImplementation project(':trellis-id')
-    testImplementation project(':trellis-io-jena')
+    testImplementation("org.trellisldp:trellis-agent-jpms:$version")
+    testImplementation("org.trellisldp:trellis-audit-jpms:$version")
+    testImplementation("org.trellisldp:trellis-constraint-rules-jpms:$version")
+    testImplementation("org.trellisldp:trellis-event-serialization-jpms:$version")
+    testImplementation("org.trellisldp:trellis-id-jpms:$version")
+    testImplementation("org.trellisldp:trellis-io-jena-jpms:$version")
 
     testRuntimeClasspath("javax.xml.bind:jaxb-api:$jaxbVersion")
     testRuntimeClasspath("javax.activation:javax.activation-api:$activationApiVersion")
@@ -74,6 +74,5 @@ jar {
                 filter:="(osgi.serviceloader=org.trellisldp.api.AuditService)";resolution:=optional; cardinality:=optional,
                 osgi.serviceloader;filter:="(osgi.serviceloader=org.trellisldp.api.ConstraintService)"; resolution:=optional; cardinality:=multiple, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
-    appendix 'jpms'
 }
 

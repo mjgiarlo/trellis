@@ -14,7 +14,7 @@ javaModule {
 }
 
 dependencies {
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
 }
@@ -32,6 +32,5 @@ jar {
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)";resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
         instruction 'Provide-Capability', '''osgi.serviceloader;osgi.serviceloader=org.trellisldp.api.IdentifierService'''
     }
-    appendix 'jpms'
 }
 

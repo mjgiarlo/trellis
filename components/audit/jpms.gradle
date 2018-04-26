@@ -15,9 +15,9 @@ javaModule {
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
@@ -36,7 +36,6 @@ jar {
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)";resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
         instruction 'Provide-Capability', '''osgi.serviceloader;osgi.serviceloader=org.trellisldp.api.AuditService'''
     }
-    appendix 'jpms'
 }
 
 javadoc {

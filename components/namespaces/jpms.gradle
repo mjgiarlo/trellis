@@ -14,7 +14,7 @@ javaModule {
 }
 
 dependencies {
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
 
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -37,6 +37,5 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }
 

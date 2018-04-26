@@ -18,7 +18,7 @@ dependencies {
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api("commons-io:commons-io:$commonsIoVersion") {force = true}
 
-    api project(':trellis-api')
+    api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
@@ -28,7 +28,7 @@ dependencies {
     implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.mustache-compiler:$mustacheVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation project(':trellis-vocabulary')
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -52,6 +52,5 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
-    appendix 'jpms'
 }
 

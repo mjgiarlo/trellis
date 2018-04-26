@@ -7,7 +7,7 @@ mainClassName = 'org.trellisldp.app.triplestore.TrellisApplication'
 applicationName = 'trellis'
 
 dependencies {
-    compile project(':trellis-app-triplestore')
+    compile("org.trellisldp:trellis-app-triplestore-jpms:$version")
 
     runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
 }
