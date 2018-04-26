@@ -1,12 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'osgi'
 
-buildscript {
-    repositories {
-      jcenter()
-    }
+description = """Trellis OSGi"""
+
+ext {
+    moduleName = 'org.trellisldp.osgi'
 }
-
-description = """Integration tests for Trellis components"""
 
 def randomPort() {
     try {
@@ -21,12 +20,6 @@ def randomPort() {
     }
 }
 
-repositories {
-  jcenter()
-  mavenLocal()
-  mavenCentral()
-}
-
 configurations {
     karafDistro {
         description = 'Configuration used to isolate the dependency on the Karaf distro'
@@ -38,17 +31,14 @@ sonarqube {
     skipProject = true
 }
 
-uploadArchives {
-    // This should be enabled once this module is more than just a test case
-    enabled = false
-}
-
 dependencies {
-    implementation project(':trellis-api')
-    implementation project(':trellis-http')
-    implementation project(':trellis-io-jena')
-    implementation project(':trellis-namespaces')
-    implementation project(':trellis-vocabulary')
+    compile project(':trellis-api')
+    compile project(':trellis-http')
+    compile project(':trellis-io-jena')
+    compile project(':trellis-namespaces')
+    compile project(':trellis-vocabulary')
+    compile project(':trellis-triplestore')
+    compile("org.apache.jena:jena-osgi:$jenaVersion")
 
     testCompile project(':trellis-agent')
     testCompile project(':trellis-amqp')
@@ -111,6 +101,32 @@ task generateDependsFile {
         finally {
             outputStream.close()
         }
+    }
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '''\
+            org.trellisldp.triplestore,
+            org.trellisldp.api,
+            org.trellisldp.http,
+            org.apache.cxf.jaxrs,
+            *
+            '''
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+    }
+}
+
+artifacts {
+    archives (file('build/cfg/main/org.trellisldp.osgi.cfg')) {
+        classifier 'configuration'
+        type 'cfg'
     }
 }
 

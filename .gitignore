@@ -1,5 +1,6 @@
 .gradle
 build
+out
 /bin/
 */*/docs/
 .classpath
@@ -9,3 +10,4 @@ build
 out/
 .idea
 docs/
+

@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis Event Serialization Module'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.event'
+    javaModuleName = 'org.trellisldp.jpms.event'
+    osgiModuleName = 'org.trellisldp.event'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.mockito']
 }
 
@@ -30,16 +31,11 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
-        instruction 'Require-Capability', '''\
-            osgi.extender;
-                filter:="(osgi.extender=osgi.serviceloader.registrar)";
-                resolution:=optional'''
-        instruction 'Provide-Capability', '''\
-            osgi.serviceloader;
-                osgi.serviceloader=org.trellisldp.api.ActivityStreamService'''
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)";resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
+        instruction 'Provide-Capability', '''osgi.serviceloader;osgi.serviceloader=org.trellisldp.api.ActivityStreamService'''
     }
     appendix 'jpms'
 }

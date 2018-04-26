@@ -44,6 +44,7 @@ ext {
     jaxrsVersion = '2.1'
     jettyAlpnServerVersion = '9.4.8.v20171121'
     jenaVersion = '3.8.0-SNAPSHOT'
+    jerseyVersion = '2.25.1'
     jmsApiVersion = '2.0.1'
     jsonldVersion = '0.12.0'
     jwtVersion = '0.9.0'
@@ -58,15 +59,15 @@ ext {
     /* Transitive dependencies (for Karaf provisioning) */
     transitiveGuavaVersion = '20.0' // via mustache 0.9.5
 
-    /* Transitive patched modules */
+    /* Transitive dependencies */
     commonsLoggingVersion = '1.2'
     geronimoJmsSpecVersion = '1.1.1'
     geronimoAnnotationSpecVersion = '1.0-alpha-1'
     hamcrestLibraryVersion = '1.3'
     jsr305Version = '3.0.2'
     servicemixXercesVersion = '2.11.0_1'
-    xmlApisVersion = '1.4.01'
     thriftVersion = '0.11.0'
+    xmlApisVersion = '1.4.01'
 
     /* Testing */
     apiguardianVersion = '1.0.0'
@@ -76,7 +77,6 @@ ext {
     dexxCollectionVersion = '0.7'
     guavaVersion = '24.1-jre'
     httpclientVersion = '4.5.3'
-    jerseyVersion = '2.25.1'
     jsonVersion = '1.1.2'
     junitVersion = '5.1.1'
     junitPlatformVersion = '1.1.1'
@@ -87,11 +87,10 @@ ext {
     asmVersion = '6.1.1'
     jenaVersionRange = '[3.7,4)'
     karafVersion = '4.2.0'
-    osgiVersion = '6.0.0'
-    osgiCompendiumVersion = '5.0.0'
     paxExamVersion = '4.11.0'
     projectOsgiVersion = project.version.replaceAll("-SNAPSHOT", ".SNAPSHOT")
     spiflyVersion = '1.0.10'
+    osgiEeJavaVersion= 'osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'
     // ActiveMQ requires Spring4, but Karaf 4.2 includes Spring5, so this forces an earlier spring dependency
     springFeatureVersion = '4.1.0'
 
@@ -109,7 +108,7 @@ ext {
             'trellis-jms',
             'trellis-kafka',
             'trellis-namespaces',
-            'trellis-osgi',
+            //'trellis-osgi',
             'trellis-triplestore',
             'trellis-vocabulary',
             'trellis-webac',
@@ -152,7 +151,6 @@ allprojects { subproj ->
             dirs "$rootProject.projectDir/lib"
         }
     }
-
 
     configurations {
         all {

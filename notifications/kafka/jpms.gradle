@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis Notifications (Kafka)'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.kafka'
+    javaModuleName = 'org.trellisldp.jpms.kafka'
+    osgiModuleName = 'org.trellisldp.kafka'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.trellisldp.jpms.vocabulary']
 }
 
@@ -36,15 +37,11 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
-        instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
-        instruction 'Require-Capability', '''\
-            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
-            osgi.serviceloader;
-                filter:="(osgi.serviceloader=org.trellisldp.api.ActivityStreamService)";
-                resolution:=mandatory; cardinality:=mandatory
-            '''
+        instruction 'Automatic-Module-Name', javaModuleName
+        instruction 'Import-Package', 'org.apache.kafka.common.serialization,*'
+        instruction 'Export-Package', "${osgiModuleName};version=${projectOsgiVersion}"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;filter:="(osgi.serviceloader=org.trellisldp.api.ActivityStreamService)";
+                resolution:=mandatory; cardinality:=mandatory, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
     appendix 'jpms'
 }

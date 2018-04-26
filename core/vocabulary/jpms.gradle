@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis Vocabularies'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.vocabulary'
+    javaModuleName = 'org.trellisldp.jpms.vocabulary'
+    osgiModuleName = 'org.trellisldp.vocabulary'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.apache.jena.base','org.apache.jena.core', 'org.apache.jena.arq', 'jsonld.java']
 }
 
@@ -40,15 +41,11 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
-        instruction 'Require-Capability', '''\
-            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
-            osgi.serviceloader;
-                filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";
-                resolution:=mandatory; cardinality:=at_least_one
-            '''
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;
+                filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";resolution:=mandatory; cardinality:=at_least_one,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
     appendix 'jpms'
 }

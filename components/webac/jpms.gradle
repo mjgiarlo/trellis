@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis WebAC Module'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.webac'
+    javaModuleName = 'org.trellisldp.jpms.webac'
+    osgiModuleName = 'org.trellisldp.webac'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.mockito', 'org.apache.jena.arq']
 }
 
@@ -43,9 +44,10 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', "$osgiEeJavaVersion"
     }
     appendix 'jpms'
 }

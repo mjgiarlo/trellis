@@ -4,11 +4,12 @@ apply plugin: 'com.zyxist.chainsaw'
 description = 'Trellis Audit'
 
 ext {
-    moduleName = 'org.trellisldp.jpms.audit'
+    javaModuleName = 'org.trellisldp.jpms.audit'
+    osgiModuleName = 'org.trellisldp.audit'
 }
 
 javaModule {
-    name = moduleName
+    name = javaModuleName
     extraTestModules = ['org.mockito']
 }
 
@@ -29,16 +30,11 @@ jar {
         vendor project.vendor
         license project.license
 
-        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Automatic-Module-Name', javaModuleName
         instruction 'Import-Package', '*'
-        instruction 'Export-Package', "$moduleName;version=$projectOsgiVersion"
-        instruction 'Require-Capability', '''\
-            osgi.extender;
-                filter:="(osgi.extender=osgi.serviceloader.registrar)";
-                resolution:=optional'''
-        instruction 'Provide-Capability', '''\
-            osgi.serviceloader;
-                osgi.serviceloader=org.trellisldp.api.AuditService'''
+        instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
+        instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)";resolution:=optional, osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
+        instruction 'Provide-Capability', '''osgi.serviceloader;osgi.serviceloader=org.trellisldp.api.AuditService'''
     }
     appendix 'jpms'
 }
