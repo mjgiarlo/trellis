@@ -30,14 +30,25 @@ dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
-    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
-    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
+        exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
+    }
+    testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
+    testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
+        exclude(module: 'commons-logging')
+    }
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
-    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
+    testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
+        exclude(module: 'httpclient')
+        exclude(module: 'httpcore')
+    }
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("com.google.guava:guava:$guavaVersion")
+
 }
 
 jar {

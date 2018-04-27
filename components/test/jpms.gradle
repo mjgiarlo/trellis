@@ -58,14 +58,19 @@ dependencies {
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
     implementation("com.google.guava:guava:$guavaVersion")
+    implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion") {force = true}
+    implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {force = true}
     implementation("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
-    implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'}
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
     implementation("javax.jms:javax.jms-api:$jmsApiVersion")
     implementation("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
     implementation("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
-    implementation("org.apache.thrift:libthrift:$thriftVersion")
+    implementation("org.apache.thrift:libthrift:$thriftVersion"){
+        exclude(module: 'httpclient')
+        exclude(module: 'httpcore')
+    }
     implementation("org.awaitility:awaitility:$awaitilityVersion")
     implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     //implementation("org.apache.activemq:activemq-client:$activeMqVersion

@@ -17,6 +17,10 @@ dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.trellisldp:trellis-api-jpms:$version")
 
+    implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {force = true}
+    implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion") {force = true}
+    implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {force = true}
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion") {force = true}
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 

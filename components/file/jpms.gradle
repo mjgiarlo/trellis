@@ -32,13 +32,21 @@ dependencies {
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
-    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
-    testImplementation("com.google.guava:guava:$guavaVersion")
-    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
+        exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
+    }
+    testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
     testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
-    testImplementation("org.apache.thrift:libthrift:$thriftVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
+        exclude(module: 'httpclient')
+        exclude(module: 'httpcore')
+    }
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
+    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    }
     testImplementation("org.trellisldp:trellis-id-jpms:$version")
 }
 

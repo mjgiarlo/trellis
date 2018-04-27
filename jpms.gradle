@@ -53,7 +53,6 @@ ext {
     mustacheVersion = '0.9.5_1'
     rabbitMqVersion = '5.2.0'
     slf4jVersion = '1.7.25'
-    tamayaVersion = '0.3.0'
     tamayaVersion = '0.3-incubating'
 
     /* Transitive dependencies (for Karaf provisioning) */
@@ -151,48 +150,21 @@ allprojects { subproj ->
             dirs "$rootProject.projectDir/lib"
         }
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
     }
 
     configurations {
         all {
-            exclude group: 'org.trellisldp', module: 'trellis-api'
-            exclude group: 'org.trellisldp', module: 'trellis-agent'
-            exclude group: 'org.trellisldp', module: 'trellis-app'
-            exclude group: 'org.trellisldp', module: 'trellis-audit'
-            exclude group: 'org.trellisldp', module: 'trellis-constraint-rules'
-            exclude group: 'org.trellisldp', module: 'trellis-event-serialization'
-            exclude group: 'org.trellisldp', module: 'trellis-file'
-            exclude group: 'org.trellisldp', module: 'trellis-http'
-            exclude group: 'org.trellisldp', module: 'trellis-id'
-            exclude group: 'org.trellisldp', module: 'trellis-io-jena'
-            exclude group: 'org.trellisldp', module: 'trellis-jms'
-            exclude group: 'org.trellisldp', module: 'trellis-kafka'
-            exclude group: 'org.trellisldp', module: 'trellis-namespaces'
-            exclude group: 'org.trellisldp', module: 'trellis-triplestore'
-            exclude group: 'org.trellisldp', module: 'trellis-vocabulary'
-            exclude group: 'org.trellisldp', module: 'trellis-webac'
-            exclude group: 'xml-apis', module: 'xml-apis'
-            exclude group: 'com.google.code.findbugs', module: 'jsr305'
-            exclude group: 'org.apache.geronimo.specs', module: 'geronimo-annotation_1.2_spec'
-            exclude group: 'commons-logging', module: 'commons-logging'
+            exclude(module: 'jsr305')
+            exclude(module: 'geronimo-annotation_1.2_spec')
+            exclude(module: 'commons-logging')
             exclude group: 'javax.inject', module: 'javax.inject'
-            exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
             exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
         }
     }
 
     dependencies {
-        implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {force = true}
-        implementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion") {force = true}
-        implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {force = true}
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion") {force = true}
-
-        testImplementation ("com.fasterxml.jackson.core:jackson-core:$jacksonVersion") {force = true}
-        testImplementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {force = true}
-        testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion") {force = true}
-        testImplementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {force = true}
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
         testImplementation("org.apiguardian:apiguardian-api:$apiguardianVersion")
         testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")

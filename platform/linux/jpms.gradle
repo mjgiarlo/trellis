@@ -7,7 +7,22 @@ mainClassName = 'org.trellisldp.app.triplestore.TrellisApplication'
 applicationName = 'trellis'
 
 dependencies {
+    compile("org.trellisldp:trellis-agent-jpms:$version")
+    compile("org.trellisldp:trellis-api-jpms:$version")
+    compile("org.trellisldp:trellis-app-jpms:$version")
     compile("org.trellisldp:trellis-app-triplestore-jpms:$version")
+    compile("org.trellisldp:trellis-audit-jpms:$version")
+    compile("org.trellisldp:trellis-constraint-rules-jpms:$version")
+    compile("org.trellisldp:trellis-event-serialization-jpms:$version")
+    compile("org.trellisldp:trellis-file-jpms:$version")
+    compile("org.trellisldp:trellis-http-jpms:$version")
+    compile("org.trellisldp:trellis-id-jpms:$version")
+    compile("org.trellisldp:trellis-io-jena-jpms:$version")
+    compile("org.trellisldp:trellis-kafka-jpms:$version")
+    compile("org.trellisldp:trellis-namespaces-jpms:$version")
+    compile("org.trellisldp:trellis-triplestore-jpms:$version")
+    compile("org.trellisldp:trellis-vocabulary-jpms:$version")
+    compile("org.trellisldp:trellis-webac-jpms:$version")
 
     runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
 }

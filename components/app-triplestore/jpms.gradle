@@ -22,7 +22,10 @@ dependencies {
     patch "org.hamcrest:hamcrest-library:$hamcrestLibraryVersion"
     patch "org.apache.geronimo.specs:geronimo-jms_1.1_spec:$geronimoJmsSpecVersion"
 
-    compile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
+    compile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
+        exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
+    }
     compile("com.google.guava:guava:$guavaVersion")
     compile("commons-codec:commons-codec:$commonsCodecVersion")
     compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
@@ -34,15 +37,24 @@ dependencies {
     compile("javax.jms:javax.jms-api:$jmsApiVersion")
     compile ("javax.xml.bind:jaxb-api:$jaxbVersion")
     compile("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
-    compile("org.apache.httpcomponents:httpclient:$httpclientVersion")
-    compile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
+    compile("org.apache.httpcomponents:httpclient:$httpclientVersion") {
+        exclude(module: 'commons-logging')
+    }
+    compile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
+        exclude(module: 'commons-logging')
+    }
     compile("org.apache.jena:jena.arq-jpms:$jenaVersion")
     compile("org.apache.jena:jena.base-jpms:$jenaVersion")
     compile("org.apache.jena:jena.core-jpms:$jenaVersion")
     compile("org.apache.jena:jena.dboe-jpms:$jenaVersion")
     compile("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
-    compile("org.apache.thrift:libthrift:$thriftVersion")
-    compile("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
+    compile("org.apache.thrift:libthrift:$thriftVersion"){
+        exclude(module: 'httpclient')
+        exclude(module: 'httpcore')
+    }
+    compile("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
+        exclude(module: 'xml-apis')
+    }
     compile("org.eclipse.jetty:jetty-alpn-java-server:$jettyAlpnServerVersion")
     compile("org.slf4j:slf4j-api:$slf4jVersion")
 
@@ -64,15 +76,12 @@ dependencies {
     compile("org.trellisldp:trellis-webac-jpms:$version")
 
     testCompile("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
-    testCompile("com.github.jsonld-java:jsonld-java:$jsonldVersion") {force = true}
     testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")
-    testCompile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion")
     testCompile("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testCompile("org.awaitility:awaitility:$awaitilityVersion")
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("org.mockito:mockito-core:$mockitoVersion")
-    testCompile("org.apache.thrift:libthrift:$thriftVersion")
     testCompile project(':trellis-test-jpms')
 }
 

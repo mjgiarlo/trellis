@@ -17,6 +17,7 @@ dependencies {
     api("org.trellisldp:trellis-api-jpms:$version")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
 
+    implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {force = true}
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
 
