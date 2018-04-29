@@ -1,3 +1,4 @@
+apply plugin: 'java-library'
 apply plugin: 'osgi'
 apply plugin: 'com.zyxist.chainsaw'
 

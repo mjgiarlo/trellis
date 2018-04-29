@@ -3,8 +3,8 @@
 A scalable platform for building [linked data](https://www.w3.org/TR/ldp/) applications.
 
 [![Build Status](https://travis-ci.org/trellis-ldp/trellis.png?branch=jpms)](https://travis-ci.org/trellis-ldp/trellis)
-[![Build status](https://ci.appveyor.com/api/projects/status/nvdwx442663ib39d/branch/master?svg=true)](https://ci.appveyor.com/project/acoburn/trellis/branch/jpms)
-[![Coverage Status](https://coveralls.io/repos/github/trellis-ldp/trellis/badge.svg?branch=master)](https://coveralls.io/github/trellis-ldp/trellis?branch=jpmd)
+[![Build status](https://ci.appveyor.com/api/projects/status/nvdwx442663ib39d/branch/jpms?svg=true)](https://ci.appveyor.com/project/acoburn/trellis/branch/jpms)
+[![Coverage Status](https://coveralls.io/repos/github/trellis-ldp/trellis/badge.svg?branch=jpms)](https://coveralls.io/github/trellis-ldp/trellis?branch=jpms)
 [![Javadoc](https://javadoc-badge.appspot.com/org.trellisldp/trellis-api.svg?label=javadoc)](https://trellis-ldp.github.io/trellis/apidocs/)
 [![Maven Central](https://img.shields.io/maven-central/v/org.trellisldp/trellis-api.svg)](https://mvnrepository.com/artifact/org.trellisldp/trellis-api/0.6.0)
 
@@ -18,7 +18,7 @@ A [mailing list](https://groups.google.com/group/trellis-ldp) is available to an
 ## Downloads
 
 The fastest way to get started with Trellis is to download the [latest release](https://github.com/trellis-ldp/trellis/releases)
-and follow these [installation instructions](trellis-app).
+and follow these [installation instructions](components/app-triplestore).
 
 ## Features
 
@@ -85,13 +85,12 @@ All source code is open source and licensed as Apache 2. Contributions are welco
 ### Trellis Vocabulary
 
 This [vocabulary](https://github.com/trellis-ldp/trellis-ontology) defines the Trellis-specific
-[RDF terms](https://www.trellisldp.org/ns/trellis.html). A [DOAP](doap.ttl) file
-describes the Trellis project in a machine-readable format.
+[RDF terms](https://www.trellisldp.org/ns/trellis.html).
 
 ### Implementations
 
 This repository contains the core abstractions and interfaces for Trellis along with a number of default service
-implementations. It contains a [reference implementation](trellis-app) that uses a [persistence layer](trellis-triplestore)
+implementations. It contains a [reference implementation](components/app-triplestore) that uses a [persistence layer](components/triplestore)
 based on a triplestore or local dataset. In addition, below is a list of other known implementations.
 
  * [Rosid](https://github.com/trellis-ldp/trellis-rosid): A Kafka-based application that uses file-based persistence.

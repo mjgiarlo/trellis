@@ -49,3 +49,10 @@ jar {
                 filter:="(osgi.serviceloader=org.trellisldp.api.ActivityStreamService)";resolution:=mandatory; cardinality:=mandatory,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
     }
 }
+
+artifacts {
+    archives (file('build/cfg/main/org.trellisldp.jms.cfg')) {
+        classifier 'configuration'
+        type 'cfg'
+    }
+}

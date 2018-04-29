@@ -24,7 +24,7 @@ dependencies {
     compile("org.trellisldp:trellis-vocabulary-jpms:$version")
     compile("org.trellisldp:trellis-webac-jpms:$version")
 
-    runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
+    runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
 }
 
 ospackage {
