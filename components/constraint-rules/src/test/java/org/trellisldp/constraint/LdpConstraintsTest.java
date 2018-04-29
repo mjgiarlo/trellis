@@ -15,7 +15,7 @@ package org.trellisldp.constraint;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.apache.jena.rdf.model.ModelFactory.createDefaultModel;
+import static org.apache.jena.core.rdf.model.ModelFactory.createDefaultModel;
 import static org.apache.jena.arq.riot.Lang.TURTLE;
 import static org.apache.jena.arq.riot.RDFDataMgr.read;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,7 +28,7 @@ import java.util.Optional;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.rdf.model.Model;
+import org.apache.jena.core.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.ConstraintViolation;
