@@ -10,7 +10,7 @@ ext {
 javaModule {
     name = javaModuleName
     extraTestModules = ['org.trellisldp.jpms.file','org.trellisldp.jpms.id','org.trellisldp.jpms.io',
-                        'org.trellisldp.jpms.triplestore', 'org.apache.jena.rdfconnection']
+                        'org.trellisldp.jpms.triplestore', 'org.apache.jena.rdfconnection', 'org.apache.jena.arq']
     hacks {
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
