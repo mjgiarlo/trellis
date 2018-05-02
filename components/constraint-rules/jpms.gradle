@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.mockito', 'org.apache.jena.arq']
+    extraTestModules = ['org.mockito', 'org.apache.jena.arq', 'org.apache.jena.core']
 }
 
 dependencies {
