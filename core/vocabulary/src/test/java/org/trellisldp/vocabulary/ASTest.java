@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.trellisldp.vocabulary;
 
 import static org.apache.jena.core.graph.Factory.createDefaultGraph;
@@ -59,6 +60,6 @@ public class ASTest extends AbstractVocabularyTest {
     @Test
     public void checkUri() {
         getVocabulary(namespace());
-        assertEquals(namespace(), AS.URI);
+        assertEquals(namespace(), AS.getNamespace());
     }
 }

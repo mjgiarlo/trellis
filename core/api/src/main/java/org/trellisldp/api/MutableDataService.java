@@ -16,6 +16,7 @@ package org.trellisldp.api;
 
 import java.util.concurrent.Future;
 
+import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.IRI;
 
 /**
@@ -27,27 +28,42 @@ import org.apache.commons.rdf.api.IRI;
 public interface MutableDataService<U> extends RetrievalService<U> {
 
     /**
-     * @param identifier the identifier for the resource to persist
+     * Put a resource into the server.
+     *
+     * @param identifier the identifier for the new resource
      * @param session the session context for this operation
-     * @param resource a resource to persist
-     * @return whether the resource was successfully persisted
+     * @param ixnModel the LDP interaction model for this resource
+     * @param dataset the dataset to be persisted
+     * @param container an LDP container for this resource, {@code null} for none
+     * @param binary a binary resource, relevant only for ldp:NonRDFSource items: {@code null} for none
+     * @return whether the resource was added
      */
-    Future<Boolean> create(IRI identifier, Session session, U resource);
+    Future<Boolean> create(IRI identifier, Session session, IRI ixnModel, Dataset dataset, IRI container,
+            Binary binary);
 
     /**
-     * @param identifier the identifier for the resource to persist
+     * Replace a resource in the server.
+     *
+     * @param identifier the identifier for the new resource
      * @param session the session context for this operation
-     * @param resource a resource to persist
-     * @return whether the resource was successfully persisted
+     * @param ixnModel the LDP interaction model for this resource
+     * @param dataset the dataset to be persisted
+     * @param container an LDP container for this resource, {@code null} for none
+     * @param binary a binary resource, relevant only for ldp:NonRDFSource items: {@code null} for none
+     * @return whether the resource was replaced
      */
-    Future<Boolean> replace(IRI identifier, Session session, U resource);
+    Future<Boolean> replace(IRI identifier, Session session, IRI ixnModel, Dataset dataset, IRI container,
+            Binary binary);
 
     /**
-     * @param identifier the identifier for the resource to delete
+     * Delete a resource from the server.
+     *
+     * @param identifier the identifier for the new resource
      * @param session the session context for this operation
-     * @param resource a resource to delete
-     * @return whether the resource was successfully deleted
+     * @param ixnModel the new LDP interaction model for this resource
+     * @param dataset the dataset
+     * @return whether the resource was deleted
      */
-    Future<Boolean> delete(IRI identifier, Session session, U resource);
+    Future<Boolean> delete(IRI identifier, Session session, IRI ixnModel, Dataset dataset);
 
 }

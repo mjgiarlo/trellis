@@ -18,7 +18,7 @@ A [mailing list](https://groups.google.com/group/trellis-ldp) is available to an
 ## Downloads
 
 The fastest way to get started with Trellis is to download the [latest release](https://github.com/trellis-ldp/trellis/releases)
-and follow these [installation instructions](components/app-triplestore).
+and follow these [installation instructions](platform/linux).
 
 ## Features
 
@@ -74,6 +74,7 @@ Trellis is an [HTTP/1.1](https://tools.ietf.org/html/rfc7231) server, which comp
 
   * [W3C LDP Server](https://www.w3.org/TR/ldp/)
   * [W3C Activity Streams 2.0](https://www.w3.org/TR/activitystreams-core/)
+  * [W3C WebSub Publisher](https://www.w3.org/TR/websub/)
   * [Solid WebAC](https://github.com/solid/solid-spec#authorization-and-access-control) (Authorization and Access Control)
   * [RFC 7089](https://tools.ietf.org/html/rfc7089) (HTTP Framework for Time-Based Access to Resource States -- Memento)
   * [RFC 3230](https://tools.ietf.org/html/rfc3230) (Instance Digests in HTTP)

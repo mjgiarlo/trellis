@@ -101,7 +101,7 @@ public class PutHandlerTest {
     private static final Set<IRI> allInteractionModels = newHashSet(LDP.Resource, LDP.RDFSource, LDP.NonRDFSource,
             LDP.Container, LDP.BasicContainer, LDP.DirectContainer, LDP.IndirectContainer);
 
-    private final Binary testBinary = new Binary(rdf.createIRI("file:binary.txt"), binaryTime, "text/plain", null);
+    private final Binary testBinary = new Binary(rdf.createIRI("file:///binary.txt"), binaryTime, "text/plain", null);
 
     private final AgentService agentService = new SimpleAgentService();
 
@@ -141,15 +141,15 @@ public class PutHandlerTest {
         when(mockResource.getIdentifier()).thenReturn(identifier);
         when(mockResource.getBinary()).thenReturn(empty());
         when(mockResource.getModified()).thenReturn(time);
-        when(mockBinaryService.generateIdentifier()).thenReturn("file:" + randomUUID());
+        when(mockBinaryService.generateIdentifier()).thenReturn("file:///" + randomUUID());
 
         when(mockResourceService.supportedInteractionModels()).thenReturn(allInteractionModels);
         when(mockResourceService.add(any(IRI.class), any(Session.class), any(Dataset.class)))
             .thenReturn(completedFuture(true));
-        when(mockResourceService.replace(any(IRI.class), any(Session.class), any(IRI.class), any(Dataset.class)))
-            .thenReturn(completedFuture(true));
-        when(mockResourceService.create(any(IRI.class), any(Session.class), any(IRI.class), any(Dataset.class)))
-            .thenReturn(completedFuture(true));
+        when(mockResourceService.replace(any(IRI.class), any(Session.class), any(IRI.class), any(Dataset.class),
+                        any(), any())).thenReturn(completedFuture(true));
+        when(mockResourceService.create(any(IRI.class), any(Session.class), any(IRI.class), any(Dataset.class),
+                        any(), any())).thenReturn(completedFuture(true));
         when(mockResourceService.skolemize(any(Literal.class))).then(returnsFirstArg());
         when(mockResourceService.skolemize(any(IRI.class))).then(returnsFirstArg());
         when(mockResourceService.skolemize(any(BlankNode.class))).thenAnswer(inv ->
@@ -407,7 +407,7 @@ public class PutHandlerTest {
     public void testError() {
         when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
         when(mockResourceService.replace(eq(rdf.createIRI(TRELLIS_DATA_PREFIX + "resource")), any(Session.class),
-                    any(IRI.class), any(Dataset.class))).thenReturn(completedFuture(false));
+                    any(IRI.class), any(Dataset.class), any(), any())).thenReturn(completedFuture(false));
         when(mockLdpRequest.getContentType()).thenReturn(TEXT_PLAIN);
         when(mockLdpRequest.getLink()).thenReturn(fromUri(LDP.NonRDFSource.getIRIString()).rel("type").build());
 
@@ -423,7 +423,7 @@ public class PutHandlerTest {
         when(mockFuture.get()).thenThrow(new InterruptedException("Expected"));
         when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
         when(mockResourceService.replace(eq(rdf.createIRI(TRELLIS_DATA_PREFIX + "resource")), any(Session.class),
-                    any(IRI.class), any(Dataset.class))).thenReturn(mockFuture);
+                    any(IRI.class), any(Dataset.class), any(), any())).thenReturn(mockFuture);
         when(mockLdpRequest.getContentType()).thenReturn(TEXT_PLAIN);
         when(mockLdpRequest.getLink()).thenReturn(fromUri(LDP.NonRDFSource.getIRIString()).rel("type").build());
 

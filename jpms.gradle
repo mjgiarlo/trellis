@@ -77,8 +77,7 @@ ext {
     guavaVersion = '24.1-jre'
     httpclientVersion = '4.5.3'
     jsonVersion = '1.1.2'
-    junitVersion = '5.1.1'
-    junitPlatformVersion = '1.1.1'
+    junitVersion = '5.2.0'
     logbackVersion = '1.2.3'
     mockitoVersion = '2.18.3'
 
@@ -161,6 +160,7 @@ allprojects { subproj ->
                 force "org.apache.jena:jena.dboe-jpms:$jenaVersion"
                 force "org.apache.jena:jena.iri-jpms:$jenaVersion"
                 force "org.apache.jena:jena.rdfconnection-jpms:$jenaVersion"
+                cacheChangingModulesFor 0, 'seconds'
             }
             exclude(module: 'jsr305')
             exclude(module: 'geronimo-annotation_1.2_spec')

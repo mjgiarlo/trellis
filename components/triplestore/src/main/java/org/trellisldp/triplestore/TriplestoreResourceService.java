@@ -90,6 +90,7 @@ import org.apache.jena.core.graph.Node;
 import org.apache.jena.core.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.slf4j.Logger;
+import org.trellisldp.api.Binary;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.MementoService;
@@ -156,10 +157,11 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
     }
 
     @Override
-    public Future<Boolean> create(final IRI identifier, final Session session, final IRI ixnModel,
-            final Dataset dataset) {
-        LOGGER.debug("Creating: {}", identifier);
-        return supplyAsync(() -> createOrReplace(identifier, session, ixnModel, dataset, OperationType.CREATE));
+    public Future<Boolean> create(final IRI id, final Session session, final IRI ixnModel, final Dataset dataset,
+                    final IRI container, final Binary binary) {
+        LOGGER.debug("Creating: {}", id);
+        return supplyAsync(() ->
+                createOrReplace(id, session, ixnModel, dataset, OperationType.CREATE, container, binary));
     }
 
     @Override
@@ -175,14 +177,15 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
     }
 
     @Override
-    public Future<Boolean> replace(final IRI identifier, final Session session, final IRI ixnModel,
-            final Dataset dataset) {
-        LOGGER.debug("Updating: {}", identifier);
-        return supplyAsync(() -> createOrReplace(identifier, session, ixnModel, dataset, OperationType.REPLACE));
+    public Future<Boolean> replace(final IRI id, final Session session, final IRI ixnModel, final Dataset dataset,
+                    final IRI container, final Binary binary) {
+        LOGGER.debug("Updating: {}", id);
+        return supplyAsync(() ->
+                createOrReplace(id, session, ixnModel, dataset, OperationType.REPLACE, container, binary));
     }
 
     private Boolean createOrReplace(final IRI identifier, final Session session, final IRI ixnModel,
-            final Dataset dataset, final OperationType type) {
+                    final Dataset dataset, final OperationType type, final IRI container, final Binary binary) {
         final Instant eventTime = now();
 
         // Set the LDP type
@@ -205,8 +208,22 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
                                                 .findFirst().orElse(LDP.MemberSubject));
             });
         }
+
         // Set the parent relationship
-        getContainer(identifier).ifPresent(parent -> dataset.add(PreferServerManaged, identifier, DC.isPartOf, parent));
+        if (nonNull(container)) {
+            dataset.add(PreferServerManaged, identifier, DC.isPartOf, container);
+        }
+
+        if (nonNull(binary)) {
+            dataset.add(PreferServerManaged, identifier, DC.hasPart, binary.getIdentifier());
+            dataset.add(PreferServerManaged, binary.getIdentifier(), DC.modified,
+                    rdf.createLiteral(binary.getModified().toString(), XSD.dateTime));
+            binary.getMimeType().map(rdf::createLiteral).ifPresent(mimeType ->
+                    dataset.add(PreferServerManaged, binary.getIdentifier(), DC.format, mimeType));
+            binary.getSize().map(size -> rdf.createLiteral(size.toString(), XSD.long_)).ifPresent(size ->
+                    dataset.add(PreferServerManaged, binary.getIdentifier(), DC.extent, size));
+        }
+
         return storeAndNotify(identifier, session, dataset, eventTime, type);
     }
 

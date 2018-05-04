@@ -39,7 +39,7 @@ public class XSDTest {
 
     @Test
     public void checkUri() {
-        assertEquals(namespace(), XSD.URI);
-        assertEquals(NS, XSD.URI);
+        assertEquals(namespace(), XSD.getNamespace());
+        assertEquals(NS, XSD.getNamespace());
     }
 }
