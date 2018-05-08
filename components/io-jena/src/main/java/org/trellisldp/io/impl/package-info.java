@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 /**
- * Implementation classes for the jena-based input/output service.
  *
- * @author acoburn
  */
 package org.trellisldp.io.impl;

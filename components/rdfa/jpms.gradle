@@ -1,0 +1,48 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis RDFa Module'
+
+ext {
+    javaModuleName = 'org.trellisldp.jpms.rdfa'
+    osgiModuleName = 'org.trellisldp.rdfa'
+}
+
+javaModule {
+    name = javaModuleName
+    extraTestModules = ['org.apache.jena.core']
+}
+
+dependencies {
+    api("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    api("org.trellisldp:trellis-api-jpms:$version")
+
+    implementation("commons-io:commons-io:$commonsIoVersion")
+
+    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.mustache-compiler:$mustacheVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
+
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', javaModuleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${osgiModuleName};version=${projectOsgiVersion}"
+    }
+}
+

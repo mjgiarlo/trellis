@@ -32,6 +32,7 @@ import org.trellisldp.api.IOService;
 import org.trellisldp.api.IdentifierService;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.NamespaceService;
+import org.trellisldp.api.RDFaWriterService;
 import org.trellisldp.api.ResourceService;
 import org.trellisldp.app.AbstractTrellisApplication;
 import org.trellisldp.app.TrellisCache;
@@ -41,6 +42,7 @@ import org.trellisldp.file.FileMementoService;
 import org.trellisldp.id.UUIDGenerator;
 import org.trellisldp.io.JenaIOService;
 import org.trellisldp.namespaces.NamespacesJsonContext;
+import org.trellisldp.rdfa.HtmlSerializer;
 import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
@@ -117,7 +119,10 @@ public class TrellisApplication extends AbstractTrellisApplication<TrellisConfig
         final Cache<String, String> cache = newBuilder().maximumSize(cacheSize).expireAfterAccess(hours, HOURS).build();
         final TrellisCache<String, String> profileCache = new TrellisCache<>(cache);
         final NamespaceService namespaceService = new NamespacesJsonContext(config.getNamespaces());
-        return new JenaIOService(namespaceService, profileCache, AppUtils.getAssetConfiguration(config));
+        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService,
+                null, config.getAssets().getCss(), config.getAssets().getJs(), config.getAssets().getIcon());
+        return new JenaIOService(namespaceService, htmlSerializer, profileCache,
+                config.getJsonld().getContextWhitelist(), config.getJsonld().getContextDomainWhitelist());
     }
 
     private BinaryService buildBinaryService(final IdentifierService idService, final TrellisConfiguration config) {

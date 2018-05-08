@@ -17,6 +17,7 @@ include ':trellis-file-jpms'
 include ':trellis-id-jpms'
 include ':trellis-io-jena-jpms'
 include ':trellis-namespaces-jpms'
+include ':trellis-rdfa-jpms'
 include ':trellis-triplestore-jpms'
 include ':trellis-webac-jpms'
 include ':trellis-app-jpms'
@@ -45,6 +46,7 @@ project(':trellis-file-jpms').projectDir = "$rootDir/components/file" as File
 project(':trellis-id-jpms').projectDir = "$rootDir/components/id" as File
 project(':trellis-io-jena-jpms').projectDir = "$rootDir/components/io-jena" as File
 project(':trellis-namespaces-jpms').projectDir = "$rootDir/components/namespaces" as File
+project(':trellis-rdfa-jpms').projectDir = "$rootDir/components/rdfa" as File
 project(':trellis-test-jpms').projectDir = "$rootDir/components/test" as File
 project(':trellis-triplestore-jpms').projectDir = "$rootDir/components/triplestore" as File
 project(':trellis-webac-jpms').projectDir = "$rootDir/components/webac" as File
@@ -58,3 +60,4 @@ project(':trellis-linux-jpms').projectDir = "$rootDir/platform/linux" as File
 for (project in rootProject.children) {
     project.buildFileName = 'jpms.gradle'
 }
+

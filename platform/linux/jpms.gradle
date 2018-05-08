@@ -20,6 +20,7 @@ dependencies {
     compile("org.trellisldp:trellis-io-jena-jpms:$version")
     compile("org.trellisldp:trellis-kafka-jpms:$version")
     compile("org.trellisldp:trellis-namespaces-jpms:$version")
+    compile("org.trellisldp:trellis-rdfa-jpms:$version")
     compile("org.trellisldp:trellis-triplestore-jpms:$version")
     compile("org.trellisldp:trellis-vocabulary-jpms:$version")
     compile("org.trellisldp:trellis-webac-jpms:$version")

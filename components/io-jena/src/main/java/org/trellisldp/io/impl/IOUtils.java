@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.trellisldp.io.impl;
 
 import static java.util.Collections.unmodifiableMap;
@@ -39,13 +40,12 @@ import org.apache.jena.arq.riot.RDFFormat;
  */
 public final class IOUtils {
 
-    private static final Map<IRI, RDFFormat> JSONLD_FORMATS = unmodifiableMap(Stream.of(
-                new SimpleEntry<>(compacted, JSONLD_COMPACT_FLAT),
-                new SimpleEntry<>(flattened, JSONLD_FLATTEN_FLAT),
-                new SimpleEntry<>(expanded, JSONLD_EXPAND_FLAT),
-                new SimpleEntry<>(compacted_flattened, JSONLD_FLATTEN_FLAT),
-                new SimpleEntry<>(expanded_flattened, JSONLD_FLATTEN_FLAT))
-            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    private static final Map<IRI, RDFFormat> JSONLD_FORMATS = unmodifiableMap(
+            Stream.of(new SimpleEntry<>(compacted, JSONLD_COMPACT_FLAT),
+                    new SimpleEntry<>(flattened, JSONLD_FLATTEN_FLAT), new SimpleEntry<>(expanded, JSONLD_EXPAND_FLAT),
+                    new SimpleEntry<>(compacted_flattened, JSONLD_FLATTEN_FLAT),
+                    new SimpleEntry<>(expanded_flattened, JSONLD_FLATTEN_FLAT)).collect(
+                    toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
     /**
      * Combine multiple JSON-LD profiles into a single profile.

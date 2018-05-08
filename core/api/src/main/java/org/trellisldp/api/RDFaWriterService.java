@@ -11,12 +11,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.trellisldp.io.impl;
+package org.trellisldp.api;
 
-import org.trellisldp.api.NoopCacheService;
+import java.io.OutputStream;
+import java.util.stream.Stream;
+
+import org.apache.commons.rdf.api.Triple;
 
 /**
- * A specialized no-op cache.
+ * A service for generating HTML output from a stream of triples.
  */
-public class NoopProfileCache extends NoopCacheService<String, String> {
+public interface RDFaWriterService {
+
+    /**
+     * Produce RDFa (HTML) output from a given stream of triples.
+     * @param triples the triples
+     * @param output the output stream
+     * @param subject the subject of the resource, may be {@code null}
+     */
+    void write(Stream<? extends Triple> triples, OutputStream output, String subject);
 }

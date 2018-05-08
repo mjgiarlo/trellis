@@ -11,18 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module org.trellisldp.jpms.io {
-    exports org.trellisldp.io;
-    exports org.trellisldp.io.impl;
-    requires javax.inject;
-    requires org.apache.commons.io;
-    requires org.apache.commons.rdf.api;
+module org.trellisldp.jpms.rdfa {
+    exports org.trellisldp.rdfa;
     requires org.apache.commons.rdf.jena;
-    requires org.apache.jena.arq;
-    requires org.apache.jena.base;
-    requires org.apache.jena.core;
+    requires tamaya.api;
+    requires org.apache.servicemix.bundles.mustache.compiler;
+    requires javax.inject;
+    requires org.apache.commons.rdf.api;
     requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.vocabulary;
-    requires slf4j.api;
-    requires tamaya.api;
 }

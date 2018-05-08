@@ -14,10 +14,10 @@ javaModule {
 }
 
 dependencies {
+    api("commons-io:commons-io:$commonsIoVersion") {force = true}
+    api("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api("commons-io:commons-io:$commonsIoVersion") {force = true}
-
     api("org.trellisldp:trellis-api-jpms:$version")
 
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
@@ -25,7 +25,6 @@ dependencies {
     implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
-    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.mustache-compiler:$mustacheVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
