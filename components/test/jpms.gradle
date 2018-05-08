@@ -72,7 +72,6 @@ dependencies {
         exclude(module: 'httpcore')
     }
     implementation("org.awaitility:awaitility:$awaitilityVersion")
-    implementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion")
     //implementation("org.apache.activemq:activemq-client:$activeMqVersion
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     runtime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")

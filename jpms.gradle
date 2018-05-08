@@ -31,11 +31,13 @@ ext {
     bouncyCastleVersion = '1.59'
     commonsCodecVersion = '1.11'
     commonsCollectionsVersion = '4.1'
+    commonsCsvVersion = '1.5'
     commonsIoVersion = '2.6'
     commonsLangVersion = '3.7'
     commonsRdfVersion = '0.5.0'
     commonsRdfJenaVersion = '0.6.0-SNAPSHOT'
     dropwizardVersion = '1.2.0'
+    hk2Version = '2.5.0-b61'
     jacksonVersion = '2.9.5'
     javaxAnnotationsVersion = '1.3.2'
     javaxInjectVersion = '2.4.0'
@@ -64,7 +66,6 @@ ext {
     geronimoAnnotationSpecVersion = '1.0-alpha-1'
     hamcrestLibraryVersion = '1.3'
     jsr305Version = '3.0.2'
-    servicemixXercesVersion = '2.11.0_1'
     thriftVersion = '0.11.0'
     xmlApisVersion = '1.4.01'
 
@@ -154,12 +155,12 @@ allprojects { subproj ->
     configurations {
         all {
             resolutionStrategy {
-                force "org.apache.jena:jena.arq-jpms:$jenaVersion"
-                force "org.apache.jena:jena.base-jpms:$jenaVersion"
-                force "org.apache.jena:jena.core-jpms:$jenaVersion"
-                force "org.apache.jena:jena.dboe-jpms:$jenaVersion"
-                force "org.apache.jena:jena.iri-jpms:$jenaVersion"
-                force "org.apache.jena:jena.rdfconnection-jpms:$jenaVersion"
+                force "de.ubleipzig:jena.arq-jpms:$jenaVersion"
+                force "de.ubleipzig:jena.base-jpms:$jenaVersion"
+                force "de.ubleipzig.jena:jena.core-jpms:$jenaVersion"
+                force "de.ubleipzig:jena.dboe-jpms:$jenaVersion"
+                force "de.ubleipzig:jena.iri-jpms:$jenaVersion"
+                force "de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion"
                 cacheChangingModulesFor 0, 'seconds'
             }
             exclude(module: 'jsr305')

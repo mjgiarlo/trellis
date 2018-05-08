@@ -46,11 +46,12 @@ dependencies {
     testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
     testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
-    testImplementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
-    testImplementation("org.apache.jena:jena.base-jpms:$jenaVersion")
-    testImplementation("org.apache.jena:jena.core-jpms:$jenaVersion")
-    testImplementation("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
-    testImplementation("org.apache.jena:jena.dboe-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.dboe-jpms:$jenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
@@ -58,9 +59,6 @@ dependencies {
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
-        exclude(module: 'xml-apis')
-    }
     testImplementation("org.trellisldp:trellis-triplestore-jpms:$version")
     testImplementation("org.trellisldp:trellis-io-jena-jpms:$version")
     testImplementation("org.trellisldp:trellis-file-jpms:$version")

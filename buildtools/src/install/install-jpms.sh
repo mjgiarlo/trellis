@@ -14,7 +14,6 @@
 ./gradlew --stacktrace --warning-mode=all trellis-jms-jpms:build
 ./gradlew --stacktrace --warning-mode=all trellis-kafka-jpms:build
 ./gradlew --stacktrace --warning-mode=all trellis-test-jpms:build
-./gradlew --stacktrace --warning-mode=all trellis-triplestore-jpms:build
 ./gradlew --stacktrace --warning-mode=all trellis-webac-jpms:build
 ./gradlew --stacktrace --warning-mode=all trellis-audit-jpms:build
 ./gradlew --stacktrace --warning-mode=all trellis-app-jpms:build

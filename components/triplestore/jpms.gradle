@@ -26,10 +26,10 @@ dependencies {
 
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
-    implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.base-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.core-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.rdfconnection-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")

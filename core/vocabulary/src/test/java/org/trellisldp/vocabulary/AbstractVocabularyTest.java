@@ -69,7 +69,7 @@ public abstract class AbstractVocabularyTest {
                 assertTrue(subjects.contains(namespace() + field),
                         "Field definition is not in published ontology! " + field);
             } else if (!subjects.contains(namespace() + field)) {
-                LOGGER.warn("Field definition is not in published ontology! {}", field);
+                LOGGER.debug("Field definition is not in published ontology! {}", field);
             }
         });
     }
@@ -86,7 +86,7 @@ public abstract class AbstractVocabularyTest {
                 .filterKeep(Objects::nonNull)
                 .filterKeep(uri -> uri.startsWith(namespace())).filterDrop(namespace()::equals)
                 .filterDrop(subjects::contains).forEachRemaining(uri -> {
-            LOGGER.warn("{} not defined in {} class", uri, vocabulary().getName());
+            LOGGER.debug("{} not defined in {} class", uri, vocabulary().getName());
         });
     }
 

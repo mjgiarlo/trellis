@@ -23,10 +23,10 @@ dependencies {
     implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
     implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
-    implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.base-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.core-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
@@ -44,9 +44,6 @@ dependencies {
         exclude(module: 'httpcore')
     }
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
     testImplementation("org.trellisldp:trellis-id-jpms:$version")
 }
 

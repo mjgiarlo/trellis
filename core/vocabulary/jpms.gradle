@@ -16,9 +16,9 @@ javaModule {
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
 
-    implementation("org.apache.jena:jena.arq-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.base-jpms:$jenaVersion")
-    implementation("org.apache.jena:jena.core-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
+    implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
@@ -32,10 +32,7 @@ dependencies {
     testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
         exclude(module: 'commons-logging')
     }
-    testImplementation("org.apache.jena:jena.iri-jpms:$jenaVersion")
-    testImplementation("org.apache.servicemix.bundles:org.apache.servicemix.bundles.xerces:$servicemixXercesVersion") {
-        exclude group: 'xml-apis', module: 'xml-apis'
-    }
+    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
