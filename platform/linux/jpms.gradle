@@ -10,7 +10,7 @@ dependencies {
     compile("org.trellisldp:trellis-agent-jpms:$version")
     compile("org.trellisldp:trellis-api-jpms:$version")
     compile("org.trellisldp:trellis-app-jpms:$version")
-    compile project (":trellis-app-triplestore-jpms")
+    compile("org.trellisldp:trellis-app-triplestore-jpms:$version")
     compile("org.trellisldp:trellis-audit-jpms:$version")
     compile("org.trellisldp:trellis-constraint-rules-jpms:$version")
     compile("org.trellisldp:trellis-event-serialization-jpms:$version")

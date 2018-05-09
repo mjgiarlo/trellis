@@ -15,9 +15,10 @@ module org.trellisldp.jpms.rdfa {
     exports org.trellisldp.rdfa;
     requires org.apache.commons.rdf.jena;
     requires tamaya.api;
-    requires org.apache.servicemix.bundles.mustache.compiler;
+    requires compiler;
     requires javax.inject;
     requires org.apache.commons.rdf.api;
     requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.vocabulary;
+    opens org.trellisldp.rdfa to compiler;
 }
