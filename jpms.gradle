@@ -103,14 +103,15 @@ ext {
             'trellis-file-jpms',
             'trellis-http-jpms',
             'trellis-id-jpms',
-            'trellis-io-jpms',
+            'trellis-io-jena-jpms',
             'trellis-jms-jpms',
             'trellis-kafka-jpms',
             'trellis-namespaces-jpms',
             //'trellis-osgi',
+            'trellis-rdfa',
             'trellis-triplestore-jpms',
             'trellis-vocabulary-jpms',
-            'trellis-webac-jpms',
+            'trellis-webac-jpms'
     ]
 }
 
@@ -163,10 +164,10 @@ allprojects { subproj ->
                 force "de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion"
                 cacheChangingModulesFor 0, 'seconds'
             }
-            exclude(module: 'jsr305')
             exclude(module: 'geronimo-annotation_1.2_spec')
             exclude(module: 'commons-logging')
             exclude group: 'javax.inject', module: 'javax.inject'
+            exclude(module: 'jsr305')
             exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
         }
     }
