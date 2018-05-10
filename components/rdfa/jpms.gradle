@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.apache.jena.core']
+    extraTestModules = ['org.apache.jena.core', 'org.apache.commons.rdf.jena']
 }
 
 dependencies {
@@ -19,10 +19,9 @@ dependencies {
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api("org.trellisldp:trellis-api-jpms:$version")
 
-    implementation("commons-io:commons-io:$commonsIoVersion")
-
-    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("com.github.spullara.mustache.java:compiler:$mustacheVersion")
+    implementation("commons-io:commons-io:$commonsIoVersion")
+    implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")

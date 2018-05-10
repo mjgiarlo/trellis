@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.mockito', 'org.trellisldp.jpms.id']
+    extraTestModules = ['org.mockito', 'org.trellisldp.jpms.id', 'org.apache.commons.rdf.jena']
 }
 
 dependencies {
@@ -20,13 +20,12 @@ dependencies {
 
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
-    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
-    implementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     implementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
+    implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
+    implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
@@ -37,6 +36,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
     }
     testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
+    testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){

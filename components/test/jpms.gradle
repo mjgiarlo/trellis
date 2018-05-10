@@ -66,7 +66,7 @@ dependencies {
     implementation("javax.jms:javax.jms-api:$jmsApiVersion")
     implementation("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
     implementation("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
-    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')

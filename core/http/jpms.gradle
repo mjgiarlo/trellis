@@ -36,8 +36,8 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
     }
     testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
-    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
+    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){

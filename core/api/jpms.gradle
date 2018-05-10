@@ -10,27 +10,27 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.trellisldp.jpms.vocabulary', 'org.apache.jena.core', 'org.apache.jena.arq']
+    extraTestModules = ['org.trellisldp.jpms.vocabulary', 'org.apache.jena.core', 'org.apache.jena.arq', 'org.apache.commons.rdf.jena']
 }
 
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.apache.commons:commons-lang3:$commonsLangVersion")
 
+    testImplementation("com.google.guava:guava:$guavaVersion")
+    testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("org.trellisldp:trellis-vocabulary-jpms:$version")
     testImplementation("commons-io:commons-io:$commonsIoVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
-    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
-    testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
-    testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
-    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
     }
-    testImplementation("com.google.guava:guava:$guavaVersion")
 }
 
 jar {

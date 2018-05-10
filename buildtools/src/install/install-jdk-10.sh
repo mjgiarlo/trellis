@@ -17,12 +17,12 @@ java --version
 
 # Install Amazon's root cacerts
 wget https://www.amazontrust.com/repository/AmazonRootCA1.pem
-keytool -import -alias amazon1 -storepass changeit -noprompt -keystore ${JAVA_HOME}/lib/security/cacerts -file AmazonRootCA1.pem
+keytool -import -alias amazon1 -storepass changeit -noprompt -cacerts -file AmazonRootCA1.pem
 wget https://www.amazontrust.com/repository/AmazonRootCA2.pem
-keytool -import -alias amazon2 -storepass changeit -noprompt -keystore ${JAVA_HOME}/lib/security/cacerts -file AmazonRootCA2.pem
+keytool -import -alias amazon2 -storepass changeit -noprompt -cacerts -file AmazonRootCA2.pem
 wget https://www.amazontrust.com/repository/AmazonRootCA3.pem
-keytool -import -alias amazon3 -storepass changeit -noprompt -keystore ${JAVA_HOME}/lib/security/cacerts -file AmazonRootCA3.pem
+keytool -import -alias amazon3 -storepass changeit -noprompt -cacerts -file AmazonRootCA3.pem
 wget https://www.amazontrust.com/repository/AmazonRootCA4.pem
-keytool -import -alias amazon4 -storepass changeit -noprompt -keystore ${JAVA_HOME}/lib/security/cacerts -file AmazonRootCA4.pem
+keytool -import -alias amazon4 -storepass changeit -noprompt -cacerts -file AmazonRootCA4.pem
 echo -n | openssl s_client -connect www.w3.org:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > activitystreams.pem
 keytool -import -alias w3c -storepass changeit -noprompt -keystore ${JAVA_HOME}/lib/security/cacerts -file activitystreams.pem

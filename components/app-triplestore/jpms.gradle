@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.trellisldp.jpms.test','org.apache.jena.rdfconnection']
+    extraTestModules = ['org.trellisldp.jpms.test','org.apache.jena.rdfconnection','org.apache.commons.rdf.jena']
     hacks {
         patches('org.apache.geronimo.specs:geronimo-jms_1.1_spec', 'javax.jms:javax.jms-api')
         patches('org.hamcrest:hamcrest-library', 'org.hamcrest:hamcrest-core')
@@ -30,6 +30,11 @@ dependencies {
     compile("com.google.guava:guava:$guavaVersion")
     compile("commons-codec:commons-codec:$commonsCodecVersion")
     compile("commons-io:commons-io:$commonsIoVersion")
+    compile("de.ubleipzig:jena.arq-jpms:$jenaVersion")
+    compile("de.ubleipzig:jena.base-jpms:$jenaVersion")
+    compile("de.ubleipzig:jena.core-jpms:$jenaVersion")
+    compile("de.ubleipzig:jena.dboe-jpms:$jenaVersion")
+    compile("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
     compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-core:$dropwizardVersion")
     compile("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
@@ -40,18 +45,13 @@ dependencies {
     compile ("javax.xml.bind:jaxb-api:$jaxbVersion")
     compile("org.apache.commons:commons-csv:$commonsCsvVersion")
     compile("org.apache.commons:commons-lang3:$commonsLangVersion")
-    compile("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    compile("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     compile("org.apache.httpcomponents:httpclient:$httpclientVersion") {
         exclude(module: 'commons-logging')
     }
     compile("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
         exclude(module: 'commons-logging')
     }
-    compile("de.ubleipzig:jena.arq-jpms:$jenaVersion")
-    compile("de.ubleipzig:jena.base-jpms:$jenaVersion")
-    compile("de.ubleipzig:jena.core-jpms:$jenaVersion")
-    compile("de.ubleipzig:jena.dboe-jpms:$jenaVersion")
-    compile("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
     compile("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
@@ -77,12 +77,12 @@ dependencies {
     compile("org.trellisldp:trellis-vocabulary-jpms:$version")
     compile("org.trellisldp:trellis-webac-jpms:$version")
 
+    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("com.github.andrewoma.dexx:collection:$dexxCollectionVersion")
     testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")
     testCompile("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testCompile("org.awaitility:awaitility:$awaitilityVersion")
-    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("org.mockito:mockito-core:$mockitoVersion")
     testCompile project(':trellis-test-jpms')
 }

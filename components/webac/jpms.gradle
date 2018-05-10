@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.mockito', 'org.apache.jena.arq']
+    extraTestModules = ['org.mockito', 'org.apache.jena.arq', 'org.apache.commons.rdf.jena']
 }
 
 dependencies {
@@ -29,12 +29,12 @@ dependencies {
     }
     testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
     testImplementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
-    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
+    testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
+    testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')

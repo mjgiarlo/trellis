@@ -35,7 +35,7 @@ ext {
     commonsIoVersion = '2.6'
     commonsLangVersion = '3.7'
     commonsRdfVersion = '0.5.0'
-    commonsRdfJenaVersion = '0.6.0-SNAPSHOT'
+    commonsRdfJenaVersion = '1.0.0-SNAPSHOT'
     dropwizardVersion = '1.2.0'
     hk2Version = '2.5.0-b32'
     jacksonVersion = '2.9.5'
@@ -146,9 +146,6 @@ allprojects { subproj ->
     repositories {
         mavenCentral()
         jcenter()
-        flatDir {
-            dirs "$rootProject.projectDir/lib"
-        }
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots'
         }

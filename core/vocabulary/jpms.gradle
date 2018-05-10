@@ -28,11 +28,11 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
         exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
     }
-    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
+    testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
         exclude(module: 'commons-logging')
     }
-    testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')

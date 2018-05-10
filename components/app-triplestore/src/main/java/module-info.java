@@ -24,7 +24,7 @@ module org.trellisldp.jpms.app.triplestore {
     requires org.apache.jena.core;
     requires org.apache.jena.dboe;
     requires org.apache.jena.rdfconnection;
-    requires org.apache.servicemix.bundles.kafka.clients;
+    requires kafka.clients;
     requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.app;
     requires org.trellisldp.jpms.audit;

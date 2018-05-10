@@ -10,7 +10,7 @@ ext {
 
 javaModule {
     name = javaModuleName
-    extraTestModules = ['org.mockito','org.trellisldp.jpms.id', 'org.trellisldp.jpms.test']
+    extraTestModules = ['org.trellisldp.jpms.id', 'org.trellisldp.jpms.test', 'org.apache.commons.rdf.jena']
     hacks {
         patches('org.hamcrest:hamcrest.library', 'org.hamcrest:hamcrest.core')
     }
@@ -25,13 +25,12 @@ dependencies {
     api("org.trellisldp:trellis-audit-jpms:$version")
 
     implementation ("commons-io:commons-io:$commonsIoVersion") {force = true}
-    implementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
     implementation("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
+    implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")

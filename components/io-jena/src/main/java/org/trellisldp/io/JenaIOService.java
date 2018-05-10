@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.trellisldp.io;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -59,7 +60,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFSyntax;
 import org.apache.commons.rdf.api.Triple;
@@ -104,13 +104,12 @@ public class JenaIOService implements IOService {
 
     private static final JenaRDF rdf = new JenaRDF();
 
-    private static final Map<IRI, RDFFormat> JSONLD_FORMATS = unmodifiableMap(Stream.of(
-                new SimpleEntry<>(compacted, JSONLD_COMPACT_FLAT),
-                new SimpleEntry<>(flattened, JSONLD_FLATTEN_FLAT),
-                new SimpleEntry<>(expanded, JSONLD_EXPAND_FLAT),
-                new SimpleEntry<>(compacted_flattened, JSONLD_FLATTEN_FLAT),
-                new SimpleEntry<>(expanded_flattened, JSONLD_FLATTEN_FLAT))
-            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    private static final Map<IRI, RDFFormat> JSONLD_FORMATS = unmodifiableMap(
+            Stream.of(new SimpleEntry<>(compacted, JSONLD_COMPACT_FLAT),
+                    new SimpleEntry<>(flattened, JSONLD_FLATTEN_FLAT), new SimpleEntry<>(expanded, JSONLD_EXPAND_FLAT),
+                    new SimpleEntry<>(compacted_flattened, JSONLD_FLATTEN_FLAT),
+                    new SimpleEntry<>(expanded_flattened, JSONLD_FLATTEN_FLAT)).collect(
+                    toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
     private final NamespaceService nsService;
     private final CacheService<String, String> cache;
@@ -131,6 +130,7 @@ public class JenaIOService implements IOService {
 
     /**
      * Create a serialization service.
+     *
      * @param namespaceService the namespace service
      */
     public JenaIOService(final NamespaceService namespaceService) {
@@ -141,7 +141,7 @@ public class JenaIOService implements IOService {
      * Create a serialization service.
      *
      * @param namespaceService the namespace service
-     * @param htmlSerializer the HTML serializer service
+     * @param htmlSerializer   the HTML serializer service
      */
     public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer) {
         this(namespaceService, htmlSerializer, null);
@@ -151,13 +151,12 @@ public class JenaIOService implements IOService {
      * Create a serialization service.
      *
      * @param namespaceService the namespace service
-     * @param htmlSerializer the HTML serializer service
-     * @param cache a cache for custom JSON-LD profile resolution
+     * @param htmlSerializer   the HTML serializer service
+     * @param cache            a cache for custom JSON-LD profile resolution
      */
     @Inject
-    public JenaIOService(final NamespaceService namespaceService,
-            final RDFaWriterService htmlSerializer,
-            @Named("TrellisProfileCache") final CacheService<String, String> cache) {
+    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer, @Named
+            ("TrellisProfileCache") final CacheService<String, String> cache) {
         this(namespaceService, htmlSerializer, cache,
                 ConfigurationProvider.getConfiguration().getOrDefault(IO_JSONLD_PROFILES, ""),
                 ConfigurationProvider.getConfiguration().getOrDefault(IO_JSONLD_DOMAINS, ""));
@@ -167,13 +166,13 @@ public class JenaIOService implements IOService {
      * Create a serialization service.
      *
      * @param namespaceService the namespace service
-     * @param htmlSerializer the HTML serializer service
-     * @param cache a cache for custom JSON-LD profile resolution
-     * @param whitelist a whitelist of JSON-LD profiles
+     * @param htmlSerializer   the HTML serializer service
+     * @param cache            a cache for custom JSON-LD profile resolution
+     * @param whitelist        a whitelist of JSON-LD profiles
      * @param whitelistDomains a whitelist of JSON-LD profile domains
      */
-    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer,
-            final CacheService<String, String> cache, final String whitelist, final String whitelistDomains) {
+    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer, final
+    CacheService<String, String> cache, final String whitelist, final String whitelistDomains) {
         this(namespaceService, htmlSerializer, cache, intoSet(whitelist), intoSet(whitelistDomains));
     }
 
@@ -182,13 +181,13 @@ public class JenaIOService implements IOService {
      * Create a serialization service.
      *
      * @param namespaceService the namespace service
-     * @param htmlSerializer the HTML serializer service
-     * @param cache a cache for custom JSON-LD profile resolution
-     * @param whitelist a whitelist of JSON-LD profiles
+     * @param htmlSerializer   the HTML serializer service
+     * @param cache            a cache for custom JSON-LD profile resolution
+     * @param whitelist        a whitelist of JSON-LD profiles
      * @param whitelistDomains a whitelist of JSON-LD profile domains
      */
-    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer,
-            final CacheService<String, String> cache, final Set<String> whitelist, final Set<String> whitelistDomains) {
+    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer, final
+    CacheService<String, String> cache, final Set<String> whitelist, final Set<String> whitelistDomains) {
         this.nsService = namespaceService;
         this.htmlSerializer = htmlSerializer;
         this.cache = cache;
@@ -221,7 +220,7 @@ public class JenaIOService implements IOService {
 
     @Override
     public void write(final Stream<? extends Triple> triples, final OutputStream output, final RDFSyntax syntax,
-            final IRI... profiles) {
+                      final IRI... profiles) {
         requireNonNull(triples, "The triples stream may not be null!");
         requireNonNull(output, "The output stream may not be null!");
         requireNonNull(syntax, "The RDF syntax value may not be null!");
@@ -230,8 +229,8 @@ public class JenaIOService implements IOService {
             if (RDFA.equals(syntax)) {
                 writeHTML(triples, output, profiles.length > 0 ? profiles[0].getIRIString() : null);
             } else {
-                final Lang lang = rdf.asJenaLang(syntax).orElseThrow(() ->
-                        new RuntimeTrellisException("Invalid content type: " + syntax.mediaType()));
+                final Lang lang = rdf.asJenaLang(syntax).orElseThrow(
+                        () -> new RuntimeTrellisException("Invalid content type: " + syntax.mediaType()));
 
                 final RDFFormat format = defaultSerialization(lang);
 
@@ -245,8 +244,8 @@ public class JenaIOService implements IOService {
                 } else {
                     LOGGER.debug("Writing buffered RDF: {}", lang);
                     final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
-                    ofNullable(nsService).map(NamespaceService::getNamespaces)
-                        .ifPresent(graph.getPrefixMapping()::setNsPrefixes);
+                    ofNullable(nsService).map(NamespaceService::getNamespaces).ifPresent(
+                            graph.getPrefixMapping()::setNsPrefixes);
                     triples.map(rdf::asJenaTriple).forEachOrdered(graph::add);
                     if (JSONLD.equals(lang)) {
                         writeJsonLd(output, DatasetGraphFactory.create(graph), profiles);
@@ -317,15 +316,15 @@ public class JenaIOService implements IOService {
 
         try {
             final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
-            final Lang lang = rdf.asJenaLang(syntax).orElseThrow(() ->
-                    new RuntimeTrellisException("Unsupported RDF Syntax: " + syntax.mediaType()));
+            final Lang lang = rdf.asJenaLang(syntax).orElseThrow(
+                    () -> new RuntimeTrellisException("Unsupported RDF Syntax: " + syntax.mediaType()));
 
             RDFParser.source(input).lang(lang).base(base).parse(graph);
 
             // Check the graph for any new namespace definitions
             if (nonNull(nsService)) {
-                final Set<String> namespaces = nsService.getNamespaces().entrySet().stream().map(Map.Entry::getValue)
-                    .collect(toSet());
+                final Set<String> namespaces = nsService.getNamespaces().entrySet().stream().map(
+                        Map.Entry::getValue).collect(toSet());
                 graph.getPrefixMapping().getNsPrefixMap().forEach((prefix, namespace) -> {
                     if (!namespaces.contains(namespace)) {
                         LOGGER.debug("Setting prefix ({}) for namespace {}", prefix, namespace);
@@ -340,7 +339,8 @@ public class JenaIOService implements IOService {
     }
 
     @Override
-    public void update(final Graph graph, final String update, final RDFSyntax syntax, final String base) {
+    public void update(final org.apache.commons.rdf.api.Graph graph, final String update, final RDFSyntax syntax,
+                       final String base) {
         requireNonNull(graph, "The input graph may not be null");
         requireNonNull(update, "The update command may not be null");
         requireNonNull(syntax, "The RDF syntax may not be null");
@@ -349,7 +349,8 @@ public class JenaIOService implements IOService {
         }
 
         try {
-            execute(create(update, base), rdf.asJenaGraph(graph));
+            final org.apache.jena.core.graph.Graph g = rdf.asJenaGraph(graph);
+            execute(create(update, base), g);
         } catch (final UpdateException | QueryParseException ex) {
             throw new RuntimeTrellisException(ex);
         }

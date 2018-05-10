@@ -41,17 +41,17 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'
         exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
     }
-    testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
-    testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
-    testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
-    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
-    testImplementation("org.apache.commons:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.base-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.dboe-jpms:$jenaVersion")
+    testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
+    testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
+    testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
+    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
+    testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
