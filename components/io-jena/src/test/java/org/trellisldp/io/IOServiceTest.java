@@ -151,7 +151,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service3.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service2.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -226,7 +226,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         myservice.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -240,7 +240,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service2.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -254,7 +254,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -268,7 +268,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -282,7 +282,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -296,7 +296,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -310,7 +310,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -324,7 +324,7 @@ public class IOServiceTest {
 
         final Graph graph = rdf.createGraph();
         service.read(new ByteArrayInputStream(output.getBytes(UTF_8)), JSONLD, null).forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -340,7 +340,7 @@ public class IOServiceTest {
         final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
         RDFDataMgr.read(graph, in, Lang.NTRIPLES);
-        validateGraph(rdf.asGraph(graph));
+        assertTrue(validateGraph(rdf.asGraph(graph)));
     }
 
     @Test
@@ -350,7 +350,7 @@ public class IOServiceTest {
         final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
         RDFDataMgr.read(graph, in, Lang.RDFXML);
-        validateGraph(rdf.asGraph(graph));
+        assertTrue(validateGraph(rdf.asGraph(graph)));
     }
 
     @Test
@@ -360,7 +360,7 @@ public class IOServiceTest {
         final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
         RDFDataMgr.read(graph, in, Lang.TURTLE);
-        validateGraph(rdf.asGraph(graph));
+        assertTrue(validateGraph(rdf.asGraph(graph)));
     }
 
     @Test
@@ -368,7 +368,7 @@ public class IOServiceTest {
         final Graph graph = rdf.createGraph();
         service.read(getClass().getResourceAsStream("/testRdf.ttl"), TURTLE, "trellis:repository/resource")
             .forEach(graph::add);
-        validateGraph(graph);
+        assertTrue(validateGraph(graph));
     }
 
     @Test
@@ -396,7 +396,7 @@ public class IOServiceTest {
         final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         final org.apache.jena.core.graph.Graph graph = createDefaultGraph();
         RDFDataMgr.read(graph, in, Lang.TURTLE);
-        validateGraph(rdf.asGraph(graph));
+        assertTrue(validateGraph(rdf.asGraph(graph)));
     }
 
     @Test
@@ -405,7 +405,7 @@ public class IOServiceTest {
         getTriples().forEach(graph::add);
         assertEquals(3L, graph.size());
         assertThrows(RuntimeTrellisException.class, () ->
-                service.update(graph, "blah blah blah blah blah", null, null));
+                service.update(graph, "blah blah blah blah blah", SPARQL_UPDATE, null));
     }
 
     @Test
@@ -425,18 +425,26 @@ public class IOServiceTest {
         final Graph graph = rdf.createGraph();
         getTriples().forEach(graph::add);
         assertEquals(3L, graph.size());
-        service.update(graph, "DELETE WHERE { ?s <http://purl.org/dc/terms/title> ?o }", mockSyntax, "test:info");
+        service.update(graph, "DELETE WHERE { ?s <http://purl.org/dc/terms/title> ?o }", SPARQL_UPDATE, "test:info");
         assertEquals(2L, graph.size());
         service.update(graph, "INSERT { " +
-                "<> <http://purl.org/dc/terms/title> \"Other title\" } WHERE {}", mockSyntax,
+                "<> <http://purl.org/dc/terms/title> \"Other title\" } WHERE {}", SPARQL_UPDATE,
                 "trellis:repository/resource");
         assertEquals(3L, graph.size());
         service.update(graph, "DELETE WHERE { ?s ?p ?o };" +
-                "INSERT { <> <http://purl.org/dc/terms/title> \"Other title\" } WHERE {}", mockSyntax,
+                "INSERT { <> <http://purl.org/dc/terms/title> \"Other title\" } WHERE {}", SPARQL_UPDATE,
                 "trellis:repository");
         assertEquals(1L, graph.size());
         assertEquals("<trellis:repository>", graph.stream().findFirst().map(Triple::getSubject)
                 .map(RDFTerm::ntriplesString).get());
+    }
+
+    @Test
+    public void testUpdateInvalidSyntax() {
+        final Graph graph = rdf.createGraph();
+        getTriples().forEach(graph::add);
+        final String patch = "UpdateList <#> <http://example.org/vocab#preferredLanguages> 1..2 ( \"fr\" ) .";
+        assertThrows(RuntimeTrellisException.class, () -> service.update(graph, patch, LD_PATCH, null));
     }
 
     @Test
@@ -504,9 +512,7 @@ public class IOServiceTest {
 
     }
 
-    private static void validateGraph(final Graph graph) {
-        getTriples().forEach(triple -> {
-            assertTrue(graph.contains(triple));
-        });
+    private static Boolean validateGraph(final Graph graph) {
+        return getTriples().map(graph::contains).reduce(true, (acc, x) -> acc && x);
     }
 }

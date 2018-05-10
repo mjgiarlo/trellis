@@ -15,7 +15,7 @@ package org.trellisldp.http.impl;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.net.URI.create;
-import static java.time.Instant.ofEpochSecond;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -23,6 +23,8 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.Link.fromUri;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static org.apache.commons.rdf.api.RDFSyntax.JSONLD;
+import static org.apache.commons.rdf.api.RDFSyntax.NTRIPLES;
 import static org.apache.commons.rdf.api.RDFSyntax.TURTLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,7 +46,6 @@ import static org.trellisldp.http.domain.RdfMediaType.TEXT_TURTLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -89,7 +90,6 @@ import org.trellisldp.vocabulary.Trellis;
  */
 public class PostHandlerTest {
 
-    private static final Instant time = ofEpochSecond(1496262729);
     private static final String baseUrl = "http://example.org/repo/";
     private static final RDF rdf = getInstance();
     private static final Set<IRI> allInteractionModels = newHashSet(LDP.Resource, LDP.RDFSource,
@@ -140,6 +140,7 @@ public class PostHandlerTest {
         when(mockResourceService.skolemize(any(BlankNode.class))).thenAnswer(inv ->
                 rdf.createIRI(TRELLIS_BNODE_PREFIX + ((BlankNode) inv.getArgument(0)).uniqueReference()));
 
+        when(mockIoService.supportedWriteSyntaxes()).thenReturn(asList(TURTLE, JSONLD));
         when(mockRequest.getSecurityContext()).thenReturn(mockSecurityContext);
         when(mockRequest.getPath()).thenReturn("");
         when(mockRequest.getBaseUrl()).thenReturn(baseUrl);
@@ -293,6 +294,7 @@ public class PostHandlerTest {
         final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + path);
         final Triple triple = rdf.createTriple(rdf.createIRI(baseUrl + path), DC.title,
                         rdf.createLiteral("A title"));
+        when(mockIoService.supportedWriteSyntaxes()).thenReturn(asList(TURTLE, JSONLD, NTRIPLES));
         when(mockIoService.read(any(), eq(TURTLE), any())).thenAnswer(x -> Stream.of(triple));
         final File entity = new File(getClass().getResource("/simpleTriple.ttl").getFile());
 
@@ -412,7 +414,6 @@ public class PostHandlerTest {
 
     @Test
     public void testEntityError() {
-        final IRI identifier = rdf.createIRI(TRELLIS_DATA_PREFIX + "newresource");
         final File entity = new File(getClass().getResource("/simpleData.txt").getFile() + ".nonexistent-suffix");
         when(mockRequest.getContentType()).thenReturn("text/plain");
 

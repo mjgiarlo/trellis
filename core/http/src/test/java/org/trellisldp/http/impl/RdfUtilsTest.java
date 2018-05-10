@@ -49,7 +49,6 @@ import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
-import org.apache.commons.text.RandomStringGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -66,9 +65,6 @@ import org.trellisldp.vocabulary.Trellis;
 public class RdfUtilsTest {
 
     private static final RDF rdf = getInstance();
-    private static final Long size = 10000L;
-    private static final RandomStringGenerator generator = new RandomStringGenerator.Builder()
-        .withinRange('a', 'z').build();
 
     private static final IOService ioService = new JenaIOService();
 
@@ -189,7 +185,6 @@ public class RdfUtilsTest {
     public void testSkolemize() {
         final IRI iri = rdf.createIRI("trellis:data/repository/resource");
         final String baseUrl = "http://example.org/";
-        final IRI anonIri = rdf.createIRI(TRELLIS_BNODE_PREFIX + "foo");
         final Literal literal = rdf.createLiteral("A title");
         final BlankNode bnode = rdf.createBlankNode("foo");
 
@@ -272,9 +267,5 @@ public class RdfUtilsTest {
                 new MediaType("text", "xml"),
                 new MediaType("application", "ld+json"));
         assertNull(RdfUtils.getProfile(types, JSONLD));
-    }
-
-    private IRI getIRI() {
-        return rdf.createIRI("ex:" + generator.generate(5));
     }
 }

@@ -4,7 +4,8 @@ A scalable platform for building [linked data](https://www.w3.org/TR/ldp/) appli
 
 [![Build Status](https://travis-ci.org/trellis-ldp/trellis.png?branch=jpms)](https://travis-ci.org/trellis-ldp/trellis)
 [![Build status](https://ci.appveyor.com/api/projects/status/nvdwx442663ib39d/branch/jpms?svg=true)](https://ci.appveyor.com/project/acoburn/trellis/branch/jpms)
-[![Coverage Status](https://coveralls.io/repos/github/trellis-ldp/trellis/badge.svg?branch=jpms)](https://coveralls.io/github/trellis-ldp/trellis?branch=jpms)
+[![Coverage Status](https://coveralls.io/repos/github/trellis-ldp/trellis/badge.svg?branch=master)](https://coveralls.io/github/trellis-ldp/trellis?branch=jpms)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/09f8d4ae61764bd9a1fead16514b6db2)](https://www.codacy.com/app/acoburn/trellis?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=trellis-ldp/trellis&amp;utm_campaign=Badge_Grade)
 [![Javadoc](https://javadoc-badge.appspot.com/org.trellisldp/trellis-api.svg?label=javadoc)](https://trellis-ldp.github.io/trellis/apidocs/)
 [![Maven Central](https://img.shields.io/maven-central/v/org.trellisldp/trellis-api.svg)](https://mvnrepository.com/artifact/org.trellisldp/trellis-api/0.6.0)
 

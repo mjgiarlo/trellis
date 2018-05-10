@@ -65,10 +65,7 @@ public class WebACServiceTest {
     private CacheService<String, Set<IRI>> mockCache;
 
     @Mock
-    private Resource mockResource, mockChildResource, mockParentResource, mockRootResource,
-                mockPrivateAclResource, mockPublicAclResource, mockAuthResource1,
-                mockAuthResource2, mockAuthResource3, mockAuthResource4, mockAuthResource5,
-                mockAuthResource6, mockAuthResource7, mockAuthResource8, mockGroupResource;
+    private Resource mockResource, mockChildResource, mockParentResource, mockRootResource, mockGroupResource;
 
     private AccessControlService testService;
 
@@ -93,8 +90,6 @@ public class WebACServiceTest {
     private static final IRI authIRI5 = rdf.createIRI("trellis:repository/acl/private/auth5");
 
     private static final IRI authIRI6 = rdf.createIRI("trellis:repository/acl/private/auth6");
-
-    private static final IRI authIRI7 = rdf.createIRI("trellis:repository/acl/private/auth7");
 
     private static final IRI authIRI8 = rdf.createIRI("trellis:repository/acl/private/auth8");
 

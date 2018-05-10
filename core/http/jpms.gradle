@@ -14,12 +14,6 @@ javaModule {
             '.trellisldp.jpms.io']
 }
 
-configurations {
-    api {
-        exclude group: 'javax.inject', module: 'javax.inject'
-    }
-}
-
 dependencies {
     api("io.dropwizard.metrics:metrics-annotation:$metricsVersion")
     api("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")

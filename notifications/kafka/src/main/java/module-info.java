@@ -15,7 +15,7 @@ module org.trellisldp.jpms.kafka {
     exports org.trellisldp.kafka;
     requires javax.inject;
     requires org.apache.commons.rdf.api;
-    requires org.apache.servicemix.bundles.kafka.clients;
+    requires kafka.clients;
     requires org.trellisldp.jpms.api;
     requires slf4j.api;
     requires tamaya.api;
