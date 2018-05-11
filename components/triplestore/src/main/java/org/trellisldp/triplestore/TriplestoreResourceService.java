@@ -38,6 +38,8 @@ import static org.trellisldp.api.RDFUtils.TRELLIS_SESSION_BASE_URL;
 import static org.trellisldp.triplestore.TriplestoreUtils.OBJECT;
 import static org.trellisldp.triplestore.TriplestoreUtils.PREDICATE;
 import static org.trellisldp.triplestore.TriplestoreUtils.SUBJECT;
+import static org.trellisldp.triplestore.TriplestoreUtils.asJenaDataset;
+import static org.trellisldp.triplestore.TriplestoreUtils.getBaseIRI;
 import static org.trellisldp.triplestore.TriplestoreUtils.getInstance;
 import static org.trellisldp.triplestore.TriplestoreUtils.getObject;
 import static org.trellisldp.triplestore.TriplestoreUtils.getPredicate;
@@ -67,11 +69,8 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
-import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.arq.query.Query;
-import org.apache.jena.arq.sparql.core.DatasetGraph;
-import org.apache.jena.arq.sparql.core.DatasetGraphFactory;
 import org.apache.jena.arq.sparql.core.Quad;
 import org.apache.jena.arq.sparql.core.Var;
 import org.apache.jena.arq.sparql.modify.request.QuadAcc;
@@ -148,14 +147,6 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
         this.supportedIxnModels = unmodifiableSet(asList(LDP.Resource, LDP.RDFSource, LDP.NonRDFSource, LDP.Container,
                 LDP.BasicContainer, LDP.DirectContainer, LDP.IndirectContainer).stream().collect(toSet()));
         init();
-    }
-
-    private static RDFTerm getBaseIRI(final RDFTerm object) {
-        if (object instanceof IRI) {
-            final String iri = ((IRI) object).getIRIString().split("#")[0];
-            return rdf.createIRI(iri);
-        }
-        return object;
     }
 
     @Override
@@ -712,25 +703,6 @@ public class TriplestoreResourceService extends DefaultAuditService implements R
     }
 
     /**
-     * TODO Replace when COMMONSRDF-74 is released.
-     *
-     * @param dataset a Commons RDF {@link Dataset}
-     * @return a Jena {@link org.apache.jena.arq.query.Dataset}
-     */
-    private org.apache.jena.arq.query.Dataset asJenaDataset(final Dataset dataset) {
-        final DatasetGraph dsg;
-        if (dataset instanceof JenaDataset) {
-            dsg = ((JenaDataset) dataset).asJenaDatasetGraph();
-        } else {
-            dsg = DatasetGraphFactory.createGeneral();
-            dataset.stream().map(rdf::asJenaQuad).forEach(dsg::add);
-        }
-        return org.apache.jena.arq.query.DatasetFactory.wrap(dsg);
-    }
-
-    /**
-     * Alias{@link org.apache.jena.core.graph.Triple#create(Node, Node, Node)} to
-     * avoid collision with {@link ResourceService#create(IRI, Session, Resource)}.
      *
      * @param subj the subject
      * @param pred the predicate

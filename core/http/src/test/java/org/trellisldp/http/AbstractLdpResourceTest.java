@@ -118,7 +118,6 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
@@ -2700,7 +2699,6 @@ abstract class AbstractLdpResourceTest extends JerseyTest {
         assertNull(res.getHeaderString(MEMENTO_DATETIME));
     }
 
-    @Disabled
     @Test
     public void testPatchExistingResponse() throws IOException {
         final Response res = target(RESOURCE_PATH).request()
@@ -2717,7 +2715,6 @@ abstract class AbstractLdpResourceTest extends JerseyTest {
         assertTrue(entity.contains("A title"));
     }
 
-    @Disabled
     @Test
     public void testPatchConstraint() {
         final Response res = target(RESOURCE_PATH).request()
