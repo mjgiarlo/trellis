@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.trellisldp.app.triplestore;
 
 import static java.util.Optional.ofNullable;
@@ -56,21 +57,20 @@ final class AppUtils {
         return p;
     }
 
-    private static EventService buildKafkaPublisher(final NotificationsConfiguration config,
-            final Environment environment) {
+    private static EventService buildKafkaPublisher(final NotificationsConfiguration config, final Environment
+            environment) {
         LOGGER.info("Connecting to Kafka broker at {}", config.getConnectionString());
         final KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(getKafkaProperties(config));
         environment.lifecycle().manage(new AutoCloseableManager(kafkaProducer));
         return new KafkaPublisher(kafkaProducer, config.getTopicName());
     }
 
-    public static EventService getNotificationService(final NotificationsConfiguration config,
-            final Environment environment) {
+    public static EventService getNotificationService(final NotificationsConfiguration config, final Environment
+            environment) {
 
         if (config.getEnabled()) {
             if (KAFKA.equals(config.getType())) {
                 return buildKafkaPublisher(config, environment);
-
             }
         }
         final String status = "notifications will be disabled";

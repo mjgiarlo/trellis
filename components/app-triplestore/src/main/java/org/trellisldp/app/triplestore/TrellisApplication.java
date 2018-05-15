@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.trellisldp.app.triplestore;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
@@ -58,6 +59,7 @@ public class TrellisApplication extends AbstractTrellisApplication<TrellisConfig
 
     /**
      * The main entry point.
+     *
      * @param args the argument list
      * @throws Exception if something goes horribly awry
      */
@@ -101,12 +103,12 @@ public class TrellisApplication extends AbstractTrellisApplication<TrellisConfig
         this.ioService = buildIoService(config);
     }
 
-    private TriplestoreResourceService buildResourceService(final IdentifierService idService,
-            final TrellisConfiguration config, final Environment environment) {
+    private TriplestoreResourceService buildResourceService(final IdentifierService idService, final
+    TrellisConfiguration config, final Environment environment) {
         final MementoService mementoService = new FileMementoService(config.getMementos());
-        final EventService notificationService;
         final RDFConnection rdfConnection = AppUtils.getRDFConnection(config);
-        notificationService = AppUtils.getNotificationService(config.getNotifications(), environment);
+        final EventService notificationService = AppUtils.getNotificationService(
+                config.getNotifications(), environment);
 
         // Health checks
         environment.healthChecks().register("rdfconnection", new RDFConnectionHealthCheck(rdfConnection));
@@ -119,14 +121,14 @@ public class TrellisApplication extends AbstractTrellisApplication<TrellisConfig
         final Cache<String, String> cache = newBuilder().maximumSize(cacheSize).expireAfterAccess(hours, HOURS).build();
         final TrellisCache<String, String> profileCache = new TrellisCache<>(cache);
         final NamespaceService namespaceService = new NamespacesJsonContext(config.getNamespaces());
-        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService,
-                null, config.getAssets().getCss(), config.getAssets().getJs(), config.getAssets().getIcon());
+        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService, null, config.getAssets().getCss(),
+                config.getAssets().getJs(), config.getAssets().getIcon());
         return new JenaIOService(namespaceService, htmlSerializer, profileCache,
                 config.getJsonld().getContextWhitelist(), config.getJsonld().getContextDomainWhitelist());
     }
 
     private BinaryService buildBinaryService(final IdentifierService idService, final TrellisConfiguration config) {
         return new FileBinaryService(idService, config.getBinaries(), config.getBinaryHierarchyLevels(),
-                        config.getBinaryHierarchyLength());
+                config.getBinaryHierarchyLength());
     }
 }
