@@ -37,4 +37,5 @@ module org.trellisldp.jpms.app.triplestore {
     requires org.trellisldp.jpms.triplestore;
     requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
+    requires metrics.healthchecks;
 }

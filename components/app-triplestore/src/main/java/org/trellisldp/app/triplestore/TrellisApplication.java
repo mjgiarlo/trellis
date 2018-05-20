@@ -121,8 +121,8 @@ public class TrellisApplication extends AbstractTrellisApplication<TrellisConfig
         final Cache<String, String> cache = newBuilder().maximumSize(cacheSize).expireAfterAccess(hours, HOURS).build();
         final TrellisCache<String, String> profileCache = new TrellisCache<>(cache);
         final NamespaceService namespaceService = new NamespacesJsonContext(config.getNamespaces());
-        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService, null, config.getAssets().getCss(),
-                config.getAssets().getJs(), config.getAssets().getIcon());
+        final RDFaWriterService htmlSerializer = new HtmlSerializer(namespaceService, config.getAssets().getTemplate(),
+                config.getAssets().getCss(), config.getAssets().getJs(), config.getAssets().getIcon());
         return new JenaIOService(namespaceService, htmlSerializer, profileCache,
                 config.getJsonld().getContextWhitelist(), config.getJsonld().getContextDomainWhitelist());
     }

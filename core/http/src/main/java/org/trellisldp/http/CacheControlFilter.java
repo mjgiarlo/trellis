@@ -16,6 +16,7 @@ package org.trellisldp.http;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.Priorities.USER;
 import static javax.ws.rs.core.HttpHeaders.CACHE_CONTROL;
+import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 
 import java.io.IOException;
 
@@ -35,22 +36,29 @@ import javax.ws.rs.core.CacheControl;
 public class CacheControlFilter implements ContainerResponseFilter {
 
     private final Integer cacheAge;
+    private final Boolean revalidate;
+    private final Boolean noCache;
 
     /**
      * Create a new CacheControl Decorator.
      *
      * @param cacheAge the length of time to cache resources
+     * @param revalidate whether the cache must verify the status of stale resources
+     * @param noCache whether to set the no-cache value
      */
-    public CacheControlFilter(final Integer cacheAge) {
+    public CacheControlFilter(final Integer cacheAge, final Boolean revalidate, final Boolean noCache) {
         this.cacheAge = cacheAge;
+        this.revalidate = revalidate;
+        this.noCache = noCache;
     }
 
     @Override
     public void filter(final ContainerRequestContext req, final ContainerResponseContext res) throws IOException {
-
-        if (req.getMethod().equals(GET)) {
+        if (req.getMethod().equals(GET) && SUCCESSFUL.equals(res.getStatusInfo().getFamily())) {
             final CacheControl cc = new CacheControl();
             cc.setMaxAge(cacheAge);
+            cc.setMustRevalidate(revalidate);
+            cc.setNoCache(noCache);
             res.getHeaders().add(CACHE_CONTROL, cc);
         }
     }

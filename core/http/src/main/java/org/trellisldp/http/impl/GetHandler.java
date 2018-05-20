@@ -29,6 +29,7 @@ import static javax.ws.rs.HttpMethod.HEAD;
 import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 import static javax.ws.rs.core.HttpHeaders.ALLOW;
 import static javax.ws.rs.core.HttpHeaders.VARY;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
@@ -42,6 +43,7 @@ import static org.trellisldp.http.domain.HttpConstants.ACCEPT_PATCH;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_POST;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_RANGES;
 import static org.trellisldp.http.domain.HttpConstants.ACL;
+import static org.trellisldp.http.domain.HttpConstants.DESCRIPTION;
 import static org.trellisldp.http.domain.HttpConstants.DIGEST;
 import static org.trellisldp.http.domain.HttpConstants.LINK_TEMPLATE;
 import static org.trellisldp.http.domain.HttpConstants.MEMENTO_DATETIME;
@@ -141,27 +143,30 @@ public class GetHandler extends BaseLdpHandler {
 
         LOGGER.debug("Acceptable media types: {}", req.getHeaders().getAcceptableMediaTypes());
         final Optional<RDFSyntax> syntax = getSyntax(ioService, req.getHeaders().getAcceptableMediaTypes(),
-                res.getBinary().map(b -> b.getMimeType().orElse(APPLICATION_OCTET_STREAM)));
+                res.getBinary().filter(b -> !DESCRIPTION.equals(req.getExt()))
+                               .map(b -> b.getMimeType().orElse(APPLICATION_OCTET_STREAM)));
 
         if (ACL.equals(req.getExt()) && !res.hasAcl()) {
             throw new NotFoundException();
         }
 
         final ResponseBuilder builder = basicGetResponseBuilder(res, syntax);
-        final String self = getSelfIdentifier(identifier);
 
-        // Add NonRDFSource-related "describe*" link headers
-        res.getBinary().ifPresent(ds -> {
+        // Add NonRDFSource-related "describe*" link headers, provided this isn't an ACL resource
+        res.getBinary().filter(ds -> !ACL.equals(req.getExt())).ifPresent(ds -> {
+            final String base = getBaseBinaryIdentifier(identifier);
+            final String description = base + (base.contains("?") ? "&" : "?") + "ext=description";
             if (syntax.isPresent()) {
-                builder.link(self + "#description", "canonical").link(self, "describes");
+                builder.link(description, "canonical").link(base, "describes")
+                    .link(base + "#description", "alternate");
             } else {
-                builder.link(self, "canonical").link(self + "#description", "describedby")
+                builder.link(base, "canonical").link(description, "describedby")
                     .type(ds.getMimeType().orElse(APPLICATION_OCTET_STREAM));
             }
         });
 
         // Add a "self" link header
-        builder.link(self, "self");
+        builder.link(getSelfIdentifier(identifier), "self");
 
         // Only show memento links for the user-managed graph (not ACL)
         if (!ACL.equals(req.getExt())) {
@@ -186,7 +191,7 @@ public class GetHandler extends BaseLdpHandler {
 
     private String getSelfIdentifier(final String identifier) {
         // Add any version or ext parameters
-        if (nonNull(req.getVersion()) || ACL.equals(req.getExt())) {
+        if (nonNull(req.getVersion()) || nonNull(req.getExt())) {
             final List<String> query = new ArrayList<>();
 
             ofNullable(req.getVersion()).map(Version::getInstant).map(Instant::toEpochMilli).map(x -> "version=" + x)
@@ -194,17 +199,30 @@ public class GetHandler extends BaseLdpHandler {
 
             if (ACL.equals(req.getExt())) {
                 query.add("ext=acl");
+            } else if (DESCRIPTION.equals(req.getExt())) {
+                query.add("ext=description");
             }
             return identifier + "?" + join("&", query);
         }
         return identifier;
     }
 
+    private String getBaseBinaryIdentifier(final String identifier) {
+        // Add the version parameter, if present
+        return identifier + ofNullable(req.getVersion()).map(Version::getInstant).map(Instant::toEpochMilli)
+                .map(x -> "?version=" + x).orElse("");
+    }
+
     private ResponseBuilder getLdpRs(final String identifier, final Resource res, final ResponseBuilder builder,
             final RDFSyntax syntax, final IRI profile) {
 
+        final Prefer prefer = ACL.equals(req.getExt()) ?
+            new Prefer(PREFER_REPRESENTATION, singletonList(PreferAccessControl.getIRIString()),
+                    of(PreferUserManaged, LDP.PreferContainment, LDP.PreferMembership).map(IRI::getIRIString)
+                        .collect(toList()), null, null, null) : req.getPrefer();
+
         // Check for a cache hit
-        final EntityTag etag = new EntityTag(buildEtagHash(identifier, res.getModified()), true);
+        final EntityTag etag = new EntityTag(buildEtagHash(identifier, res.getModified(), prefer), true);
         checkCache(req.getRequest(), res.getModified(), etag);
 
         builder.tag(etag);
@@ -221,11 +239,6 @@ public class GetHandler extends BaseLdpHandler {
         // URI Templates
         builder.header(LINK_TEMPLATE, "<" + identifier + "{?subject,predicate,object}>; rel=\""
                 + LDP.RDFSource.getIRIString() + "\"");
-
-        final Prefer prefer = ACL.equals(req.getExt()) ?
-            new Prefer(PREFER_REPRESENTATION, singletonList(PreferAccessControl.getIRIString()),
-                    of(PreferUserManaged, LDP.PreferContainment, LDP.PreferMembership).map(IRI::getIRIString)
-                        .collect(toList()), null, null, null) : req.getPrefer();
 
         ofNullable(prefer).ifPresent(p -> builder.header(PREFERENCE_APPLIED, PREFER_RETURN + "=" + p.getPreference()
                     .orElse(PREFER_REPRESENTATION)));
@@ -260,7 +273,7 @@ public class GetHandler extends BaseLdpHandler {
 
         final Instant mod = res.getBinary().map(Binary::getModified).orElseThrow(() ->
                 new WebApplicationException("Could not access binary metadata for " + res.getIdentifier()));
-        final EntityTag etag = new EntityTag(buildEtagHash(identifier + "BINARY", mod));
+        final EntityTag etag = new EntityTag(buildEtagHash(identifier + "BINARY", mod, null));
         checkCache(req.getRequest(), mod, etag);
 
         // Set last-modified to be the binary's last-modified value
@@ -322,11 +335,11 @@ public class GetHandler extends BaseLdpHandler {
         final ResponseBuilder builder = ok();
 
         // Standard HTTP Headers
-        builder.lastModified(from(res.getModified()));
+        builder.lastModified(from(res.getModified())).header(VARY, ACCEPT);
 
         final IRI model;
 
-        if (isNull(req.getExt())) {
+        if (isNull(req.getExt()) || DESCRIPTION.equals(req.getExt())) {
             syntax.ifPresent(s -> {
                 builder.header(VARY, PREFER);
                 builder.type(s.mediaType());
