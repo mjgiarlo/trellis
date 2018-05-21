@@ -120,7 +120,11 @@ allprojects { subproj ->
 
     apply plugin: 'checkstyle'
     apply plugin: 'com.github.hierynomus.license'
-    apply plugin: 'jacoco'
+
+    if (!JavaVersion.current().isJava11Compatible()) {
+        apply plugin: 'jacoco'
+    }
+
     apply plugin: 'com.zyxist.chainsaw'
     apply plugin: 'org.junit.platform.gradle.plugin'
     apply plugin: 'idea'
@@ -139,7 +143,9 @@ allprojects { subproj ->
         checkstyleVersion = '8.10'
     }
 
-    jacoco.toolVersion = jacocoVersion
+    if (!JavaVersion.current().isJava11Compatible()) {
+        jacoco.toolVersion = jacocoVersion
+    }
 
     group = 'org.trellisldp'
 
@@ -359,10 +365,12 @@ subprojects { subproj ->
         }
     }
 
-    afterEvaluate {
-        if (subproj.name in jacocoTestProjects) {
-            jacoco {
-                applyTo subproj.tasks.matching { it.name == 'junitPlatformTest' }
+    if (!JavaVersion.current().isJava11Compatible()) {
+        afterEvaluate {
+            if (subproj.name in jacocoTestProjects) {
+                jacoco {
+                    applyTo subproj.tasks.matching { it.name == 'junitPlatformTest' }
+                }
             }
         }
     }
@@ -419,26 +427,28 @@ configure(rootProject) {
         }
     }
 
-    task jacocoMerge(type: JacocoMerge) {
-        subprojects.findAll { it.name in jacocoTestProjects }
-                .each { subproj ->
-            executionData fileTree(dir: "${subproj.buildDir}/jacoco", include: '*.exec')
-            dependsOn subproj.tasks.withType(Test)
+    if (!JavaVersion.current().isJava11Compatible()) {
+        task jacocoMerge(type: JacocoMerge) {
+            subprojects.findAll { it.name in jacocoTestProjects }
+                    .each { subproj ->
+                executionData fileTree(dir: "${subproj.buildDir}/jacoco", include: '*.exec')
+                dependsOn subproj.tasks.withType(Test)
+            }
         }
-    }
 
-    task jacocoRootReport(type: JacocoReport, dependsOn: jacocoMerge) {
-        sourceDirectories = files(subprojects
-                .findAll { it.name in jacocoTestProjects }
-                .sourceSets.main.allSource.srcDirs)
-        classDirectories = files(subprojects
-                .findAll { it.name in jacocoTestProjects }
-                .sourceSets.main.output)
-        executionData jacocoMerge.destinationFile
-        reports {
-            html.enabled = true
-            xml.enabled = true
-            csv.enabled = false
+        task jacocoRootReport(type: JacocoReport, dependsOn: jacocoMerge) {
+            sourceDirectories = files(subprojects
+                    .findAll { it.name in jacocoTestProjects }
+                    .sourceSets.main.allSource.srcDirs)
+            classDirectories = files(subprojects
+                    .findAll { it.name in jacocoTestProjects }
+                    .sourceSets.main.output)
+            executionData jacocoMerge.destinationFile
+            reports {
+                html.enabled = true
+                xml.enabled = true
+                csv.enabled = false
+            }
         }
     }
 

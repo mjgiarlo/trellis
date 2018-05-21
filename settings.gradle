@@ -61,3 +61,4 @@ for (project in rootProject.children) {
     project.buildFileName = 'jpms.gradle'
 }
 
+enableFeaturePreview('STABLE_PUBLISHING')

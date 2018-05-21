@@ -23,7 +23,6 @@ module org.trellisldp.jpms.app {
     requires java.annotation;
     requires java.naming;
     requires java.ws.rs;
-    requires java.xml.bind;
     requires jjwt;
     requires metrics.healthchecks;
     requires org.apache.commons.rdf.api;
