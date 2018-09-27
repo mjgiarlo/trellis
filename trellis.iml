@@ -15,6 +15,7 @@
         <webroots>
           <root url="file://$MODULE_DIR$/platform/webapp/src/main/webapp" relative="/" />
         </webroots>
+        <sourceRoots />
       </configuration>
     </facet>
   </component>

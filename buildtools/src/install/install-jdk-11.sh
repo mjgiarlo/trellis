@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# Based on JDK 10 installation script from the junit5 project
-
 set -e
 
-JDK_FEATURE=10
-JDK_ARCHIVE=openjdk-${JDK_FEATURE}_linux-x64_bin.tar.gz
+JDK_FEATURE=11
+JDK_ARCHIVE=jdk-${JDK_FEATURE}_linux-x64_bin.tar.gz
 
 cd ~
-wget https://download.java.net/java/GA/jdk${JDK_FEATURE}/${JDK_FEATURE}/binaries/${JDK_ARCHIVE}
+wget http://download.oracle.com/otn-pub/java/jdk/11+28/55eed80b163941c8885ad9298e6d786a/jdk-11_linux-x64_bin.tar.gz
 tar -xzf ${JDK_ARCHIVE}
 export JAVA_HOME=~/jdk-${JDK_FEATURE}
 export PATH=${JAVA_HOME}/bin:$PATH

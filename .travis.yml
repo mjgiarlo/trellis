@@ -22,7 +22,7 @@ matrix:
 install: true
 
 script:
-- . ./buildtools/src/install/install-jdk-10.sh
+- . ./buildtools/src/install/install-jdk-11.sh
 - . ./buildtools/src/install/install-jpms.sh
 
 after_success:
