@@ -22,9 +22,12 @@ import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.HttpHeaders.ALLOW;
+import static javax.ws.rs.core.Response.Status.GONE;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.trellisldp.api.Resource.SpecialResources.DELETED_RESOURCE;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_PATCH;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_POST;
 import static org.trellisldp.http.domain.HttpConstants.ACL;
@@ -37,14 +40,15 @@ import static org.trellisldp.vocabulary.LDP.RDFSource;
 import static org.trellisldp.vocabulary.Trellis.PreferAccessControl;
 import static org.trellisldp.vocabulary.Trellis.PreferUserManaged;
 
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFSyntax;
 import org.slf4j.Logger;
-import org.trellisldp.api.IOService;
 import org.trellisldp.api.Resource;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.http.domain.LdpRequest;
 
 /**
@@ -56,57 +60,68 @@ public class OptionsHandler extends BaseLdpHandler {
 
     private static final Logger LOGGER = getLogger(OptionsHandler.class);
 
-    private final IOService ioService;
+    private final IRI graphName;
+    private final Boolean isMemento;
 
     /**
      * An OPTIONS response builder.
      *
      * @param req the LDP request
-     * @param resourceService the resource service
-     * @param ioService the I/O service
+     * @param trellis the Trellis application bundle
+     * @param isMemento true if the resource is a memento; false otherwise
      * @param baseUrl the base URL
      */
-    public OptionsHandler(final LdpRequest req, final ResourceService resourceService, final IOService ioService,
+    public OptionsHandler(final LdpRequest req, final ServiceBundler trellis, final Boolean isMemento,
             final String baseUrl) {
-        super(req, resourceService, null, baseUrl);
-        this.ioService = ioService;
+        super(req, trellis, baseUrl);
+        this.graphName = ACL.equals(req.getExt()) ? PreferAccessControl : PreferUserManaged;
+        this.isMemento = isMemento;
+    }
+
+    /**
+     * Initialize the request handler.
+     * @param resource the Trellis resource
+     * @return a response builder
+     */
+    public ResponseBuilder initialize(final Resource resource) {
+
+        if (MISSING_RESOURCE.equals(resource)) {
+            throw new NotFoundException();
+        } else if (DELETED_RESOURCE.equals(resource)) {
+            throw new WebApplicationException(GONE);
+        }
+
+        setResource(resource);
+        return status(NO_CONTENT);
     }
 
     /**
      * Build the representation for the given resource.
      *
-     * @param res the resource
+     * @param builder a response builder
      * @return the response builder
      */
-    public ResponseBuilder ldpOptions(final Resource res) {
-        final String identifier = getBaseUrl() + req.getPath();
+    public ResponseBuilder ldpOptions(final ResponseBuilder builder) {
+        LOGGER.debug("OPTIONS request for {}", getIdentifier());
 
-        LOGGER.debug("OPTIONS request for {}", identifier);
+        ldpResourceTypes(getResource().getInteractionModel())
+            .forEach(type -> builder.link(type.getIRIString(), "type"));
 
-        final IRI graphName = ACL.equals(req.getExt()) ? PreferAccessControl : PreferUserManaged;
-
-        // Check if this is already deleted
-        checkDeleted(res, identifier);
-
-        final ResponseBuilder builder = status(NO_CONTENT);
-
-        ldpResourceTypes(res.getInteractionModel()).forEach(type -> builder.link(type.getIRIString(), "type"));
-
-        if (res.isMemento() || TIMEMAP.equals(req.getExt())) {
+        if (isMemento || TIMEMAP.equals(getRequest().getExt())) {
             // Mementos and TimeMaps are read-only
             builder.header(ALLOW, join(",", GET, HEAD, OPTIONS));
         } else {
             builder.header(ACCEPT_PATCH, APPLICATION_SPARQL_UPDATE);
             // ACL resources allow a limited set of methods (no DELETE or POST)
             // If it's not a container, POST isn't allowed
-            if (PreferAccessControl.equals(graphName) || res.getInteractionModel().equals(RDFSource) ||
-                    res.getInteractionModel().equals(NonRDFSource)) {
+            if (PreferAccessControl.equals(graphName) || getResource().getInteractionModel().equals(RDFSource) ||
+                    getResource().getInteractionModel().equals(NonRDFSource)) {
                 builder.header(ALLOW, join(",", GET, HEAD, OPTIONS, PATCH, PUT, DELETE));
             } else {
                 // Containers and binaries support POST
                 builder.header(ALLOW, join(",", GET, HEAD, OPTIONS, PATCH, PUT, DELETE, POST));
-                builder.header(ACCEPT_POST, ioService.supportedWriteSyntaxes().stream().map(RDFSyntax::mediaType)
-                        .collect(joining(",")));
+                builder.header(ACCEPT_POST, getServices().getIOService().supportedWriteSyntaxes().stream()
+                        .map(RDFSyntax::mediaType).collect(joining(",")));
             }
         }
 

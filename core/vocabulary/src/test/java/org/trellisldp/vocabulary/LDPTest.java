@@ -13,6 +13,11 @@
  */
 package org.trellisldp.vocabulary;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.junit.jupiter.api.Test;
+
 /**
  * Test the LDP Vocabulary Class
  * @author acoburn
@@ -27,5 +32,12 @@ public class LDPTest extends AbstractVocabularyTest {
     @Override
     public Class<LDP> vocabulary() {
         return LDP.class;
+    }
+
+    @Test
+    public void testSuperclass() {
+        assertEquals(LDP.Resource, LDP.getSuperclassOf(LDP.NonRDFSource), "LDP-R isn't a superclass of LDP-NR!");
+        assertEquals(LDP.Container, LDP.getSuperclassOf(LDP.BasicContainer), "LDP-C isn't a superclass of LDP-BC!");
+        assertNull(LDP.getSuperclassOf(LDP.Resource), "Astonishingly, LDP-R has a superclass!");
     }
 }

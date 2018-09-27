@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.trellisldp.api.EventService;
 import org.trellisldp.api.NoopEventService;
 import org.trellisldp.app.config.NotificationsConfiguration;
-import org.trellisldp.app.config.TrellisConfiguration;
 import org.trellisldp.kafka.KafkaPublisher;
 
 final class AppUtils {
@@ -78,7 +77,7 @@ final class AppUtils {
         return new NoopEventService();
     }
 
-    public static RDFConnection getRDFConnection(final TrellisConfiguration config) {
+    public static RDFConnection getRDFConnection(final AppConfiguration config) {
         final Optional<String> location = ofNullable(config.getResources());
         if (location.isPresent()) {
             final String loc = location.get();

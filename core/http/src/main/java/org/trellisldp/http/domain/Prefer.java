@@ -20,6 +20,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.joining;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 
@@ -64,10 +64,6 @@ public class Prefer {
 
     public static final String PREFER_WAIT = "wait";
 
-    private static Function<String, String> trimQuotes = param ->
-        param.startsWith("\"") && param.endsWith("\"") && param.length() > 1 ?
-            param.substring(1, param.length() - 1) : param;
-
     private final Optional<String> preference;
 
     private final Optional<String> handling;
@@ -93,10 +89,10 @@ public class Prefer {
     public Prefer(final String preference, final List<String> include, final List<String> omit,
             final Set<String> params, final String handling, final Integer wait) {
         this.preference = ofNullable(preference)
-            .filter(x -> x.equals(PREFER_MINIMAL) || x.equals(PREFER_REPRESENTATION));
+            .filter(isEqual(PREFER_MINIMAL).or(PREFER_REPRESENTATION::equals));
         this.include = ofNullable(include).orElseGet(Collections::emptyList);
         this.omit = ofNullable(omit).orElseGet(Collections::emptyList);
-        this.handling = ofNullable(handling).filter(x -> x.equals(PREFER_LENIENT) || x.equals(PREFER_STRICT));
+        this.handling = ofNullable(handling).filter(isEqual(PREFER_LENIENT).or(PREFER_STRICT::equals));
         this.wait = ofNullable(wait);
         this.params = ofNullable(params).orElseGet(Collections::emptySet);
     }
@@ -218,6 +214,14 @@ public class Prefer {
     }
 
     private static List<String> parseParameter(final String param) {
-        return ofNullable(param).map(trimQuotes).map(x -> asList(x.split("\\s+"))).orElseGet(Collections::emptyList);
+        return ofNullable(param).map(Prefer::trimQuotes).map(x -> asList(x.split("\\s+")))
+            .orElseGet(Collections::emptyList);
+    }
+
+    private static String trimQuotes(final String param) {
+        if (param.startsWith("\"") && param.endsWith("\"") && param.length() > 1) {
+            return param.substring(1, param.length() - 1);
+        }
+        return param;
     }
 }

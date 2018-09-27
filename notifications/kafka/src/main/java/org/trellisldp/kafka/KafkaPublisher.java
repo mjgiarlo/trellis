@@ -15,8 +15,7 @@ package org.trellisldp.kafka;
 
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
-
-import java.util.ServiceLoader;
+import static org.trellisldp.api.RDFUtils.findFirst;
 
 import javax.inject.Inject;
 
@@ -28,18 +27,19 @@ import org.slf4j.Logger;
 import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
 import org.trellisldp.api.EventService;
+import org.trellisldp.api.RuntimeTrellisException;
 
 /**
  * A Kafka message producer capable of publishing messages to a Kafka cluster.
  */
 public class KafkaPublisher implements EventService {
 
-    public static final String KAFKA_TOPIC = "trellis.kafka.topic";
-
     private static final Logger LOGGER = getLogger(KafkaPublisher.class);
+    private static ActivityStreamService service = findFirst(ActivityStreamService.class)
+        .orElseThrow(() -> new RuntimeTrellisException("No ActivityStream service available!"));
 
-    // TODO - JDK9 ServiceLoader::findFirst
-    private static ActivityStreamService service = ServiceLoader.load(ActivityStreamService.class).iterator().next();
+    /** The configuration key controlling the name of the kafka topic. **/
+    public static final String KAFKA_TOPIC = "trellis.kafka.topic";
 
     private final Producer<String, String> producer;
     private final String topic;

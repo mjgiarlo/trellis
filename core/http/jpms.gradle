@@ -25,7 +25,10 @@ dependencies {
 
     implementation("commons-codec:commons-codec:$commonsCodecVersion") { force = true }
     implementation("commons-io:commons-io:$commonsIoVersion") { force = true }
+    implementation("javax.activation:javax.activation-api:$activationApiVersion")
+    implementation("javax.enterprise:cdi-api:$cdiApiVersion")
     implementation("javax.json:javax.json-api:$javaxJsonVersion")
+    implementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
@@ -36,8 +39,7 @@ dependencies {
         exclude group: 'org.apache.httpcomponents', module: 'httpcore-osgi'
     }
     testImplementation("com.google.guava:guava:$guavaVersion") {force = true}
-    testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
-    testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
+
     testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("org.apache.httpcomponents:httpclient-cache:$httpclientVersion"){
@@ -49,9 +51,12 @@ dependencies {
         exclude(module: 'httpcore')
     }
     testImplementation("org.glassfish:javax.json:$jsonVersion")
+    testImplementation("org.glassfish.jersey.connectors:jersey-apache-connector:$jerseyVersion")
     testImplementation("org.glassfish.jersey.core:jersey-server:$jerseyVersion")
+    testImplementation("org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion")
     testImplementation("org.glassfish.jersey.test-framework" +
             ".providers:jersey-test-framework-provider-inmemory:$jerseyVersion")
+    testImplementation("org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:$jerseyVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.trellisldp:trellis-agent-jpms:$version")
     testImplementation("org.trellisldp:trellis-audit-jpms:$version")

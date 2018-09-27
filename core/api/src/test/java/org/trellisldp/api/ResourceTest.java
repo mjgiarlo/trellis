@@ -18,11 +18,15 @@ import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.trellisldp.api.Resource.SpecialResources.DELETED_RESOURCE;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.vocabulary.Trellis.PreferUserManaged;
 
 import org.apache.commons.rdf.api.IRI;
@@ -55,8 +59,7 @@ public class ResourceTest {
         doCallRealMethod().when(mockResource).stream(any(IRI.class));
         doCallRealMethod().when(mockResource).stream(anyCollection());
         doCallRealMethod().when(mockResource).getBinary();
-        doCallRealMethod().when(mockResource).isMemento();
-        doCallRealMethod().when(mockResource).isDeleted();
+        doCallRealMethod().when(mockResource).hasAcl();
         doCallRealMethod().when(mockResource).getExtraLinkRelations();
 
         when(mockResource.stream()).thenAnswer((x) -> empty());
@@ -64,36 +67,50 @@ public class ResourceTest {
 
     @Test
     public void testResource() {
-        assertEquals(0L, mockResource.stream(prefer).count());
-        assertEquals(0L, mockResource.stream(singleton(prefer)).count());
-        assertFalse(mockResource.getMembershipResource().isPresent());
-        assertFalse(mockResource.getMemberRelation().isPresent());
-        assertFalse(mockResource.getMemberOfRelation().isPresent());
-        assertFalse(mockResource.getInsertedContentRelation().isPresent());
-        assertFalse(mockResource.getMemberRelation().isPresent());
-        assertFalse(mockResource.getBinary().isPresent());
-        assertFalse(mockResource.isMemento());
-        assertFalse(mockResource.getExtraLinkRelations().findFirst().isPresent());
-        assertFalse(mockResource.isDeleted());
+        assertEquals(0L, mockResource.stream(prefer).count(), "Resource stream has extra triples!");
+        assertEquals(0L, mockResource.stream(singleton(prefer)).count(), "Resource stream has extra triples!");
+        assertFalse(mockResource.getMembershipResource().isPresent(), "Membership resource unexpectedly present!");
+        assertFalse(mockResource.getMemberRelation().isPresent(), "Member relation unexpectedly present!");
+        assertFalse(mockResource.getMemberOfRelation().isPresent(), "Member of relation unexpectedly present!");
+        assertFalse(mockResource.getInsertedContentRelation().isPresent(), "Inserted content relation is present!");
+        assertFalse(mockResource.getBinary().isPresent(), "Binary is unexpectedly present!");
+        assertFalse(mockResource.getExtraLinkRelations().findFirst().isPresent(), "Extra links unexpectedly present!");
+        assertFalse(mockResource.hasAcl(), "ACL unexpectedly present!");
     }
 
     @Test
-    public void testResource2() {
+    public void testResourceWithQuads() {
         final IRI subject = rdf.createIRI("ex:subject");
         when(mockResource.stream()).thenAnswer((x) -> of(
                     rdf.createQuad(prefer, subject, DC.title, rdf.createLiteral("A title")),
                     rdf.createQuad(PreferUserManaged, subject, DC.title, rdf.createLiteral("Other title"))));
 
-        assertEquals(1L, mockResource.stream(prefer).count());
-        assertEquals(1L, mockResource.stream(singleton(prefer)).count());
-        assertFalse(mockResource.getMembershipResource().isPresent());
-        assertFalse(mockResource.getMemberRelation().isPresent());
-        assertFalse(mockResource.getMemberOfRelation().isPresent());
-        assertFalse(mockResource.getInsertedContentRelation().isPresent());
-        assertFalse(mockResource.getMemberRelation().isPresent());
-        assertFalse(mockResource.getBinary().isPresent());
-        assertFalse(mockResource.isMemento());
-        assertFalse(mockResource.getExtraLinkRelations().findFirst().isPresent());
-        assertFalse(mockResource.isDeleted());
+        assertEquals(1L, mockResource.stream(prefer).count(), "Resource stream has wrong number of triples!");
+        assertEquals(1L, mockResource.stream(singleton(prefer)).count(), "Resource has wrong number of triples!");
+    }
+
+    @Test
+    public void testSingletons() {
+        assertEquals(MISSING_RESOURCE, MISSING_RESOURCE, "Missing resource singleton doesn't act like a singleton!");
+        assertEquals(DELETED_RESOURCE, DELETED_RESOURCE, "Deleted resource singleton doesn't act like a singleton!");
+        assertNotEquals(MISSING_RESOURCE, DELETED_RESOURCE, "Deleted and missing resources match each other!");
+    }
+
+    @Test
+    public void testMissingResource() {
+        assertNull(MISSING_RESOURCE.getIdentifier(), "Missing resource has an identifier!");
+        assertNull(MISSING_RESOURCE.getInteractionModel(), "Missing resource has an interaction model!");
+        assertNull(MISSING_RESOURCE.getModified(), "Missing resource has a last modified date!");
+        assertEquals(0L, MISSING_RESOURCE.stream().count(), "Missing resource contains triples!");
+        assertEquals("A non-existent resource", MISSING_RESOURCE.toString(), "Missing resource has wrong string repr.");
+    }
+
+    @Test
+    public void testDeletedResource() {
+        assertNull(DELETED_RESOURCE.getIdentifier(), "Deleted resource has an identifier!");
+        assertNull(DELETED_RESOURCE.getInteractionModel(), "Deleted resource has an interaction model!");
+        assertNull(DELETED_RESOURCE.getModified(), "Deleted resource has a modification date!");
+        assertEquals(0L, DELETED_RESOURCE.stream().count(), "Deleted resource contains triples!");
+        assertEquals("A deleted resource", DELETED_RESOURCE.toString(), "Deleted resource has wrong string repr.");
     }
 }

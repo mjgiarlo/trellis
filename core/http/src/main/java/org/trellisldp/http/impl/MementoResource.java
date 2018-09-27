@@ -18,7 +18,6 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.ZonedDateTime.parse;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
@@ -30,9 +29,10 @@ import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.core.HttpHeaders.ALLOW;
 import static javax.ws.rs.core.HttpHeaders.VARY;
 import static javax.ws.rs.core.Response.Status.FOUND;
+import static javax.ws.rs.core.Response.ok;
+import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.apache.commons.lang3.Range.between;
-import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.RDFUtils.getInstance;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_DATETIME;
 import static org.trellisldp.http.domain.HttpConstants.APPLICATION_LINK_FORMAT;
@@ -52,12 +52,13 @@ import java.io.OutputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang3.Range;
@@ -65,8 +66,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.api.RDFSyntax;
 import org.apache.commons.rdf.api.Triple;
-import org.trellisldp.api.IOService;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.http.domain.LdpRequest;
 import org.trellisldp.vocabulary.Memento;
 import org.trellisldp.vocabulary.Time;
@@ -94,74 +94,42 @@ public final class MementoResource {
 
     private static final String TIMEMAP_PARAM = "?ext=timemap";
 
-    private static final Function<Link, Stream<Triple>> linkToTriples = link -> {
-        final String linkUri = link.getUri().toString();
-        final IRI iri = rdf.createIRI(linkUri);
-        final List<Triple> buffer = new ArrayList<>();
-        final String timeIriPrefix = "http://reference.data.gov.uk/id/gregorian-instant/";
-
-        // TimeMap quads
-        if (link.getParams().containsKey(FROM)) {
-            buffer.add(rdf.createTriple(iri, type, Memento.TimeMap));
-            buffer.add(rdf.createTriple(iri, Time.hasBeginning, rdf.createIRI(timeIriPrefix +
-                            parse(link.getParams().get(FROM), RFC_1123_DATE_TIME).toString())));
-        }
-        if (link.getParams().containsKey(UNTIL)) {
-            buffer.add(rdf.createTriple(iri, Time.hasEnd, rdf.createIRI(timeIriPrefix +
-                            parse(link.getParams().get(UNTIL), RFC_1123_DATE_TIME).toString())));
-        }
-
-        // Quads for Mementos
-        if (MEMENTO.equals(link.getRel()) && link.getParams().containsKey(DATETIME)) {
-            final IRI original = rdf.createIRI(linkUri.split("\\?")[0]);
-            final IRI timemapUrl = rdf.createIRI(linkUri.split("\\?")[0] + TIMEMAP_PARAM);
-            buffer.add(rdf.createTriple(iri, type, Memento.Memento));
-            buffer.add(rdf.createTriple(iri, Memento.original, original));
-            buffer.add(rdf.createTriple(iri, timegate, original));
-            buffer.add(rdf.createTriple(iri, timemap, timemapUrl));
-            buffer.add(rdf.createTriple(iri, Time.hasTime, rdf.createIRI(timeIriPrefix +
-                            parse(link.getParams().get(DATETIME), RFC_1123_DATE_TIME).toString())));
-            buffer.add(rdf.createTriple(iri, mementoDatetime, rdf.createLiteral(parse(
-                                link.getParams().get(DATETIME), RFC_1123_DATE_TIME).toString(), dateTime)));
-        }
-        return buffer.stream();
-    };
-
-    private final ResourceService resourceService;
+    private final ServiceBundler trellis;
 
     /**
      * Wrap a resource in some Memento-specific response builders.
      *
-     * @param resourceService the resource service
+     * @param trellis the Trellis application bundle
      */
-    public MementoResource(final ResourceService resourceService) {
-        this.resourceService = resourceService;
+    public MementoResource(final ServiceBundler trellis) {
+        this.trellis = trellis;
     }
 
     /**
      * Create a response builder for a TimeMap response.
      *
+     * @param mementos the mementos
      * @param baseUrl the base URL
      * @param req the LDP request
-     * @param serializer the serializer to use
      * @return a response builder object
      */
-    public Response.ResponseBuilder getTimeMapBuilder(final LdpRequest req,
-            final IOService serializer, final String baseUrl) {
+    public ResponseBuilder getTimeMapBuilder(final List<Range<Instant>> mementos, final LdpRequest req,
+            final String baseUrl) {
 
         final List<MediaType> acceptableTypes = req.getHeaders().getAcceptableMediaTypes();
         final String identifier = getBaseUrl(baseUrl, req) + req.getPath();
-        final IRI internalIdentifier = rdf.createIRI(TRELLIS_DATA_PREFIX + req.getPath());
-        final List<Link> links = getMementoLinks(identifier, resourceService.getMementos(internalIdentifier))
-            .collect(toList());
+        final List<Link> links = getMementoLinks(identifier, mementos).collect(toList());
 
-        final Response.ResponseBuilder builder = Response.ok().link(identifier, ORIGINAL + " " + TIMEGATE);
+        final ResponseBuilder builder = ok().link(identifier, ORIGINAL + " " + TIMEGATE);
         builder.links(links.toArray(new Link[0])).link(Resource.getIRIString(), "type")
             .link(RDFSource.getIRIString(), "type").header(ALLOW, join(",", GET, HEAD, OPTIONS));
 
-        final RDFSyntax syntax = getSyntax(serializer, acceptableTypes, of(APPLICATION_LINK_FORMAT)).orElse(null);
-        if (nonNull(syntax)) {
-            final IRI profile = ofNullable(getProfile(acceptableTypes, syntax)).orElse(expanded);
+        final Optional<RDFSyntax> syntax;
+        syntax = getSyntax(trellis.getIOService(), acceptableTypes, of(APPLICATION_LINK_FORMAT));
+
+        if (syntax.isPresent()) {
+            final RDFSyntax rdfSyntax = syntax.get();
+            final IRI profile = ofNullable(getProfile(acceptableTypes, syntax.get())).orElse(expanded);
 
             final List<Triple> extraData = getExtraTriples(identifier);
             for (final Link l : links) {
@@ -174,12 +142,12 @@ public final class MementoResource {
             final StreamingOutput stream = new StreamingOutput() {
                 @Override
                 public void write(final OutputStream out) throws IOException {
-                    serializer.write(concat(links.stream().flatMap(linkToTriples), extraData.stream()), out, syntax,
-                            profile);
+                    trellis.getIOService().write(concat(links.stream().flatMap(MementoResource::linkToTriples),
+                                extraData.stream()), out, rdfSyntax, profile);
                 }
             };
 
-            return builder.type(syntax.mediaType()).entity(stream);
+            return builder.type(syntax.get().mediaType()).entity(stream);
         }
 
         return builder.type(APPLICATION_LINK_FORMAT)
@@ -202,17 +170,18 @@ public final class MementoResource {
     /**
      * Create a response builder for a TimeGate response.
      *
+     * @param mementos the list of memento ranges
      * @param req the LDP request
      * @param baseUrl the base URL
      * @return a response builder object
      */
-    public Response.ResponseBuilder getTimeGateBuilder(final LdpRequest req, final String baseUrl) {
+    public ResponseBuilder getTimeGateBuilder(final List<Range<Instant>> mementos, final LdpRequest req,
+            final String baseUrl) {
         final String identifier = getBaseUrl(baseUrl, req) + req.getPath();
-        final IRI internalIdentifier = rdf.createIRI(TRELLIS_DATA_PREFIX + req.getPath());
-        return Response.status(FOUND)
+        return status(FOUND)
             .location(fromUri(identifier + "?version=" + req.getDatetime().getInstant().toEpochMilli()).build())
             .link(identifier, ORIGINAL + " " + TIMEGATE)
-            .links(getMementoLinks(identifier, resourceService.getMementos(internalIdentifier)).toArray(Link[]::new))
+            .links(getMementoLinks(identifier, mementos).toArray(Link[]::new))
             .header(VARY, ACCEPT_DATETIME);
     }
 
@@ -227,7 +196,16 @@ public final class MementoResource {
         return concat(getTimeMap(identifier, mementos.stream()), mementos.stream().map(mementoToLink(identifier)));
     }
 
-    private String getBaseUrl(final String baseUrl, final LdpRequest req) {
+    /**
+     * Determine whether a link is a well-formed Memento link.
+     * @param link the link header
+     * @return true if this is a memento link; false otherwise
+     */
+    public static Boolean isMementoLink(final Link link) {
+        return MEMENTO.equals(link.getRel()) && link.getParams().containsKey(DATETIME);
+    }
+
+    private static String getBaseUrl(final String baseUrl, final LdpRequest req) {
         return ofNullable(baseUrl).orElseGet(req::getBaseUrl);
     }
 
@@ -245,5 +223,38 @@ public final class MementoResource {
             Link.fromUri(identifier + "?version=" + range.getMinimum().toEpochMilli()).rel(MEMENTO)
                 .param(DATETIME, ofInstant(range.getMinimum().minusNanos(1L).plusSeconds(1L), UTC)
                         .format(RFC_1123_DATE_TIME)).build();
+    }
+
+    private static Stream<Triple> linkToTriples(final Link link) {
+        final String linkUri = link.getUri().toString();
+        final IRI iri = rdf.createIRI(linkUri);
+        final List<Triple> buffer = new ArrayList<>();
+        final String timeIriPrefix = "http://reference.data.gov.uk/id/gregorian-instant/";
+
+        // TimeMap quads
+        if (link.getParams().containsKey(FROM)) {
+            buffer.add(rdf.createTriple(iri, type, Memento.TimeMap));
+            buffer.add(rdf.createTriple(iri, Time.hasBeginning, rdf.createIRI(timeIriPrefix +
+                            parse(link.getParams().get(FROM), RFC_1123_DATE_TIME).toString())));
+        }
+        if (link.getParams().containsKey(UNTIL)) {
+            buffer.add(rdf.createTriple(iri, Time.hasEnd, rdf.createIRI(timeIriPrefix +
+                            parse(link.getParams().get(UNTIL), RFC_1123_DATE_TIME).toString())));
+        }
+
+        // Quads for Mementos
+        if (isMementoLink(link)) {
+            final IRI original = rdf.createIRI(linkUri.split("\\?")[0]);
+            final IRI timemapUrl = rdf.createIRI(linkUri.split("\\?")[0] + TIMEMAP_PARAM);
+            buffer.add(rdf.createTriple(iri, type, Memento.Memento));
+            buffer.add(rdf.createTriple(iri, Memento.original, original));
+            buffer.add(rdf.createTriple(iri, timegate, original));
+            buffer.add(rdf.createTriple(iri, timemap, timemapUrl));
+            buffer.add(rdf.createTriple(iri, Time.hasTime, rdf.createIRI(timeIriPrefix +
+                            parse(link.getParams().get(DATETIME), RFC_1123_DATE_TIME).toString())));
+            buffer.add(rdf.createTriple(iri, mementoDatetime, rdf.createLiteral(parse(
+                                link.getParams().get(DATETIME), RFC_1123_DATE_TIME).toString(), dateTime)));
+        }
+        return buffer.stream();
     }
 }

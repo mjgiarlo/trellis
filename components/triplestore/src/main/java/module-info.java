@@ -24,4 +24,5 @@ module org.trellisldp.jpms.triplestore {
     requires org.apache.jena.arq;
     requires org.apache.jena.rdfconnection;
     requires slf4j.api;
+    requires org.trellisldp.jpms.http;
 }

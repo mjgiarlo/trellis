@@ -15,10 +15,10 @@
 package org.trellisldp.api;
 
 import static java.util.stream.Stream.concat;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 
 import java.time.Instant;
-import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.Dataset;
@@ -50,37 +50,41 @@ public abstract class JoiningResourceService implements ResourceService {
     }
 
     @Override
-    public Optional<? extends Resource> get(final IRI identifier) {
-        final Optional<Resource> mutableFirst = mutableData.get(identifier).map(mutable -> {
-            // perhaps only some resources possess immutable metadata
-            final Optional<? extends Resource> immutable = immutableData.get(identifier);
-            return immutable.isPresent() ? new RetrievableResource(mutable, immutable.get()) : mutable;
+    public CompletableFuture<? extends Resource> get(final IRI identifier) {
+        return mutableData.get(identifier).thenCombine(immutableData.get(identifier), (mutable, immutable) -> {
+            if (MISSING_RESOURCE.equals(mutable) && MISSING_RESOURCE.equals(immutable)) {
+                return MISSING_RESOURCE;
+            } else if (MISSING_RESOURCE.equals(mutable)) {
+                return immutable;
+            } else if (MISSING_RESOURCE.equals(immutable)) {
+                return mutable;
+            } else {
+                return new RetrievableResource(mutable, immutable);
+            }
         });
-        // fall through to immutable-only data
-        return mutableFirst.isPresent() ? mutableFirst : immutableData.get(identifier);
     }
 
     @Override
-    public Future<Boolean> add(final IRI id, final Session session, final Dataset dataset) {
-        return immutableData.add(id, session, dataset);
+    public CompletableFuture<Void> add(final IRI id, final Dataset dataset) {
+        return immutableData.add(id, dataset);
     }
 
     @Override
-    public Future<Boolean> create(final IRI id, final Session session, final IRI ixnModel, final Dataset dataset,
-            final IRI container, final Binary binary) {
-        return mutableData.create(id, session, ixnModel, dataset, container, binary);
+    public CompletableFuture<Void> create(final IRI id, final IRI ixnModel,
+            final Dataset dataset, final IRI container, final Binary binary) {
+        return mutableData.create(id, ixnModel, dataset, container, binary);
     }
 
     @Override
-    public Future<Boolean> replace(final IRI id, final Session session, final IRI ixnModel, final Dataset dataset,
-            final IRI container, final Binary binary) {
-        return mutableData.replace(id, session, ixnModel, dataset, container, binary);
+    public CompletableFuture<Void> replace(final IRI id, final IRI ixnModel,
+            final Dataset dataset, final IRI container, final Binary binary) {
+        return mutableData.replace(id, ixnModel, dataset, container, binary);
     }
 
     @Override
-    public Future<Boolean> delete(final IRI id, final Session session, final IRI ixnModel,
+    public CompletableFuture<Void> delete(final IRI id, final IRI ixnModel,
             final Dataset dataset) {
-        return mutableData.delete(id, session, ixnModel, dataset);
+        return mutableData.delete(id, ixnModel, dataset);
     }
 
     /**

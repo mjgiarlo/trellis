@@ -63,8 +63,10 @@ dependencies {
     implementation("commons-codec:commons-codec:$commonsCodecVersion") {force = true}
     implementation("com.github.jsonld-java:jsonld-java:$jsonldVersion") {exclude group: 'org.apache.httpcomponents', module: 'httpclient-osgi'}
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
+    implementation("javax.activation:javax.activation-api:$activationApiVersion")
     implementation("javax.jms:javax.jms-api:$jmsApiVersion")
     implementation("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
+    implementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     implementation("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.apache.thrift:libthrift:$thriftVersion"){

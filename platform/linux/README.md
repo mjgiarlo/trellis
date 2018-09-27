@@ -120,6 +120,7 @@ namespaces: /path/to/namespaces.json
 
 ```yaml
 auth:
+    adminUsers: []
     webac:
         enabled: true
     anon:
@@ -135,6 +136,7 @@ auth:
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
+| adminUsers | (none) | A list of webIDs that should be given admin access for the purpose of authorization |
 | webac / enabled | true | Whether WebAC authorization is enabled |
 | anon / enabled | false | Whether anonymous authentication is enabled |
 | jwt / enabled | true | Whether jwt authentication is enabled |
@@ -173,12 +175,17 @@ cors:
 | allowCredentials | true | Whether the actual request can be made with credentials |
 
 ```yaml
-cacheMaxAge: 86400
+cache:
+    maxAge: 86400
+    mustRevalidate: true
+    noCache: false
 ```
 
 | Name | Default | Description |
 | ---- | ------- | ----------- |
-| cacheMaxAge | 86400 | The value of the `Cache-Control: max-age=` response header |
+| maxAge | 86400 | The value of the `Cache-Control: max-age=` response header |
+| mustRevalidate | true | Whether to include a `Cache-Controle: must-revalidate` directive |
+| noCache | false | Whether to include a `Cache-Control: no-cache` directive |
 
 ```yaml
 jsonld:
@@ -196,6 +203,31 @@ jsonld:
 | contextDomainWhitelist | an empty list | a user-supplied whitelist of domains for valid JSON-LD profile values |
 | cacheExpireHours | 24 | The number of hours that a JSON-LD profile value will be stored in a cache. |
 | cacheSize | 100 | The number of entries stored in the JSON-LD profile cache. |
+
+## Alternate HTML Representation
+The Trellis RDFa module includes a configurable HTMLSerializer.  It accepts the following optional asset configuration options.
+
+For example, to configure the HTML to produce a table, one can opt to use the `resource-table.mustache` template.  
+With this tabular HTML, one could then add sorting and search filter functionality with a JS library.
+
+```yaml
+assets:
+    template: org/trellisldp/rdfa/resource-table.mustache
+    icon: "http://example.org/image.icon"
+    js:
+        - "https://unpkg.com/vanilla-datatables@latest/dist/vanilla-dataTables.min.js"
+        - "http://example.org/table.js"
+    css:
+        - "http://example.org/styles1.css"
+        - "http://example.org/styles2.css"
+```
+
+| Name | Default | Description |
+| ---- | ------- | ----------- |
+| template | org/trellisldp/rdfa/resource.mustache | an HTML template located in the `org.trellisldp.rdfa` module classpath |
+| icon | none | a URL to a favicon |
+| js | none | a list of URLs for javascript assets |
+| css | none | a list of URLs for CSS assets |
 
 ## HTTP/2
 

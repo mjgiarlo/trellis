@@ -13,10 +13,8 @@
  */
 package org.trellisldp.api;
 
-import static java.time.Instant.now;
-import static java.util.Arrays.asList;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,28 +23,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.trellisldp.vocabulary.RDF.type;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.trellisldp.vocabulary.DC;
-import org.trellisldp.vocabulary.LDP;
-import org.trellisldp.vocabulary.Trellis;
 
 /**
  * @author acoburn
@@ -54,7 +41,7 @@ import org.trellisldp.vocabulary.Trellis;
 public class ResourceServiceTest {
 
     private static final RDF rdf = new JenaRDF();
-    private static final IRI existing = rdf.createIRI("trellis:repository/existing");
+    private static final IRI existing = rdf.createIRI("trellis:data/existing");
 
     @Mock
     private ResourceService mockResourceService;
@@ -67,8 +54,8 @@ public class ResourceServiceTest {
 
     private static class MyRetrievalService implements RetrievalService<Resource> {
         @Override
-        public Optional<Resource> get(final IRI id) {
-            return of(mockResource);
+        public CompletableFuture<Resource> get(final IRI id) {
+            return completedFuture(mockResource);
         }
     }
 
@@ -78,72 +65,42 @@ public class ResourceServiceTest {
         doCallRealMethod().when(mockResourceService).skolemize(any());
         doCallRealMethod().when(mockResourceService).unskolemize(any());
         doCallRealMethod().when(mockResourceService).getContainer(any());
-        doCallRealMethod().when(mockResourceService).export(any());
         doCallRealMethod().when(mockResourceService).toInternal(any(), any());
         doCallRealMethod().when(mockResourceService).toExternal(any(), any());
 
-        when(mockRetrievalService.get(eq(existing))).thenAnswer(inv -> of(mockResource));
-        doCallRealMethod().when(mockRetrievalService).get(any(IRI.class), any(Instant.class));
-
-        when(mockResourceService.scan()).thenAnswer(inv ->
-            asList(rdf.createTriple(existing, type, LDP.Container)).stream());
+        when(mockRetrievalService.get(eq(existing))).thenAnswer(inv -> completedFuture(mockResource));
     }
 
     @Test
     public void testRetrievalService2() {
         final RetrievalService<Resource> svc = new MyRetrievalService();
-        final Optional<? extends Resource> res = svc.get(existing);
-        final Optional<? extends Resource> res2 = svc.get(existing, now());
-        assertTrue(res.isPresent());
-        assertEquals(mockResource, res.get());
-        assertTrue(res2.isPresent());
-        assertEquals(mockResource, res2.get());
+        assertEquals(mockResource, svc.get(existing).join(), "Incorrect resource returned by retrieval service!");
     }
 
     @Test
     public void testRetrievalService() {
-        final Optional<? extends Resource> res = mockRetrievalService.get(existing);
-        final Optional<? extends Resource> res2 = mockRetrievalService.get(existing, now());
-        assertTrue(res.isPresent());
-        assertEquals(mockResource, res.get());
-        assertTrue(res2.isPresent());
-        assertEquals(mockResource, res2.get());
+        assertEquals(mockResource, mockRetrievalService.get(existing).join(),
+                "Incorrect resource found by retrieval service!");
     }
 
     @Test
     public void testSkolemization() {
         final BlankNode bnode = rdf.createBlankNode("testing");
         final IRI iri = rdf.createIRI("trellis:bnode/testing");
-        final IRI resource = rdf.createIRI("trellis:repository/resource");
+        final IRI resource = rdf.createIRI("trellis:data/resource");
 
-        assertTrue(mockResourceService.skolemize(bnode) instanceof IRI);
-        assertTrue(((IRI) mockResourceService.skolemize(bnode)).getIRIString().startsWith("trellis:bnode/"));
-        assertTrue(mockResourceService.unskolemize(iri) instanceof BlankNode);
-        assertEquals(mockResourceService.unskolemize(iri), mockResourceService.unskolemize(iri));
-
-        assertFalse(mockResourceService.unskolemize(rdf.createLiteral("Test")) instanceof BlankNode);
-        assertFalse(mockResourceService.unskolemize(resource) instanceof BlankNode);
-        assertFalse(mockResourceService.skolemize(rdf.createLiteral("Test2")) instanceof IRI);
-    }
-
-    @Test
-    public void testExport() {
-        final Set<IRI> graphs = new HashSet<>();
-        graphs.add(Trellis.PreferAccessControl);
-        graphs.add(Trellis.PreferAudit);
-        graphs.add(Trellis.PreferServerManaged);
-        graphs.add(Trellis.PreferUserManaged);
-        when(mockResource.getIdentifier()).thenReturn(existing);
-        when(mockResource.stream(eq(graphs))).thenAnswer(inv ->
-                Stream.of(rdf.createTriple(existing, DC.title, rdf.createLiteral("A title"))));
-        Mockito.<Optional<? extends Resource>>when(mockResourceService.get(eq(existing))).thenReturn(of(mockResource));
-
-        final List<Quad> export = mockResourceService.export(graphs).collect(toList());
-        assertEquals(1L, export.size());
-        assertEquals(of(existing), export.get(0).getGraphName());
-        assertEquals(existing, export.get(0).getSubject());
-        assertEquals(DC.title, export.get(0).getPredicate());
-        assertEquals(rdf.createLiteral("A title"), export.get(0).getObject());
+        assertTrue(mockResourceService.skolemize(bnode) instanceof IRI, "Blank node not skolemized into IRI!");
+        assertTrue(((IRI) mockResourceService.skolemize(bnode)).getIRIString().startsWith("trellis:bnode/"),
+                "Skolem node has wrong prefix!");
+        assertTrue(mockResourceService.unskolemize(iri) instanceof BlankNode, "Skolem IRI not unskolemized to bnode!");
+        assertEquals(mockResourceService.unskolemize(iri), mockResourceService.unskolemize(iri),
+                "Unskolemized bnodes (from the same skolem node) don't match!");
+        assertFalse(mockResourceService.unskolemize(rdf.createLiteral("Test")) instanceof BlankNode,
+                "Unskolemized literal transformed into blank node!");
+        assertFalse(mockResourceService.unskolemize(resource) instanceof BlankNode,
+                "Unskolemized resource IRI transformed into blank node!");
+        assertFalse(mockResourceService.skolemize(rdf.createLiteral("Test2")) instanceof IRI,
+                "Unskolemized literal transformed into IRI!");
     }
 
     @Test
@@ -151,28 +108,28 @@ public class ResourceServiceTest {
         final IRI root = rdf.createIRI("trellis:data/");
         final IRI resource = rdf.createIRI("trellis:data/resource");
         final IRI child = rdf.createIRI("trellis:data/resource/child");
-        assertEquals(of(root), mockResourceService.getContainer(resource));
-        assertEquals(of(resource), mockResourceService.getContainer(child));
-        assertFalse(mockResourceService.getContainer(root).isPresent());
+        assertEquals(of(root), mockResourceService.getContainer(resource), "Resource parent isn't the root resource!");
+        assertEquals(of(resource), mockResourceService.getContainer(child), "Child resource doesn't point to parent!");
+        assertFalse(mockResourceService.getContainer(root).isPresent(), "Root resource has a parent!");
     }
 
     @Test
     public void testInternalExternal() {
         final String baseUrl = "http://example.com/";
-        final IRI external = rdf.createIRI(baseUrl + "repository/resource");
-        final IRI internal = rdf.createIRI("trellis:data/repository/resource");
-        final IRI other = rdf.createIRI("http://example.org/repository/resource");
-        assertEquals(internal, mockResourceService.toInternal(external, baseUrl));
-        assertEquals(external, mockResourceService.toExternal(internal, baseUrl));
-        assertEquals(other, mockResourceService.toInternal(other, baseUrl));
-        assertEquals(other, mockResourceService.toExternal(other, baseUrl));
+        final IRI external = rdf.createIRI(baseUrl + "resource");
+        final IRI internal = rdf.createIRI("trellis:data/resource");
+        final IRI other = rdf.createIRI("http://example.org/resource");
+        assertEquals(internal, mockResourceService.toInternal(external, baseUrl), "Bad external->internal conversion!");
+        assertEquals(external, mockResourceService.toExternal(internal, baseUrl), "Bad internal->external conversion!");
+        assertEquals(other, mockResourceService.toInternal(other, baseUrl), "Bad conversion of out-of-domain resource");
+        assertEquals(other, mockResourceService.toExternal(other, baseUrl), "Bad conversion of out-of-domain resource");
 
         final BlankNode bnode = rdf.createBlankNode();
-        assertEquals(bnode, mockResourceService.toInternal(bnode, baseUrl));
-        assertEquals(bnode, mockResourceService.toExternal(bnode, baseUrl));
+        assertEquals(bnode, mockResourceService.toInternal(bnode, baseUrl), "Bad conversion of blank node!");
+        assertEquals(bnode, mockResourceService.toExternal(bnode, baseUrl), "Bad conversion of blank node!");
 
         final Literal literal = rdf.createLiteral("A literal");
-        assertEquals(literal, mockResourceService.toInternal(literal, baseUrl));
-        assertEquals(literal, mockResourceService.toExternal(literal, baseUrl));
+        assertEquals(literal, mockResourceService.toInternal(literal, baseUrl), "Bad conversion of literal!");
+        assertEquals(literal, mockResourceService.toExternal(literal, baseUrl), "Bad conversion of literal!");
     }
 }

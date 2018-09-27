@@ -18,11 +18,10 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Date.from;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.function.Predicate.isEqual;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -30,12 +29,13 @@ import static javax.ws.rs.HttpMethod.HEAD;
 import static javax.ws.rs.HttpMethod.OPTIONS;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
-import static javax.ws.rs.core.HttpHeaders.ALLOW;
 import static javax.ws.rs.core.HttpHeaders.VARY;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_HTML_TYPE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.MediaType.WILDCARD_TYPE;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.notModified;
@@ -44,6 +44,7 @@ import static org.apache.commons.rdf.api.RDFSyntax.JSONLD;
 import static org.apache.commons.rdf.api.RDFSyntax.NTRIPLES;
 import static org.apache.commons.rdf.api.RDFSyntax.RDFA;
 import static org.apache.commons.rdf.api.RDFSyntax.TURTLE;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -53,14 +54,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.trellisldp.api.RDFUtils.getInstance;
 import static org.trellisldp.api.Syntax.LD_PATCH;
-import static org.trellisldp.api.Syntax.SPARQL_UPDATE;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_DATETIME;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_PATCH;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_POST;
 import static org.trellisldp.http.domain.HttpConstants.ACCEPT_RANGES;
+import static org.trellisldp.http.domain.HttpConstants.DESCRIPTION;
 import static org.trellisldp.http.domain.HttpConstants.MEMENTO_DATETIME;
 import static org.trellisldp.http.domain.HttpConstants.PATCH;
 import static org.trellisldp.http.domain.HttpConstants.PREFER;
@@ -77,30 +76,20 @@ import static org.trellisldp.vocabulary.JSONLD.compacted;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.function.Executable;
 import org.trellisldp.api.Binary;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.IOService;
-import org.trellisldp.api.Resource;
-import org.trellisldp.api.ResourceService;
-import org.trellisldp.http.domain.LdpRequest;
 import org.trellisldp.http.domain.Prefer;
 import org.trellisldp.vocabulary.LDP;
 import org.trellisldp.vocabulary.OA;
@@ -109,184 +98,120 @@ import org.trellisldp.vocabulary.SKOS;
 /**
  * @author acoburn
  */
-public class GetHandlerTest {
+public class GetHandlerTest extends HandlerBaseTest {
 
-    private static final Instant time = ofEpochSecond(1496262729);
     private static final Instant binaryTime = ofEpochSecond(1496262750);
-    private static final String baseUrl = "http://localhost:8080/repo/";
-    private static final RDF rdf = getInstance();
 
     private Binary testBinary = new Binary(rdf.createIRI("file:///testResource.txt"), binaryTime, "text/plain", 100L);
 
-    @Mock
-    private ResourceService mockResourceService;
-
-    @Mock
-    private IOService mockIoService;
-
-    @Mock
-    private BinaryService mockBinaryService;
-
-    @Mock
-    private Resource mockResource;
-
-    @Mock
-    private Request mockRequest;
-
-    @Mock
-    private HttpHeaders mockHeaders;
-
-    @Mock
-    private LdpRequest mockLdpRequest;
-
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-        when(mockResourceService.getMementos(any())).thenReturn(emptyList());
-        when(mockResource.getInteractionModel()).thenReturn(LDP.RDFSource);
-        when(mockResource.getModified()).thenReturn(time);
-        when(mockResource.getBinary()).thenReturn(empty());
-        when(mockResource.isMemento()).thenReturn(false);
-        when(mockResource.getExtraLinkRelations()).thenAnswer(inv -> Stream.empty());
-        when(mockIoService.supportedReadSyntaxes()).thenReturn(asList(TURTLE, JSONLD, RDFA));
-
-        when(mockLdpRequest.getRequest()).thenReturn(mockRequest);
-        when(mockLdpRequest.getPath()).thenReturn("");
-        when(mockLdpRequest.getBaseUrl()).thenReturn(baseUrl);
-        when(mockLdpRequest.getHeaders()).thenReturn(mockHeaders);
-    }
-
     @Test
     public void testGetLdprs() {
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
-        when(mockIoService.supportedUpdateSyntaxes()).thenReturn(singletonList(SPARQL_UPDATE));
+        when(mockLdpRequest.getBaseUrl()).thenReturn("http://example.org");
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertFalse(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertNull(res.getHeaderString(ACCEPT_POST));
-        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH));
-        assertNull(res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE));
-        assertEquals(from(time), res.getLastModified());
-
-        final String allow = res.getHeaderString(ALLOW);
-        assertTrue(allow.contains(GET));
-        assertTrue(allow.contains(HEAD));
-        assertTrue(allow.contains(OPTIONS));
-        assertTrue(allow.contains(PUT));
-        assertTrue(allow.contains(DELETE));
-        assertTrue(allow.contains(PATCH));
-        assertFalse(allow.contains(POST));
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response type!");
+        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH), "Incorrect Accept-Patch header!");
+        assertEquals(from(time), res.getLastModified(), "Incorrect modified date!");
+        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()), "Incompatible media type!");
+        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE), "Incompatible media type!");
+        assertNull(res.getHeaderString(PREFERENCE_APPLIED), "Unexpected Preference-Applied header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertNull(res.getHeaderString(ACCEPT_POST), "Unexpected Accept-Post header!");
+        assertAll("Check LDP type Link headers", checkLdpType(res, LDP.RDFSource));
+        assertAll("Check Allow headers", checkAllowHeader(res, asList(GET, HEAD, OPTIONS, PUT, DELETE, PATCH)));
 
         final EntityTag etag = res.getEntityTag();
-        assertTrue(etag.isWeak());
-        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + baseUrl), etag.getValue());
+        assertTrue(etag.isWeak(), "ETag isn't weak for an RDF document!");
+        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + ".." + baseUrl), etag.getValue(),
+                "Unexpected ETag value!");
 
         final List<Object> varies = res.getHeaders().get(VARY);
-        assertFalse(varies.contains(RANGE));
-        assertFalse(varies.contains(WANT_DIGEST));
-        assertTrue(varies.contains(ACCEPT_DATETIME));
-        assertTrue(varies.contains(PREFER));
+        assertFalse(varies.contains(RANGE), "Unexpected Vary: range header!");
+        assertFalse(varies.contains(WANT_DIGEST), "Unexpected Vary: want-digest header!");
+        assertTrue(varies.contains(ACCEPT_DATETIME), "Unexpected Vary: accept-datetime header!");
+        assertTrue(varies.contains(PREFER), "Unexpected Vary: prefer header!");
     }
 
     @Test
     public void testGetPreferLdprs() {
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
         when(mockIoService.supportedUpdateSyntaxes()).thenReturn(singletonList(LD_PATCH));
         when(mockLdpRequest.getPrefer())
             .thenReturn(Prefer.valueOf("return=representation; include=\"http://www.w3.org/ns/ldp#PreferContainment"));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertFalse(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertNull(res.getHeaderString(ACCEPT_POST));
-        assertEquals("text/ldpatch", res.getHeaderString(ACCEPT_PATCH));
-        assertEquals("return=representation", res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE));
-        assertEquals(from(time), res.getLastModified());
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response status!");
+        assertEquals("text/ldpatch", res.getHeaderString(ACCEPT_PATCH), "Incorrect Accept-Patch header!");
+        assertEquals("return=representation", res.getHeaderString(PREFERENCE_APPLIED), "Incorrect Preference-Applied!");
+        assertEquals(from(time), res.getLastModified(), "Incorrect modified header!");
+        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()), "Incompatible content-type header!");
+        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE), "Incompatible content-type header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertNull(res.getHeaderString(ACCEPT_POST), "Unexpected Accept-Post header!");
+        assertAll("Check LDP type headers", checkLdpType(res, LDP.RDFSource));
     }
 
     @Test
     public void testGetVersionedLdprs() {
-        when(mockResource.isMemento()).thenReturn(true);
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, true, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
-
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertFalse(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertNull(res.getHeaderString(ACCEPT_POST));
-        assertNull(res.getHeaderString(ACCEPT_PATCH));
-        assertNull(res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE));
-        assertEquals(from(time), res.getLastModified());
-        assertEquals(ofInstant(time, UTC).format(RFC_1123_DATE_TIME), res.getHeaderString(MEMENTO_DATETIME));
-
-        final String allow = res.getHeaderString(ALLOW);
-        assertTrue(allow.contains(GET));
-        assertTrue(allow.contains(HEAD));
-        assertTrue(allow.contains(OPTIONS));
-        assertFalse(allow.contains(PUT));
-        assertFalse(allow.contains(DELETE));
-        assertFalse(allow.contains(PATCH));
-        assertFalse(allow.contains(POST));
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code!");
+        assertEquals(from(time), res.getLastModified(), "Incorrect modified date!");
+        assertEquals(ofInstant(time, UTC).format(RFC_1123_DATE_TIME), res.getHeaderString(MEMENTO_DATETIME),
+                "Incorrect Memento-Datetime header!");
+        assertTrue(TEXT_TURTLE_TYPE.isCompatible(res.getMediaType()), "Incompatible Content-Type header!");
+        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE), "Incompatible Content-Type header!");
+        assertNull(res.getHeaderString(ACCEPT_POST), "Unexpected Accept-Post header!");
+        assertNull(res.getHeaderString(ACCEPT_PATCH), "Unexpected Accept-Patch header!");
+        assertNull(res.getHeaderString(PREFERENCE_APPLIED), "Unexpected Preference-Applied header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertAll("Check LDP type headers", checkLdpType(res, LDP.RDFSource));
+        assertAll("Check Allow headers", checkAllowHeader(res, asList(GET, HEAD, OPTIONS)));
 
         final EntityTag etag = res.getEntityTag();
-        assertTrue(etag.isWeak());
-        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + baseUrl), etag.getValue());
+        assertTrue(etag.isWeak(), "ETag header is not weak for an RDF resource!");
+        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + ".." + baseUrl), etag.getValue(),
+                "Unexpected ETag value!");
 
         final List<Object> varies = res.getHeaders().get(VARY);
-        assertFalse(varies.contains(RANGE));
-        assertFalse(varies.contains(WANT_DIGEST));
-        assertFalse(varies.contains(ACCEPT_DATETIME));
-        assertTrue(varies.contains(PREFER));
+        assertTrue(varies.contains(PREFER), "Missing Vary: prefer header!");
+        assertFalse(varies.contains(RANGE), "Unexpected Vary: range header!");
+        assertFalse(varies.contains(WANT_DIGEST), "Unexpected Vary: want-digest header!");
+        assertFalse(varies.contains(ACCEPT_DATETIME), "Unexpected Vary: accept-datetime header!");
     }
 
     @Test
     public void testCache() {
         when(mockRequest.evaluatePreconditions(eq(from(time)), any(EntityTag.class)))
                 .thenReturn(notModified());
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
-
-        assertThrows(WebApplicationException.class, () -> getHandler.getRepresentation(mockResource));
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = assertThrows(WebApplicationException.class, () ->
+                unwrapAsyncError(handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))),
+                "Unexpected cache response for LDP-RS!").getResponse();
+        assertEquals(NOT_MODIFIED, res.getStatusInfo(), "Incorrect Cache response!");
     }
 
     @Test
     public void testCacheLdpNr() {
         when(mockResource.getBinary()).thenReturn(of(testBinary));
         when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(WILDCARD_TYPE));
         when(mockRequest.evaluatePreconditions(eq(from(binaryTime)), any(EntityTag.class)))
                 .thenReturn(notModified());
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(WILDCARD_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
-
-        assertThrows(WebApplicationException.class, () -> getHandler.getRepresentation(mockResource));
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = assertThrows(WebApplicationException.class, () ->
+                unwrapAsyncError(handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))),
+                "Unexpected cache response for LDP-NR!").getResponse();
+        assertEquals(NOT_MODIFIED, res.getStatusInfo(), "Incorrect Cache response!");
     }
 
     @Test
@@ -298,227 +223,201 @@ public class GetHandlerTest {
                 new SimpleEntry<>(annService, OA.annotationService.getIRIString()),
                 new SimpleEntry<>(SKOS.Concept.getIRIString(), "type"),
                 new SimpleEntry<>(inbox, "inbox")));
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(SKOS.Concept)));
-        assertTrue(res.getLinks().stream().anyMatch(hasLink(rdf.createIRI(inbox), "inbox")));
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code!");
+        assertTrue(res.getLinks().stream().anyMatch(hasType(SKOS.Concept)), "Missing extra type link header!");
+        assertTrue(res.getLinks().stream().anyMatch(hasLink(rdf.createIRI(inbox), "inbox")), "No ldp:inbox header!");
         assertTrue(res.getLinks().stream().anyMatch(hasLink(rdf.createIRI(annService),
-                        OA.annotationService.getIRIString())));
+                        OA.annotationService.getIRIString())), "Missing extra annotationService link header!");
     }
 
     @Test
     public void testNotAcceptableLdprs() {
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(APPLICATION_JSON_TYPE));
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(APPLICATION_JSON_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
 
-        assertThrows(NotAcceptableException.class, () -> getHandler.getRepresentation(mockResource));
+        final Response res = assertThrows(NotAcceptableException.class, () ->
+                unwrapAsyncError(handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))),
+                "No error thrown when given an unaccepable media type!").getResponse();
+        assertEquals(NOT_ACCEPTABLE, res.getStatusInfo(), "Incorrect response code!");
     }
 
     @Test
     public void testMinimalLdprs() {
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(APPLICATION_LD_JSON_TYPE));
-        when(mockIoService.supportedUpdateSyntaxes()).thenReturn(singletonList(SPARQL_UPDATE));
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(APPLICATION_LD_JSON_TYPE));
         when(mockLdpRequest.getPrefer()).thenReturn(Prefer.valueOf("return=minimal"));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(NO_CONTENT, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertFalse(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertNull(res.getHeaderString(ACCEPT_POST));
-        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH));
-        assertEquals("return=minimal", res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(APPLICATION_LD_JSON_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(APPLICATION_LD_JSON_TYPE));
-        assertEquals(from(time), res.getLastModified());
-
-        final String allow = res.getHeaderString(ALLOW);
-        assertTrue(allow.contains(GET));
-        assertTrue(allow.contains(HEAD));
-        assertTrue(allow.contains(OPTIONS));
-        assertTrue(allow.contains(PUT));
-        assertTrue(allow.contains(DELETE));
-        assertTrue(allow.contains(PATCH));
-        assertFalse(allow.contains(POST));
+        assertEquals(NO_CONTENT, res.getStatusInfo(), "Incorrect response code!");
+        assertEquals(from(time), res.getLastModified(), "Incorrect modified date!");
+        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH), "Incorrect Accept-Patch header!");
+        assertEquals("return=minimal", res.getHeaderString(PREFERENCE_APPLIED), "Incorrect Preference-Applied header!");
+        assertTrue(APPLICATION_LD_JSON_TYPE.isCompatible(res.getMediaType()), "Incompatible media type!");
+        assertTrue(res.getMediaType().isCompatible(APPLICATION_LD_JSON_TYPE), "Incompatible media type!");
+        assertNull(res.getHeaderString(ACCEPT_POST), "Unexpected Accept-Post header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertAll("Check LDP type headers", checkLdpType(res, LDP.RDFSource));
+        assertAll("Check Allow headers", checkAllowHeader(res, asList(GET, HEAD, OPTIONS, PUT, DELETE, PATCH)));
 
         final EntityTag etag = res.getEntityTag();
-        assertTrue(etag.isWeak());
-        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + baseUrl), etag.getValue());
+        assertTrue(etag.isWeak(), "ETag header isn't weak for LDP-RS!");
+        final String preferHash = new ArrayList().hashCode() + "." + new ArrayList().hashCode();
+        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + "." + preferHash + "." + baseUrl),
+                etag.getValue(), "Unexpected ETag value!");
 
         final List<Object> varies = res.getHeaders().get(VARY);
-        assertFalse(varies.contains(RANGE));
-        assertFalse(varies.contains(WANT_DIGEST));
-        assertTrue(varies.contains(ACCEPT_DATETIME));
-        assertTrue(varies.contains(PREFER));
+        assertTrue(varies.contains(ACCEPT_DATETIME), "Missing Vary: accept-datetime header!");
+        assertTrue(varies.contains(PREFER), "Missing Vary: prefer header!");
+        assertFalse(varies.contains(RANGE), "Unexpected Vary: range header!");
+        assertFalse(varies.contains(WANT_DIGEST), "Unexpected Vary: want-digest header!");
     }
 
     @Test
     public void testGetLdpc() {
         when(mockResource.getInteractionModel()).thenReturn(LDP.Container);
         when(mockIoService.supportedWriteSyntaxes()).thenReturn(Stream.of(TURTLE, NTRIPLES, JSONLD).collect(toList()));
-        when(mockIoService.supportedUpdateSyntaxes()).thenReturn(singletonList(SPARQL_UPDATE));
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(
                     MediaType.valueOf(APPLICATION_LD_JSON + "; profile=\"" + compacted.getIRIString() + "\"")));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH));
-        assertNull(res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(APPLICATION_LD_JSON_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(APPLICATION_LD_JSON_TYPE));
-        assertEquals(from(time), res.getLastModified());
-        assertFalse(res.getLinks().stream().anyMatch(link -> link.getRel().equals("describes")));
-        assertFalse(res.getLinks().stream().anyMatch(link -> link.getRel().equals("describedby")));
-        assertFalse(res.getLinks().stream().anyMatch(link -> link.getRel().equals("canonical")));
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code");
+        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH), "Incorrect Accept-Patch header!");
+        assertEquals(from(time), res.getLastModified(), "Incorrect modified date!");
+        assertTrue(APPLICATION_LD_JSON_TYPE.isCompatible(res.getMediaType()), "Incompatible content-type header!");
+        assertTrue(res.getMediaType().isCompatible(APPLICATION_LD_JSON_TYPE), "Incompatible content-type header!");
+        assertFalse(res.getLinks().stream().map(Link::getRel).anyMatch(isEqual("describes")),
+                "Unexpected rel=describes");
+        assertFalse(res.getLinks().stream().map(Link::getRel).anyMatch(isEqual("describedby")),
+                "Unexpected rel=describedby");
+        assertFalse(res.getLinks().stream().map(Link::getRel).anyMatch(isEqual("canonical")),
+                "Unexpected rel=canonical");
+        assertNull(res.getHeaderString(PREFERENCE_APPLIED), "Unexpected Preference-Applied header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertAll("Check LDP type link headers", checkLdpType(res, LDP.Container));
+        assertAll("Check Allow headers", checkAllowHeader(res, asList(GET, HEAD, OPTIONS, PUT, DELETE, PATCH, POST)));
 
         final String acceptPost = res.getHeaderString(ACCEPT_POST);
-        assertNotNull(acceptPost);
-        assertTrue(acceptPost.contains("text/turtle"));
-        assertTrue(acceptPost.contains(APPLICATION_LD_JSON));
-        assertTrue(acceptPost.contains(APPLICATION_N_TRIPLES));
-
-        final String allow = res.getHeaderString(ALLOW);
-        assertTrue(allow.contains(GET));
-        assertTrue(allow.contains(HEAD));
-        assertTrue(allow.contains(OPTIONS));
-        assertTrue(allow.contains(PUT));
-        assertTrue(allow.contains(DELETE));
-        assertTrue(allow.contains(PATCH));
-        assertTrue(allow.contains(POST));
+        assertNotNull(acceptPost, "Missing Accept-Post header!");
+        assertTrue(acceptPost.contains("text/turtle"), "Accept-Post doesn't contain Turtle!");
+        assertTrue(acceptPost.contains(APPLICATION_LD_JSON), "Accept-Post doesn't advertise JSON-LD!");
+        assertTrue(acceptPost.contains(APPLICATION_N_TRIPLES), "Accept-Post doesn't advertise N-Triples!");
 
         final EntityTag etag = res.getEntityTag();
-        assertTrue(etag.isWeak());
-        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + baseUrl), etag.getValue());
+        assertTrue(etag.isWeak(), "ETag isn't weak for RDF!");
+        assertEquals(md5Hex(time.toEpochMilli() + "." + time.getNano() + ".." + baseUrl), etag.getValue(),
+                "Incorrect ETag value for LDP-C!");
 
         final List<Object> varies = res.getHeaders().get(VARY);
-        assertFalse(varies.contains(RANGE));
-        assertFalse(varies.contains(WANT_DIGEST));
-        assertTrue(varies.contains(ACCEPT_DATETIME));
-        assertTrue(varies.contains(PREFER));
+        assertTrue(varies.contains(ACCEPT_DATETIME), "Missing Vary: accept-datetime header!");
+        assertTrue(varies.contains(PREFER), "Missing Vary: prefer header!");
+        assertFalse(varies.contains(RANGE), "Unexpected Vary: range header!");
+        assertFalse(varies.contains(WANT_DIGEST), "Unexpected Vary: want-digest header!");
     }
 
     @Test
     public void testGetHTML() {
         when(mockResource.getInteractionModel()).thenReturn(LDP.Container);
-        when(mockIoService.supportedUpdateSyntaxes()).thenReturn(singletonList(SPARQL_UPDATE));
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(MediaType.valueOf(RDFA.mediaType())));
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(MediaType.valueOf(RDFA.mediaType())));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Container)));
-        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH));
-        assertNull(res.getHeaderString(PREFERENCE_APPLIED));
-        assertNull(res.getHeaderString(ACCEPT_RANGES));
-        assertTrue(TEXT_HTML_TYPE.isCompatible(res.getMediaType()));
-        assertTrue(res.getMediaType().isCompatible(TEXT_HTML_TYPE));
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code!");
+        assertEquals(APPLICATION_SPARQL_UPDATE, res.getHeaderString(ACCEPT_PATCH), "Incorrect Accept-Patch header!");
+        assertTrue(TEXT_HTML_TYPE.isCompatible(res.getMediaType()), "Incompatible content-type!");
+        assertTrue(res.getMediaType().isCompatible(TEXT_HTML_TYPE), "Incompatible content-type!");
+        assertNull(res.getHeaderString(PREFERENCE_APPLIED), "Unexpected Preference-Applied header!");
+        assertNull(res.getHeaderString(ACCEPT_RANGES), "Unexpected Accept-Ranges header!");
+        assertAll("Check LDP type link headers", checkLdpType(res, LDP.Container));
     }
 
     @Test
     public void testGetBinaryDescription() {
         when(mockResource.getBinary()).thenReturn(of(testBinary));
         when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE));
-        assertEquals(-1, res.getLength());
-        assertEquals(from(time), res.getLastModified());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.RDFSource)));
-        assertTrue(res.getLinks().stream()
-                .anyMatch(link -> link.getRel().equals("describes") &&
-                    !link.getUri().toString().endsWith("#description")));
-        assertTrue(res.getLinks().stream()
-                .anyMatch(link -> link.getRel().equals("canonical") &&
-                    link.getUri().toString().endsWith("#description")));
+        assertAll("Check binary description", checkBinaryDescription(res));
+    }
+
+    @Test
+    public void testGetBinaryDescription2() {
+        when(mockResource.getBinary()).thenReturn(of(testBinary));
+        when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
+        when(mockLdpRequest.getExt()).thenReturn(DESCRIPTION);
+
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, null);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
+
+        assertAll("Check binary description", checkBinaryDescription(res));
+    }
+
+    private Stream<Executable> checkBinaryDescription(final Response res) {
+        return Stream.of(
+                () -> assertEquals(OK, res.getStatusInfo(), "Incorrect response code!"),
+                () -> assertEquals(-1, res.getLength(), "Incorrect response size!"),
+                () -> assertEquals(from(time), res.getLastModified(), "Incorrect modified date!"),
+                () -> assertTrue(res.getMediaType().isCompatible(TEXT_TURTLE_TYPE), "Incompatible content-type!"),
+                () -> assertTrue(res.getLinks().stream()
+                        .anyMatch(link -> link.getRel().equals("describes") &&
+                            !link.getUri().toString().endsWith("?ext=description")), "MIssing rel=describes header!"),
+                () -> assertTrue(res.getLinks().stream()
+                        .anyMatch(link -> link.getRel().equals("canonical") &&
+                            link.getUri().toString().endsWith("?ext=description")), "Missing rel=canonical header!"),
+                () -> assertAll("Check LDP type link headers", checkLdpType(res, LDP.RDFSource)));
     }
 
     @Test
     public void testGetBinary() throws IOException {
         when(mockResource.getBinary()).thenReturn(of(testBinary));
         when(mockResource.getInteractionModel()).thenReturn(LDP.NonRDFSource);
+        when(mockHttpHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(WILDCARD_TYPE));
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertTrue(res.getMediaType().isCompatible(TEXT_PLAIN_TYPE));
-        assertEquals(-1, res.getLength());
-        assertEquals(from(binaryTime), res.getLastModified());
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.Resource)));
-        assertTrue(res.getLinks().stream().anyMatch(hasType(LDP.NonRDFSource)));
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code!");
+        assertEquals(-1, res.getLength(), "Incorrect response length!");
+        assertEquals(from(binaryTime), res.getLastModified(), "Incorrect content-type header!");
+        assertTrue(res.getMediaType().isCompatible(TEXT_PLAIN_TYPE), "Incorrect content-type header!");
         assertTrue(res.getLinks().stream()
                 .anyMatch(link -> link.getRel().equals("describedby") &&
-                    link.getUri().toString().endsWith("#description")));
+                    link.getUri().toString().endsWith("?ext=description")), "Missing rel=describedby header!");
         assertTrue(res.getLinks().stream()
                 .anyMatch(link -> link.getRel().equals("canonical") &&
-                    !link.getUri().toString().endsWith("#description")));
+                    !link.getUri().toString().endsWith("?ext=description")), "Missing rel=canonical header!");
+        assertAll("Check LDP type link headers", checkLdpType(res, LDP.NonRDFSource));
     }
 
     @Test
     public void testGetAcl() {
         when(mockResource.getInteractionModel()).thenReturn(LDP.Container);
         when(mockResource.hasAcl()).thenReturn(true);
-        when(mockHeaders.getAcceptableMediaTypes()).thenReturn(singletonList(TEXT_TURTLE_TYPE));
         when(mockLdpRequest.getExt()).thenReturn("acl");
 
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, baseUrl);
+        final GetHandler handler = new GetHandler(mockLdpRequest, mockBundler, false, baseUrl);
+        final Response res = handler.getRepresentation(handler.standardHeaders(handler.initialize(mockResource)))
+            .join().build();
 
-        final Response res = getHandler.getRepresentation(mockResource).build();
-        assertEquals(OK, res.getStatusInfo());
-
-        final String allow = res.getHeaderString(ALLOW);
-        assertTrue(allow.contains(GET));
-        assertTrue(allow.contains(HEAD));
-        assertTrue(allow.contains(OPTIONS));
-        assertFalse(allow.contains(PUT));
-        assertFalse(allow.contains(DELETE));
-        assertTrue(allow.contains(PATCH));
-        assertFalse(allow.contains(POST));
-    }
-
-    @Test
-    public void testGetDeleted() {
-        when(mockResource.isDeleted()).thenReturn(true);
-
-        final GetHandler getHandler = new GetHandler(mockLdpRequest, mockResourceService,
-                mockIoService, mockBinaryService, null);
-
-        assertThrows(WebApplicationException.class, () -> getHandler.getRepresentation(mockResource));
-    }
-
-    private static Predicate<Link> hasLink(final IRI iri, final String rel) {
-        return link -> rel.equals(link.getRel()) && iri.getIRIString().equals(link.getUri().toString());
-    }
-
-    private static Predicate<Link> hasType(final IRI iri) {
-        return hasLink(iri, "type");
+        assertEquals(OK, res.getStatusInfo(), "Incorrect response code!");
+        assertAll("Check LDP type link headers", checkLdpType(res, LDP.RDFSource));
+        assertAll("Check Allow headers", checkAllowHeader(res, asList(GET, HEAD, OPTIONS, PATCH)));
     }
 }

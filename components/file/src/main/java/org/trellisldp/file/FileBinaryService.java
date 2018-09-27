@@ -14,21 +14,25 @@
 package org.trellisldp.file;
 
 import static java.nio.file.Files.copy;
+import static java.nio.file.Files.delete;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Arrays.asList;
 import static java.util.Base64.getEncoder;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.codec.digest.DigestUtils.getDigest;
+import static org.apache.commons.codec.digest.DigestUtils.updateDigest;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD2;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.MD5;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_256;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_384;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA3_512;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_256;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_384;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_512;
-import static org.apache.commons.collections4.IteratorUtils.asEnumeration;
 import static org.apache.commons.lang3.StringUtils.stripStart;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -36,23 +40,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.tamaya.Configuration;
 import org.apache.tamaya.ConfigurationProvider;
@@ -73,11 +71,23 @@ import org.trellisldp.api.IdentifierService;
  * <li>SHA-384</li>
  * <li>SHA-512</li>
  * </ul>
+ *
+ * <p>When running under JDK 9+, the following additional digest algorithms are supported:
+ * <ul>
+ * <li>SHA3-256</li>
+ * <li>SHA3-384</li>
+ * <li>SHA3-512</li>
+ * </ul>
  */
 public class FileBinaryService implements BinaryService {
 
+    /** The configuration key controlling the base filesystem path for the binary service. */
     public static final String BINARY_BASE_PATH = "trellis.file.binary.basepath";
+
+    /** The configuration key controlling the levels of hierarchy in a binary storage layout. */
     public static final String BINARY_HIERARCHY = "trellis.file.binary.hierarchy";
+
+    /** The configuration key controlling the length of each level of hierarchy in a filesystem layout. */
     public static final String BINARY_LENGTH = "trellis.file.binary.length";
 
     private static final Logger LOGGER = getLogger(FileBinaryService.class);
@@ -85,8 +95,8 @@ public class FileBinaryService implements BinaryService {
     private static final Integer DEFAULT_HIERARCHY = 3;
     private static final Integer DEFAULT_LENGTH = 2;
 
-    // TODO JDK9 supports SHA3 algorithms (SHA3_256, SHA3_384, SHA3_512)
-    private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512).stream()
+    private static final Set<String> algorithms = asList(MD5, MD2, SHA, SHA_1, SHA_256, SHA_384, SHA_512,
+            SHA3_256, SHA3_384, SHA3_512).stream()
         .collect(toSet());
 
     private final String basePath;
@@ -124,27 +134,10 @@ public class FileBinaryService implements BinaryService {
     }
 
     @Override
-    public Boolean exists(final IRI identifier) {
-         return getFileFromIdentifier(identifier).filter(File::isFile).isPresent();
-    }
-
-    @Override
-    public Optional<InputStream> getContent(final IRI identifier, final List<Range<Integer>> ranges) {
-        requireNonNull(ranges, "Byte ranges may not be null");
-        return getFileFromIdentifier(identifier).map(file -> {
+    public CompletableFuture<InputStream> getContent(final IRI identifier) {
+        return supplyAsync(() -> {
             try {
-                if (ranges.isEmpty()) {
-                    return new FileInputStream(file);
-                } else {
-                    final List<InputStream> iss = new ArrayList<>();
-                    for (final Range<Integer> r : ranges) {
-                        final InputStream input = new FileInputStream(file);
-                        final long skipped = input.skip(r.getMinimum());
-                        LOGGER.debug("Skipped {} bytes", skipped);
-                        iss.add(new BoundedInputStream(input, r.getMaximum() - r.getMinimum()));
-                    }
-                    return new SequenceInputStream(asEnumeration(iss.iterator()));
-                }
+                return new FileInputStream(getFileFromIdentifier(identifier));
             } catch (final IOException ex) {
                 throw new UncheckedIOException(ex);
             }
@@ -152,35 +145,64 @@ public class FileBinaryService implements BinaryService {
     }
 
     @Override
-    public void purgeContent(final IRI identifier) {
-        getFileFromIdentifier(identifier).ifPresent(File::delete);
+    public CompletableFuture<InputStream> getContent(final IRI identifier, final Integer from, final Integer to) {
+        requireNonNull(from, "From value cannot be null!");
+        requireNonNull(to, "To value cannot be null!");
+        return supplyAsync(() -> {
+            try {
+                final InputStream input = new FileInputStream(getFileFromIdentifier(identifier));
+                final long skipped = input.skip(from);
+                LOGGER.debug("Skipped {} bytes", skipped);
+                return new BoundedInputStream(input, to - from);
+            } catch (final IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        });
     }
 
     @Override
-    public void setContent(final IRI identifier, final InputStream stream,
+    public CompletableFuture<Void> purgeContent(final IRI identifier) {
+        return supplyAsync(() -> {
+            try {
+                delete(getFileFromIdentifier(identifier).toPath());
+            } catch (final IOException ex) {
+                LOGGER.warn("File could not deleted {}: {}", identifier, ex.getMessage());
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public CompletableFuture<Void> setContent(final IRI identifier, final InputStream stream,
             final Map<String, String> metadata) {
         requireNonNull(stream, "InputStream may not be null!");
-        getFileFromIdentifier(identifier).ifPresent(file -> {
+        return supplyAsync(() -> {
+            final File file = getFileFromIdentifier(identifier);
             LOGGER.debug("Setting binary content for {} at {}", identifier.getIRIString(), file.getAbsolutePath());
-            try {
+            try (final InputStream input = stream) {
                 final File parent = file.getParentFile();
                 parent.mkdirs();
                 copy(stream, file.toPath(), REPLACE_EXISTING);
-                stream.close();
             } catch (final IOException ex) {
                 LOGGER.error("Error while setting content: {}", ex.getMessage());
+                LOGGER.error("Error setting content", ex);
                 throw new UncheckedIOException(ex);
             }
+            return null;
         });
     }
 
     @Override
-    public Optional<String> digest(final String algorithm, final InputStream stream) {
-        if (SHA.equals(algorithm)) {
-            return of(SHA_1).map(DigestUtils::getDigest).flatMap(digest(stream));
-        }
-        return ofNullable(algorithm).filter(supportedAlgorithms()::contains).map(DigestUtils::getDigest)
-            .flatMap(digest(stream));
+    public CompletableFuture<String> calculateDigest(final IRI identifier, final String algorithm) {
+        return supplyAsync(() -> {
+            if (SHA.equals(algorithm)) {
+                return computeDigest(identifier, getDigest(SHA_1));
+            } else if (supportedAlgorithms().contains(algorithm)) {
+                return computeDigest(identifier, getDigest(algorithm));
+            }
+            LOGGER.warn("Algorithm not supported: {}", algorithm);
+            return null;
+        });
     }
 
     @Override
@@ -193,21 +215,19 @@ public class FileBinaryService implements BinaryService {
         return idSupplier.get();
     }
 
-    private Optional<File> getFileFromIdentifier(final IRI identifier) {
-        return ofNullable(identifier).map(IRI::getIRIString).map(URI::create).map(URI::getSchemeSpecificPart)
-            .map(x -> stripStart(x, "/")).map(x -> new File(basePath, x));
+    private File getFileFromIdentifier(final IRI identifier) {
+        requireNonNull(identifier, "Identifier may not be null!");
+        return of(identifier).map(IRI::getIRIString).filter(x -> x.startsWith("file:")).map(URI::create)
+            .map(URI::getSchemeSpecificPart).map(x -> stripStart(x, "/")).map(x -> new File(basePath, x))
+            .orElseThrow(() -> new IllegalArgumentException("Could not create File object from IRI: " + identifier));
     }
 
-    private Function<MessageDigest, Optional<String>> digest(final InputStream stream) {
-        return algorithm -> {
-            try {
-                final String digest = getEncoder().encodeToString(DigestUtils.updateDigest(algorithm, stream).digest());
-                stream.close();
-                return of(digest);
-            } catch (final IOException ex) {
-                LOGGER.error("Error computing digest", ex);
-            }
-            return empty();
-        };
+    private String computeDigest(final IRI identifier, final MessageDigest algorithm) {
+        try (final InputStream input = new FileInputStream(getFileFromIdentifier(identifier))) {
+            return getEncoder().encodeToString(updateDigest(algorithm, input).digest());
+        } catch (final IOException ex) {
+            LOGGER.error("Error computing digest", ex);
+            throw new UncheckedIOException(ex);
+        }
     }
 }

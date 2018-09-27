@@ -13,7 +13,10 @@
  */
 package org.trellisldp.triplestore;
 
+import static org.apache.jena.core.rdf.model.ResourceFactory.createProperty;
+import static org.apache.jena.core.rdf.model.ResourceFactory.createResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.trellisldp.vocabulary.RDF.type;
@@ -25,6 +28,8 @@ import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.jena.core.rdf.model.Property;
+import org.apache.jena.core.rdf.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.trellisldp.vocabulary.AS;
 import org.trellisldp.vocabulary.DC;
@@ -48,11 +53,12 @@ public class TriplestoreUtilsTest {
         dataset.add(jenaRdf.createQuad(PreferUserManaged, subject, SKOS.prefLabel, literal));
         dataset.add(jenaRdf.createQuad(PreferUserManaged, subject, type, SKOS.Concept));
         dataset.add(jenaRdf.createQuad(PreferUserManaged, subject, DC.subject, AS.Activity));
-        assertEquals(3L, dataset.size());
+        assertEquals(3L, dataset.size(), "Confirm dataset size");
 
-        assertTrue(TriplestoreUtils.asJenaDataset(dataset).containsNamedModel(PreferUserManaged.getIRIString()));
+        assertTrue(TriplestoreUtils.asJenaDataset(dataset).containsNamedModel(PreferUserManaged.getIRIString()),
+                "Confirm presence of trellis:PreferUserManaged named graph");
         assertEquals(TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph(),
-                TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph());
+                TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph(), "Confirm datasets are equal");
     }
 
     @Test
@@ -62,28 +68,45 @@ public class TriplestoreUtilsTest {
         dataset.add(simpleRdf.createQuad(PreferUserManaged, subject, SKOS.prefLabel, literal));
         dataset.add(simpleRdf.createQuad(PreferUserManaged, subject, type, SKOS.Concept));
         dataset.add(simpleRdf.createQuad(PreferUserManaged, subject, DC.subject, AS.Activity));
-        assertEquals(3L, dataset.size());
+        assertEquals(3L, dataset.size(), "Confirm dataset size");
 
-        assertTrue(TriplestoreUtils.asJenaDataset(dataset).containsNamedModel(PreferUserManaged.getIRIString()));
+        assertTrue(TriplestoreUtils.asJenaDataset(dataset).containsNamedModel(PreferUserManaged.getIRIString()),
+                "Confirm presence of trellis:PreferUserManaged named graph");
         assertNotEquals(TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph(),
-                TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph());
+                TriplestoreUtils.asJenaDataset(dataset).asDatasetGraph(), "Confirm dataset has been converted");
     }
 
     @Test
     public void testBaseIRItruncate() {
         final IRI iri = jenaRdf.createIRI("http://example.com/resource#i");
-        assertEquals(jenaRdf.createIRI("http://example.com/resource"), TriplestoreUtils.getBaseIRI(iri));
+        assertEquals(jenaRdf.createIRI("http://example.com/resource"), TriplestoreUtils.getBaseIRI(iri),
+                "Check that fragment URLs are removed");
     }
 
     @Test
     public void testBaseIRInoTruncate() {
         final IRI iri = jenaRdf.createIRI("http://example.com/resource");
-        assertEquals(iri, TriplestoreUtils.getBaseIRI(iri));
+        assertEquals(iri, TriplestoreUtils.getBaseIRI(iri), "Check that fragment URLs are removed");
+    }
+
+    @Test
+    public void testNodeConversion() {
+        final Resource s = createResource("http://example.com/Resource");
+        final Property p = createProperty("http://example.com/prop");
+        final Resource o = createResource("http://example.com/Other");
+        assertFalse(TriplestoreUtils.nodesToTriple(null, null, null).isPresent(), "null nodes yield valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(s, null, null).isPresent(), "null node results in a valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(null, p, null).isPresent(), "null node results in a valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(null, null, o).isPresent(), "null node results in a valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(s, p, null).isPresent(), "null node results in a valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(s, null, o).isPresent(), "null node results in a valid triple!");
+        assertFalse(TriplestoreUtils.nodesToTriple(null, p, o).isPresent(), "null node results in a valid triple!");
+        assertTrue(TriplestoreUtils.nodesToTriple(s, p, o).isPresent(), "Nodes not converted to triple!");
     }
 
     @Test
     public void testBaseIRIliteral() {
         final Literal l = jenaRdf.createLiteral("a literal");
-        assertEquals(l, TriplestoreUtils.getBaseIRI(l));
+        assertEquals(l, TriplestoreUtils.getBaseIRI(l), "Incorrect literal value!");
     }
 }

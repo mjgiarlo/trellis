@@ -1,0 +1,37 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis WebAC Module'
+
+ext {
+    moduleName = 'org.trellisldp.webac'
+}
+
+dependencies {
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    api project(':trellis-api')
+
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation project(':trellis-vocabulary')
+
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+    }
+}
+

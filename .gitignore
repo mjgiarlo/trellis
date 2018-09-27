@@ -11,4 +11,5 @@ out/
 .idea
 docs/
 modulepath
+**/bin/
 

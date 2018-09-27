@@ -14,7 +14,7 @@
 
 package org.trellisldp.api;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.IRI;
@@ -28,42 +28,46 @@ import org.apache.commons.rdf.api.IRI;
 public interface MutableDataService<U> extends RetrievalService<U> {
 
     /**
-     * Put a resource into the server.
+     * Create a resource in the server.
      *
      * @param identifier the identifier for the new resource
-     * @param session the session context for this operation
      * @param ixnModel the LDP interaction model for this resource
      * @param dataset the dataset to be persisted
      * @param container an LDP container for this resource, {@code null} for none
      * @param binary a binary resource, relevant only for ldp:NonRDFSource items: {@code null} for none
-     * @return whether the resource was added
+     * @return a new completion stage that, when the stage completes normally, indicates that the supplied data were
+     * successfully created in the corresponding persistence layer. In the case of an unsuccessful write operation,
+     * the {@link CompletableFuture} will complete exceptionally and can be handled with
+     * {@link CompletableFuture#handle}, {@link CompletableFuture#exceptionally} or similar methods.
      */
-    Future<Boolean> create(IRI identifier, Session session, IRI ixnModel, Dataset dataset, IRI container,
-            Binary binary);
+    CompletableFuture<Void> create(IRI identifier, IRI ixnModel, Dataset dataset, IRI container, Binary binary);
 
     /**
      * Replace a resource in the server.
      *
      * @param identifier the identifier for the new resource
-     * @param session the session context for this operation
      * @param ixnModel the LDP interaction model for this resource
      * @param dataset the dataset to be persisted
      * @param container an LDP container for this resource, {@code null} for none
      * @param binary a binary resource, relevant only for ldp:NonRDFSource items: {@code null} for none
-     * @return whether the resource was replaced
+     * @return a new completion stage that, when the stage completes normally, indicates that the supplied data
+     * were successfully stored in the corresponding persistence layer. In the case of an unsuccessful write operation,
+     * the {@link CompletableFuture} will complete exceptionally and can be handled with
+     * {@link CompletableFuture#handle}, {@link CompletableFuture#exceptionally} or similar methods.
      */
-    Future<Boolean> replace(IRI identifier, Session session, IRI ixnModel, Dataset dataset, IRI container,
-            Binary binary);
+    CompletableFuture<Void> replace(IRI identifier, IRI ixnModel, Dataset dataset, IRI container, Binary binary);
 
     /**
      * Delete a resource from the server.
      *
      * @param identifier the identifier for the new resource
-     * @param session the session context for this operation
      * @param ixnModel the new LDP interaction model for this resource
      * @param dataset the dataset
-     * @return whether the resource was deleted
+     * @return a new completion stage that, when the stage completes normally, indicates that the resource
+     * was successfully deleted from the corresponding persistence layer. In the case of an unsuccessful delete
+     * operation, the {@link CompletableFuture} will complete exceptionally and can be handled with
+     * {@link CompletableFuture#handle}, {@link CompletableFuture#exceptionally} or similar methods.
      */
-    Future<Boolean> delete(IRI identifier, Session session, IRI ixnModel, Dataset dataset);
+    CompletableFuture<Void> delete(IRI identifier, IRI ixnModel, Dataset dataset);
 
 }

@@ -18,6 +18,8 @@ import static java.util.stream.Collector.Characteristics.CONCURRENT;
 import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
 import static java.util.stream.Collector.Characteristics.UNORDERED;
 
+import java.util.Iterator;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +32,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.api.Triple;
@@ -42,8 +45,8 @@ import org.apache.commons.rdf.api.Triple;
  */
 public final class RDFUtils {
 
-    // TODO - JDK9 ServiceLoader::findFirst
-    private static RDF rdf = ServiceLoader.load(RDF.class).iterator().next();
+    private static RDF rdf = findFirst(RDF.class)
+        .orElseThrow(() -> new RuntimeTrellisException("No RDF Commons implementation available!"));
 
     /**
      * The internal trellis scheme.
@@ -66,17 +69,24 @@ public final class RDFUtils {
     public static final String TRELLIS_SESSION_PREFIX = TRELLIS_SCHEME + "session/";
 
     /**
-     * The session property for a baseURL.
-     */
-    public static final String TRELLIS_SESSION_BASE_URL = "baseURL";
-
-    /**
      * Get the Commons RDF instance in use.
      *
      * @return the RDF instance
      */
     public static RDF getInstance() {
         return rdf;
+    }
+
+    /**
+     * Get a service.
+     * @param service the interface or abstract class representing the service
+     * @param <T> the class of the service type
+     * @return the first service provider or empty Optional if no service providers are located
+     */
+    public static <T> Optional<T> findFirst(final Class<T> service) {
+        // TODO - JDK9 replace with ServiceLoader::findFirst
+        return Optional.of(ServiceLoader.load(service)).map(ServiceLoader::iterator).filter(Iterator::hasNext)
+            .map(Iterator::next);
     }
 
     /**
@@ -89,6 +99,16 @@ public final class RDFUtils {
             right.iterate().forEach(left::add);
             return left;
         }, UNORDERED);
+    }
+
+    /**
+     * Get a mapping function to turn a triple into a quad.
+     *
+     * @param graphName the graph name
+     * @return the mapping function
+     */
+    public static Function<Triple, Quad> toQuad(final IRI graphName) {
+        return triple -> rdf.createQuad(graphName, triple.getSubject(), triple.getPredicate(), triple.getObject());
     }
 
     /**

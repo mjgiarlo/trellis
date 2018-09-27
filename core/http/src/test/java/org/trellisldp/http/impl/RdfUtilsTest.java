@@ -21,6 +21,7 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.rdf.api.RDFSyntax.JSONLD;
 import static org.apache.commons.rdf.api.RDFSyntax.TURTLE;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.trellisldp.api.RDFUtils.TRELLIS_BNODE_PREFIX;
@@ -36,6 +38,9 @@ import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.RDFUtils.getInstance;
 import static org.trellisldp.vocabulary.JSONLD.compacted;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 import javax.ws.rs.NotAcceptableException;
@@ -65,11 +70,21 @@ import org.trellisldp.vocabulary.Trellis;
 public class RdfUtilsTest {
 
     private static final RDF rdf = getInstance();
-
     private static final IOService ioService = new JenaIOService();
+    private static final IRI identifier = rdf.createIRI("trellis:data/repository/resource");
+    private static final Quad QUAD1 = rdf.createQuad(Trellis.PreferAudit, identifier, DC.creator,
+            rdf.createLiteral("me"));
+    private static final Quad QUAD2 = rdf.createQuad(Trellis.PreferServerManaged, identifier, DC.modified,
+            rdf.createLiteral("now"));
+    private static final Quad QUAD3 = rdf.createQuad(Trellis.PreferUserManaged, identifier, DC.subject,
+            rdf.createLiteral("subj"));
+    private static final List<Quad> QUADS = asList(QUAD1, QUAD2, QUAD3);
 
     @Mock
     private ResourceService mockResourceService;
+
+    @Mock
+    private InputStream mockInputStream;
 
     @BeforeEach
     public void setUp() {
@@ -83,13 +98,13 @@ public class RdfUtilsTest {
                 new MediaType("text", "xml"),
                 new MediaType("text", "turtle"));
 
-        assertEquals(of(TURTLE), RdfUtils.getSyntax(ioService, types, empty()));
+        assertEquals(of(TURTLE), RdfUtils.getSyntax(ioService, types, empty()), "Cannot determine Turtle syntax!");
     }
 
     @Test
     public void testGetSyntaxEmpty() {
-        assertFalse(RdfUtils.getSyntax(ioService, emptyList(), of("some/type")).isPresent());
-        assertEquals(of(TURTLE), RdfUtils.getSyntax(ioService, emptyList(), empty()));
+        assertFalse(RdfUtils.getSyntax(ioService, emptyList(), of("some/type")).isPresent(), "Syntax not rejected!");
+        assertEquals(of(TURTLE), RdfUtils.getSyntax(ioService, emptyList(), empty()), "Turtle not default syntax!");
     }
 
     @Test
@@ -99,7 +114,8 @@ public class RdfUtilsTest {
                 new MediaType("text", "xml"),
                 new MediaType("text", "turtle"));
 
-        assertFalse(RdfUtils.getSyntax(ioService, types, of("application/json")).isPresent());
+        assertFalse(RdfUtils.getSyntax(ioService, types, of("application/json")).isPresent(),
+                "Non-RDF syntax is incorrectly handled!");
     }
 
     @Test
@@ -108,82 +124,56 @@ public class RdfUtilsTest {
                 new MediaType("application", "json"),
                 new MediaType("text", "xml"));
 
-        assertThrows(NotAcceptableException.class, () -> RdfUtils.getSyntax(ioService, types, empty()));
+        assertThrows(NotAcceptableException.class, () -> RdfUtils.getSyntax(ioService, types, empty()),
+                "Not-Acceptable Exception should be thrown when nothing matches");
     }
 
     @Test
     public void testFilterPrefer1() {
-        final IRI iri = rdf.createIRI("trellis:data/repository/resource");
-        final Quad q1 = rdf.createQuad(Trellis.PreferAudit, iri, DC.creator, rdf.createLiteral("me"));
-        final Quad q2 = rdf.createQuad(Trellis.PreferServerManaged, iri, DC.modified, rdf.createLiteral("now"));
-        final Quad q3 = rdf.createQuad(Trellis.PreferUserManaged, iri, DC.subject, rdf.createLiteral("subj"));
-        final List<Quad> quads = asList(q1, q2, q3);
-
-        final List<Quad> filtered = quads.stream().filter(RdfUtils.filterWithPrefer(
+        final List<Quad> filtered = QUADS.stream().filter(RdfUtils.filterWithPrefer(
                     Prefer.valueOf("return=representation; include=\"" +
                         Trellis.PreferServerManaged.getIRIString() + "\""))).collect(toList());
 
-        assertFalse(filtered.contains(q2));
-        assertTrue(filtered.contains(q3));
-        assertEquals(1, filtered.size());
+        assertFalse(filtered.contains(QUAD2), "Prefer filter doesn't catch quad!");
+        assertTrue(filtered.contains(QUAD3), "Prefer filter misses quad!");
+        assertEquals(1, filtered.size(), "Incorrect size of filtered quad list");
     }
 
     @Test
     public void testFilterPrefer2() {
-        final IRI iri = rdf.createIRI("trellis:data/repository/resource");
-        final Quad q1 = rdf.createQuad(Trellis.PreferAudit, iri, DC.creator, rdf.createLiteral("me"));
-        final Quad q2 = rdf.createQuad(Trellis.PreferServerManaged, iri, DC.modified, rdf.createLiteral("now"));
-        final Quad q3 = rdf.createQuad(Trellis.PreferUserManaged, iri, DC.subject, rdf.createLiteral("subj"));
-        final List<Quad> quads = asList(q1, q2, q3);
-
-        final List<Quad> filtered2 = quads.stream().filter(RdfUtils.filterWithPrefer(
+        final List<Quad> filtered2 = QUADS.stream().filter(RdfUtils.filterWithPrefer(
                     Prefer.valueOf("return=representation"))).collect(toList());
 
-        assertTrue(filtered2.contains(q3));
-        assertEquals(1, filtered2.size());
+        assertTrue(filtered2.contains(QUAD3), "Prefer filter omits quad!");
+        assertEquals(1, filtered2.size(), "Incorrect size of filtered quad list!");
     }
 
     @Test
     public void testFilterPrefer3() {
-        final IRI iri = rdf.createIRI("trellis:data/repository/resource");
-        final Quad q1 = rdf.createQuad(Trellis.PreferAudit, iri, DC.creator, rdf.createLiteral("me"));
-        final Quad q2 = rdf.createQuad(Trellis.PreferServerManaged, iri, DC.modified, rdf.createLiteral("now"));
-        final Quad q3 = rdf.createQuad(Trellis.PreferUserManaged, iri, DC.subject, rdf.createLiteral("subj"));
-        final List<Quad> quads = asList(q1, q2, q3);
-
-
-        final List<Quad> filtered3 = quads.stream().filter(RdfUtils.filterWithPrefer(
+        final List<Quad> filtered3 = QUADS.stream().filter(RdfUtils.filterWithPrefer(
                     Prefer.valueOf("return=representation; include=\"" +
                         Trellis.PreferAudit.getIRIString() + "\""))).collect(toList());
 
-        assertTrue(filtered3.contains(q1));
-        assertFalse(filtered3.contains(q2));
-        assertTrue(filtered3.contains(q3));
-        assertEquals(2, filtered3.size());
+        assertTrue(filtered3.contains(QUAD1), "Prefer filter omits quad!");
+        assertFalse(filtered3.contains(QUAD2), "Prefer filter doesn't catch quad!");
+        assertTrue(filtered3.contains(QUAD3), "Prefer filter omits quad!");
+        assertEquals(2, filtered3.size(), "Incorrect size of filtered quad list!");
     }
 
     @Test
     public void testFilterPrefer4() {
-        final IRI iri = rdf.createIRI("trellis:data/repository/resource");
-        final Quad q1 = rdf.createQuad(Trellis.PreferAudit, iri, DC.creator, rdf.createLiteral("me"));
-        final Quad q2 = rdf.createQuad(Trellis.PreferServerManaged, iri, DC.modified, rdf.createLiteral("now"));
-        final Quad q3 = rdf.createQuad(Trellis.PreferUserManaged, iri, DC.subject, rdf.createLiteral("subj"));
-        final List<Quad> quads = asList(q1, q2, q3);
-
-
-        final List<Quad> filtered4 = quads.stream().filter(RdfUtils.filterWithPrefer(
+        final List<Quad> filtered4 = QUADS.stream().filter(RdfUtils.filterWithPrefer(
                     Prefer.valueOf("return=representation; include=\"" +
                         Trellis.PreferUserManaged.getIRIString() + "\""))).collect(toList());
 
-        assertFalse(filtered4.contains(q1));
-        assertFalse(filtered4.contains(q2));
-        assertTrue(filtered4.contains(q3));
-        assertEquals(1, filtered4.size());
+        assertFalse(filtered4.contains(QUAD1), "Prefer filter doesn't omit quad!");
+        assertFalse(filtered4.contains(QUAD2), "Prefer filter doesn't omit quad!");
+        assertTrue(filtered4.contains(QUAD3), "Prefer filter omits quad!");
+        assertEquals(1, filtered4.size(), "Incorrect size of filtered quad list!");
     }
 
     @Test
     public void testSkolemize() {
-        final IRI iri = rdf.createIRI("trellis:data/repository/resource");
         final String baseUrl = "http://example.org/";
         final Literal literal = rdf.createLiteral("A title");
         final BlankNode bnode = rdf.createBlankNode("foo");
@@ -203,9 +193,9 @@ public class RdfUtilsTest {
         when(mockResourceService.toExternal(any(RDFTerm.class), eq(baseUrl))).thenAnswer(inv -> {
             final RDFTerm term = (RDFTerm) inv.getArgument(0);
             if (term instanceof IRI) {
-                final String iriString = ((IRI) term).getIRIString();
-                if (iriString.startsWith(TRELLIS_DATA_PREFIX)) {
-                    return rdf.createIRI(baseUrl + iriString.substring(TRELLIS_DATA_PREFIX.length()));
+                final String identifierString = ((IRI) term).getIRIString();
+                if (identifierString.startsWith(TRELLIS_DATA_PREFIX)) {
+                    return rdf.createIRI(baseUrl + identifierString.substring(TRELLIS_DATA_PREFIX.length()));
                 }
             }
             return term;
@@ -213,9 +203,9 @@ public class RdfUtilsTest {
         when(mockResourceService.toInternal(any(RDFTerm.class), eq(baseUrl))).thenAnswer(inv -> {
             final RDFTerm term = (RDFTerm) inv.getArgument(0);
             if (term instanceof IRI) {
-                final String iriString = ((IRI) term).getIRIString();
-                if (iriString.startsWith(baseUrl)) {
-                    return rdf.createIRI(TRELLIS_DATA_PREFIX + iriString.substring(baseUrl.length()));
+                final String identifierString = ((IRI) term).getIRIString();
+                if (identifierString.startsWith(baseUrl)) {
+                    return rdf.createIRI(TRELLIS_DATA_PREFIX + identifierString.substring(baseUrl.length()));
                 }
             }
             return term;
@@ -233,13 +223,13 @@ public class RdfUtilsTest {
             .map(RdfUtils.skolemizeTriples(mockResourceService, "http://example.org/"))
             .collect(toList());
 
-        assertTrue(triples.stream().anyMatch(t -> t.getSubject().equals(iri)));
-        assertTrue(triples.stream().anyMatch(t -> t.getObject().equals(literal)));
+        assertTrue(triples.stream().anyMatch(t -> t.getSubject().equals(identifier)), "subject not in triple stream!");
+        assertTrue(triples.stream().anyMatch(t -> t.getObject().equals(literal)), "Literal not in triple stream!");
         assertTrue(triples.stream().anyMatch(t -> t.getSubject().ntriplesString()
-                    .startsWith("<" + TRELLIS_BNODE_PREFIX)));
+                    .startsWith("<" + TRELLIS_BNODE_PREFIX)), "Skolemized bnode not in triple stream!");
 
-        triples.stream().map(RdfUtils.unskolemizeTriples(mockResourceService, "http://example.org/"))
-            .forEach(t -> assertTrue(graph.contains(t)));
+        assertAll(triples.stream().map(RdfUtils.unskolemizeTriples(mockResourceService, "http://example.org/"))
+            .map(t -> () -> assertTrue(graph.contains(t), "Graph doesn't include triple: " + t)));
     }
 
     @Test
@@ -248,7 +238,7 @@ public class RdfUtilsTest {
                 new MediaType("application", "json"),
                 new MediaType("text", "xml"),
                 new MediaType("application", "ld+json", singletonMap("profile", compacted.getIRIString())));
-        assertEquals(compacted, RdfUtils.getProfile(types, JSONLD));
+        assertEquals(compacted, RdfUtils.getProfile(types, JSONLD), "Incorrect json-ld profile!");
     }
 
     @Test
@@ -257,7 +247,7 @@ public class RdfUtilsTest {
                 new MediaType("application", "json"),
                 new MediaType("text", "xml"),
                 new MediaType("application", "ld+json", singletonMap("profile", "first second")));
-        assertEquals(rdf.createIRI("first"), RdfUtils.getProfile(types, JSONLD));
+        assertEquals(rdf.createIRI("first"), RdfUtils.getProfile(types, JSONLD), "Incorrect json-ld profile!");
     }
 
     @Test
@@ -266,6 +256,13 @@ public class RdfUtilsTest {
                 new MediaType("application", "json"),
                 new MediaType("text", "xml"),
                 new MediaType("application", "ld+json"));
-        assertNull(RdfUtils.getProfile(types, JSONLD));
+        assertNull(RdfUtils.getProfile(types, JSONLD), "Unexpected json-ld profile!");
+    }
+
+    @Test
+    public void testCloseInputStreamWithError() throws IOException {
+        doThrow(new IOException()).when(mockInputStream).close();
+        assertThrows(UncheckedIOException.class, () ->
+                RdfUtils.closeInputStreamAsync(mockInputStream).accept(null, null), "No exception on bad InputStream!");
     }
 }

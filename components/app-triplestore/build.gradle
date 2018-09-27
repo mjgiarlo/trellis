@@ -1,0 +1,66 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis Triplestore Application'
+
+ext {
+    moduleName = 'org.trellisldp.app.triplestore'
+}
+
+dependencies {
+    compile("com.github.jsonld-java:jsonld-java:$jsonldVersion")
+    compile("commons-codec:commons-codec:$commonsCodecVersion")
+    compile("io.dropwizard:dropwizard-auth:$dropwizardVersion")
+    compile("io.dropwizard:dropwizard-core:$dropwizardVersion")
+    compile("io.dropwizard:dropwizard-metrics:$dropwizardVersion")
+    compile("io.dropwizard:dropwizard-http2:$dropwizardVersion")
+    compile("io.jsonwebtoken:jjwt:$jwtVersion")
+    compile("javax.activation:javax.activation-api:$activationApiVersion")
+    compile("javax.jms:javax.jms-api:$jmsApiVersion")
+    compile("org.apache.activemq:activemq-client:$activeMqVersion")
+    compile("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    compile("org.apache.jena:jena-osgi:$jenaVersion")
+    compile("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    compile("org.slf4j:slf4j-api:$slf4jVersion")
+
+    compile project(':trellis-constraint-rules')
+    compile project(':trellis-io-jena')
+    compile project(':trellis-id')
+    compile project(':trellis-api')
+    compile project(':trellis-http')
+    compile project(':trellis-vocabulary')
+    compile project(':trellis-file')
+    compile project(':trellis-namespaces')
+    compile project(':trellis-agent')
+    compile project(':trellis-audit')
+    compile project(':trellis-event-serialization')
+    compile project(':trellis-webac')
+    compile project(':trellis-triplestore')
+    compile project(':trellis-jms')
+    compile project(':trellis-rdfa')
+    compile project(':trellis-kafka')
+    compile project(':trellis-app')
+
+    runtime ("javax.xml.bind:jaxb-api:$jaxbVersion")
+
+    testCompile("io.dropwizard:dropwizard-client:$dropwizardVersion")
+    testCompile("io.dropwizard:dropwizard-testing:$dropwizardVersion")
+    testCompile("org.apache.activemq:activemq-broker:$activeMqVersion")
+    testCompile("org.awaitility:awaitility:$awaitilityVersion")
+    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
+    testCompile("org.mockito:mockito-core:$mockitoVersion")
+    testCompile project(':trellis-test')
+}
+
+jar {
+    manifest {
+        description project.description
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+    }
+}
+

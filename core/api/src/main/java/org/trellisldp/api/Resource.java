@@ -36,6 +36,68 @@ import org.apache.commons.rdf.api.Triple;
  */
 public interface Resource {
 
+    enum SpecialResources implements Resource {
+        /**
+         * A non-existent resource: one that does not exist at a given IRI.
+         */
+        MISSING_RESOURCE {
+            @Override
+            public IRI getIdentifier() {
+                return null;
+            }
+
+            @Override
+            public IRI getInteractionModel() {
+                return null;
+            }
+
+            @Override
+            public Instant getModified() {
+                return null;
+            }
+
+            @Override
+            public Stream<? extends Quad> stream() {
+                return Stream.empty();
+            }
+
+            @Override
+            public String toString() {
+                return "A non-existent resource";
+            }
+        },
+
+        /**
+         * A resource that previously existed but which no longer exists.
+         */
+        DELETED_RESOURCE {
+            @Override
+            public IRI getIdentifier() {
+                return null;
+            }
+
+            @Override
+            public Instant getModified() {
+                return null;
+            }
+
+            @Override
+            public IRI getInteractionModel() {
+                return null;
+            }
+
+            @Override
+            public Stream<? extends Quad> stream() {
+                return Stream.empty();
+            }
+
+            @Override
+            public String toString() {
+                return "A deleted resource";
+            }
+        }
+    }
+
     /**
      * Get an identifier for this resource.
      *
@@ -51,10 +113,16 @@ public interface Resource {
     IRI getInteractionModel();
 
     /**
+     * Get the last modified date.
+     *
+     * @return the last-modified date
+     */
+    Instant getModified();
+
+    /**
      * Retrieve the membership resource if this is an LDP Direct or Indirect container.
      *
-     * <p>Note: Other resource types will always return an empty {@link Optional} value.</p>
-     *
+     * @implSpec Other LDP resource types will always return an empty {@link Optional} value
      * @return the membership resource
      */
     default Optional<IRI> getMembershipResource() {
@@ -64,8 +132,7 @@ public interface Resource {
     /**
      * Retrieve the member relation if this is an LDP Direct or Indirect container.
      *
-     * <p>Note: Other resource types will always return an empty {@link Optional} value.
-     *
+     * @implSpec Other LDP resource types will always return an empty {@link Optional} value
      * @return the ldp:hasMemberRelation IRI
      */
     default Optional<IRI> getMemberRelation() {
@@ -75,8 +142,7 @@ public interface Resource {
     /**
      * Retrieve the member of relation IRI.
      *
-     * <p>Note: Other resource types will always return an empty {@link Optional} value.
-     *
+     * @implSpec Other LDP resource types will always return an empty {@link Optional} value
      * @return the ldp:isMemberOfRelation IRI
      */
     default Optional<IRI> getMemberOfRelation() {
@@ -86,8 +152,7 @@ public interface Resource {
     /**
      * Retrieve the inserted content relation if this is an LDP Indirect container.
      *
-     * <p>Note: Other resource types will always return an empty {@link Optional} value.
-     *
+     * @implSpec Other LDP resource types will always return an empty {@link Optional} value
      * @return the inserted content relation
      */
     default Optional<IRI> getInsertedContentRelation() {
@@ -134,8 +199,7 @@ public interface Resource {
     /**
      * Retrieve a Binary for this resouce, if it is a LDP-NR.
      *
-     * <p>Note: Other resource types will always return an empty {@link Optional} value.
-     *
+     * @implSpec Other LDP resource types will always return an empty {@link Optional} value
      * @return the binary object
      */
     default Optional<Binary> getBinary() {
@@ -143,60 +207,24 @@ public interface Resource {
     }
 
     /**
-     * Test whether this resource is a Memento resource. {@code Resource}s retrieved
-     * from {@link ResourceService#get(IRI)} should return {@code false} here, and
-     * {@code Resource}s retrieved from {@link ResourceService#get(IRI, Instant)}
-     * should return {@code true}.
-     *
-     * @return {@code true} if this is a Memento resource; {@code false} otherwise
-     * 
-     * @see ResourceService#get(IRI)
-     * @see ResourceService#get(IRI, Instant)
-     */
-    default Boolean isMemento() {
-        return false;
-    }
-
-    /**
-     * Get the last modified date.
-     *
-     * @return the last-modified date
-     */
-    Instant getModified();
-
-    /**
      * Test whether this resource has an ACL resource.
      *
      * @return true if this resource has and ACL resource; false otherwise
      */
-    Boolean hasAcl();
+    default Boolean hasAcl() {
+        return false;
+    }
 
     /**
      * Get any extra implementation-defined link relations for this resource.
      *
-     * <p>Each entry will be used to create a link header, such that the key refers
-     * to the URI and the value is the "rel" portion. For example, an item with
-     * {@code key="http://example.com/author001"} and {@code value="author"} will result in
-     * the header {@code Link: <http://example.com/author001>; rel="author"}.
-     *
+     * @apiNote Each entry will be used to create a link header, such that the key refers
+     *          to the URI and the value is the "rel" portion. For example, an item with
+     *          {@code key="http://example.com/author001"} and {@code value="author"} will result
+     *          in the header {@code Link: <http://example.com/author001>; rel="author"}.
      * @return a stream of relation types
      */
     default Stream<Entry<String, String>> getExtraLinkRelations() {
         return Stream.empty();
-    }
-
-    /**
-     * Test whether this resource has been marked as deleted.
-     *
-     * <p>By default this method returns false.
-     *
-     * <p>Note: this can be used to distinguish between resources that don't exist (e.g. HTTP 404)
-     * and resources that are no longer available (e.g. HTTP 410) but which still have historical
-     * versions available.
-     *
-     * @return true if this resource has been deleted; false otherwise
-     */
-    default Boolean isDeleted() {
-        return false;
     }
 }

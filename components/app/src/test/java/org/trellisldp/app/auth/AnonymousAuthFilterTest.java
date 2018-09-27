@@ -13,10 +13,10 @@
  */
 package org.trellisldp.app.auth;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -25,6 +25,7 @@ import io.dropwizard.auth.AuthFilter;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.stream.Stream;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -35,6 +36,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -70,11 +72,7 @@ public class AnonymousAuthFilterTest {
         filter.filter(mockContext);
 
         verify(mockContext).setSecurityContext(securityCaptor.capture());
-
-        assertEquals(Trellis.AnonymousAgent.getIRIString(), securityCaptor.getValue().getUserPrincipal().getName());
-        assertFalse(securityCaptor.getValue().isUserInRole("role"));
-        assertFalse(securityCaptor.getValue().isSecure());
-        assertEquals("NONE", securityCaptor.getValue().getAuthenticationScheme());
+        assertAll("Check security context", checkSecurityContext(false));
     }
 
     @Test
@@ -90,11 +88,7 @@ public class AnonymousAuthFilterTest {
         filter.filter(mockContext);
 
         verify(mockContext).setSecurityContext(securityCaptor.capture());
-
-        assertEquals(Trellis.AnonymousAgent.getIRIString(), securityCaptor.getValue().getUserPrincipal().getName());
-        assertFalse(securityCaptor.getValue().isUserInRole("role"));
-        assertTrue(securityCaptor.getValue().isSecure());
-        assertEquals("NONE", securityCaptor.getValue().getAuthenticationScheme());
+        assertAll("Check security context", checkSecurityContext(true));
     }
 
     @Test
@@ -110,11 +104,17 @@ public class AnonymousAuthFilterTest {
         filter.filter(mockContext);
 
         verify(mockContext).setSecurityContext(securityCaptor.capture());
+        assertAll("Check security context", checkSecurityContext(false));
+    }
 
-        assertEquals(Trellis.AnonymousAgent.getIRIString(), securityCaptor.getValue().getUserPrincipal().getName());
-        assertFalse(securityCaptor.getValue().isUserInRole("role"));
-        assertFalse(securityCaptor.getValue().isSecure());
-        assertEquals("NONE", securityCaptor.getValue().getAuthenticationScheme());
+    private Stream<Executable> checkSecurityContext(final Boolean isSecure) {
+        return Stream.of(
+                () -> assertEquals(Trellis.AnonymousAgent.getIRIString(),
+                                   securityCaptor.getValue().getUserPrincipal().getName(), "Not anon principal!"),
+                () -> assertFalse(securityCaptor.getValue().isUserInRole("role"), "User is not in 'role'"),
+                () -> assertEquals(isSecure, securityCaptor.getValue().isSecure(), "secure bit is not: " + isSecure),
+                () -> assertEquals("NONE", securityCaptor.getValue().getAuthenticationScheme(),
+                                   "Incorrect auth scheme!"));
     }
 
     @Test
@@ -127,6 +127,6 @@ public class AnonymousAuthFilterTest {
         final AuthFilter<String, Principal> filter = new AnonymousAuthFilter.Builder()
             .setAuthenticator(new AnonymousAuthenticator()).buildAuthFilter();
 
-        assertThrows(WebApplicationException.class, () -> filter.filter(mockContext));
+        assertThrows(WebApplicationException.class, () -> filter.filter(mockContext), "No exception for unauth users!");
     }
 }

@@ -39,7 +39,6 @@ import org.trellisldp.api.EventService;
 import org.trellisldp.api.NoopEventService;
 import org.trellisldp.api.RuntimeTrellisException;
 import org.trellisldp.app.config.NotificationsConfiguration;
-import org.trellisldp.app.config.TrellisConfiguration;
 import org.trellisldp.kafka.KafkaPublisher;
 
 /**
@@ -61,26 +60,26 @@ public class AppUtilsTest {
 
     @Test
     public void testGetRDFConnection() throws Exception {
-        final TrellisConfiguration config = new YamlConfigurationFactory<>(TrellisConfiguration.class,
-                Validators.newValidator(), Jackson.newObjectMapper(), "").build(
-                new File(getClass().getResource("/config1.yml").toURI()));
+        final AppConfiguration config = new YamlConfigurationFactory<>(AppConfiguration.class,
+                Validators.newValidator(), Jackson.newMinimalObjectMapper(), "")
+            .build(new File(getClass().getResource("/config1.yml").toURI()));
 
-        assertNotNull(AppUtils.getRDFConnection(config));
-        assertFalse(AppUtils.getRDFConnection(config).isClosed());
+        assertNotNull(AppUtils.getRDFConnection(config), "Missing RDFConnection, using in-memory dataset!");
+        assertFalse(AppUtils.getRDFConnection(config).isClosed(), "RDFConnection has been closed!");
 
         config.setResources("http://localhost/sparql");
 
-        assertNotNull(AppUtils.getRDFConnection(config));
-        assertFalse(AppUtils.getRDFConnection(config).isClosed());
+        assertNotNull(AppUtils.getRDFConnection(config), "Missing RDFConnection, using local HTTP!");
+        assertFalse(AppUtils.getRDFConnection(config).isClosed(), "RDFConnection has been closed!");
 
         config.setResources("https://localhost/sparql");
-        assertNotNull(AppUtils.getRDFConnection(config));
-        assertFalse(AppUtils.getRDFConnection(config).isClosed());
+        assertNotNull(AppUtils.getRDFConnection(config), "Missing RDFConnection, using local HTTPS!");
+        assertFalse(AppUtils.getRDFConnection(config).isClosed(), "RDFConnection has been closed!");
 
         final File dir = new File(new File(getClass().getResource("/data").toURI()), "resources");
         config.setResources(dir.getAbsolutePath());
-        assertNotNull(AppUtils.getRDFConnection(config));
-        assertFalse(AppUtils.getRDFConnection(config).isClosed());
+        assertNotNull(AppUtils.getRDFConnection(config), "Missing RDFConnection, using local file!");
+        assertFalse(AppUtils.getRDFConnection(config).isClosed(), "RDFConnection has been closed!");
     }
 
     @Test
@@ -90,8 +89,8 @@ public class AppUtilsTest {
         c.setEnabled(true);
         c.setType(NotificationsConfiguration.Type.NONE);
         final EventService svc = AppUtils.getNotificationService(c, mockEnv);
-        assertNotNull(svc);
-        assertTrue(svc instanceof NoopEventService);
+        assertNotNull(svc, "Missing EventService!");
+        assertTrue(svc instanceof NoopEventService, "EventService isn't a NoopEvenService!");
     }
 
     @Test
@@ -104,8 +103,8 @@ public class AppUtilsTest {
         c.setEnabled(false);
         c.setType(NotificationsConfiguration.Type.KAFKA);
         final EventService svc = AppUtils.getNotificationService(c, mockEnv);
-        assertNotNull(svc);
-        assertTrue(svc instanceof NoopEventService);
+        assertNotNull(svc, "Missing EventService!");
+        assertTrue(svc instanceof NoopEventService, "EventService didn't default to No-op service!");
     }
 
     @Test
@@ -118,8 +117,8 @@ public class AppUtilsTest {
         c.setEnabled(true);
         c.setType(NotificationsConfiguration.Type.KAFKA);
         final EventService svc = AppUtils.getNotificationService(c, mockEnv);
-        assertNotNull(svc);
-        assertTrue(svc instanceof KafkaPublisher);
+        assertNotNull(svc, "Missing EventService!");
+        assertTrue(svc instanceof KafkaPublisher, "EventService isn't a KafkaPublisher!");
     }
 
     @Test
@@ -131,10 +130,11 @@ public class AppUtilsTest {
         c.set("key.serializer", "some.bogus.key.serializer");
         c.setConnectionString("localhost:9092");
         final Properties p = AppUtils.getKafkaProperties(c);
-        assertEquals("all", p.getProperty("acks"));
-        assertEquals("value", p.getProperty("some.other"));
-        assertEquals("org.apache.kafka.common.serialization.StringSerializer", p.getProperty("key.serializer"));
-        assertEquals("localhost:9092", p.getProperty("bootstrap.servers"));
+        assertEquals("all", p.getProperty("acks"), "Incorrect kafka acks property!");
+        assertEquals("value", p.getProperty("some.other"), "Incorrect custom property!");
+        assertEquals("org.apache.kafka.common.serialization.StringSerializer", p.getProperty("key.serializer"),
+                "Incorrect serializer class property!");
+        assertEquals("localhost:9092", p.getProperty("bootstrap.servers"), "Incorrect bootstrap.servers property!");
     }
 
     @Disabled
@@ -144,6 +144,7 @@ public class AppUtilsTest {
         c.setConnectionString("tcp://localhost:61616");
         c.setEnabled(true);
         c.setType(NotificationsConfiguration.Type.JMS);
-        assertThrows(RuntimeTrellisException.class, () -> AppUtils.getNotificationService(c, mockEnv));
+        assertThrows(RuntimeTrellisException.class, () ->
+                AppUtils.getNotificationService(c, mockEnv), "No exception when JMS client doesn't connect!");
     }
 }

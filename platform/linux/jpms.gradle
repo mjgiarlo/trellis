@@ -7,23 +7,23 @@ mainClassName = 'org.trellisldp.app.triplestore.TrellisApplication'
 applicationName = 'trellis'
 
 dependencies {
-    compile("org.trellisldp:trellis-agent-jpms:$version")
-    compile("org.trellisldp:trellis-api-jpms:$version")
-    compile("org.trellisldp:trellis-app-jpms:$version")
-    compile("org.trellisldp:trellis-app-triplestore-jpms:$version")
-    compile("org.trellisldp:trellis-audit-jpms:$version")
-    compile("org.trellisldp:trellis-constraint-rules-jpms:$version")
-    compile("org.trellisldp:trellis-event-serialization-jpms:$version")
-    compile("org.trellisldp:trellis-file-jpms:$version")
-    compile("org.trellisldp:trellis-http-jpms:$version")
-    compile("org.trellisldp:trellis-id-jpms:$version")
-    compile("org.trellisldp:trellis-io-jena-jpms:$version")
-    compile("org.trellisldp:trellis-kafka-jpms:$version")
-    compile("org.trellisldp:trellis-namespaces-jpms:$version")
-    compile("org.trellisldp:trellis-rdfa-jpms:$version")
-    compile("org.trellisldp:trellis-triplestore-jpms:$version")
-    compile("org.trellisldp:trellis-vocabulary-jpms:$version")
-    compile("org.trellisldp:trellis-webac-jpms:$version")
+    compile("org.trellisldp:trellis-agent-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-api-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-app-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-app-triplestore-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-audit-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-constraint-rules-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-event-serialization-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-file-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-http-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-id-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-io-jena-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-kafka-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-namespaces-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-rdfa-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-triplestore-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-vocabulary-jpms:$trellisPreviousSnapshotVersion")
+    compile("org.trellisldp:trellis-webac-jpms:$trellisPreviousSnapshotVersion")
 
     runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
 }
@@ -78,20 +78,10 @@ buildDeb {
 }
 
 signing {
-    required { !version.endsWith("SNAPSHOT") }
     sign buildRpm
     sign buildDeb
     sign distTar
     sign distZip
-}
-
-install {
-    enabled = false
-}
-
-uploadArchives {
-    // There is no need to store these artifacts on maven central
-    enabled = false
 }
 
 task copyDistTask(type: Copy) {
@@ -100,5 +90,19 @@ task copyDistTask(type: Copy) {
     into 'src/dist'
 }
 
-assembleDist.dependsOn copyDistTask
+assembleDist {
+    dependsOn copyDistTask
+    dependsOn buildRpm
+    dependsOn buildDeb
+    dependsOn signBuildRpm
+    dependsOn signBuildDeb
+}
+
+gradle.taskGraph.whenReady({ graph ->
+    tasks.withType(AbstractArchiveTask).each { archive ->
+        archive.doLast {
+            ant.checksum file: archive.archivePath, algorithm: 'sha-256', format: 'MD5SUM', fileext: '.sha256'
+        }
+    }
+})
 

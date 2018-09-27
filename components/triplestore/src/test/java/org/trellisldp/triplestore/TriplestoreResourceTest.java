@@ -16,11 +16,15 @@ package org.trellisldp.triplestore;
 import static java.time.Instant.now;
 import static java.time.Instant.parse;
 import static java.util.Collections.singleton;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
+import static java.util.function.Predicate.isEqual;
 import static org.apache.jena.arq.query.DatasetFactory.create;
 import static org.apache.jena.arq.query.DatasetFactory.wrap;
 import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,15 +33,19 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.trellisldp.triplestore.TriplestoreUtils.getInstance;
 
 import java.time.Instant;
+import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.jena.JenaDataset;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.trellisldp.api.AuditService;
+import org.trellisldp.api.Resource;
 import org.trellisldp.api.Session;
 import org.trellisldp.audit.DefaultAuditService;
 import org.trellisldp.vocabulary.ACL;
@@ -56,15 +64,16 @@ public class TriplestoreResourceTest {
 
     private static final JenaRDF rdf = getInstance();
     private static final IRI root = rdf.createIRI("trellis:");
-    private static final IRI identifier = rdf.createIRI("trellis:resource");
-    private static final IRI child1 = rdf.createIRI("trellis:resource/child1");
-    private static final IRI child2 = rdf.createIRI("trellis:resource/child2");
-    private static final IRI child3 = rdf.createIRI("trellis:resource/child3");
-    private static final IRI child4 = rdf.createIRI("trellis:resource/child4");
-    private static final IRI auditId = rdf.createIRI("trellis:resource?ext=audit");
-    private static final IRI aclId = rdf.createIRI("trellis:resource?ext=acl");
-    private static final IRI aclSubject = rdf.createIRI("trellis:resource#auth");
-    private static final IRI other = rdf.createIRI("trellis:other");
+    private static final IRI identifier = rdf.createIRI("trellis:data/resource");
+    private static final IRI child1 = rdf.createIRI("trellis:data/resource/child1");
+    private static final IRI child2 = rdf.createIRI("trellis:data/resource/child2");
+    private static final IRI child3 = rdf.createIRI("trellis:data/resource/child3");
+    private static final IRI child4 = rdf.createIRI("trellis:data/resource/child4");
+    private static final IRI auditId = rdf.createIRI("trellis:data/resource?ext=audit");
+    private static final IRI aclId = rdf.createIRI("trellis:data/resource?ext=acl");
+    private static final IRI aclSubject = rdf.createIRI("trellis:data/resource#auth");
+    private static final IRI member = rdf.createIRI("trellis:data/member");
+    private static final String time = "2018-01-12T14:02:00Z";
 
     private static final AuditService auditService = new DefaultAuditService() {};
 
@@ -83,362 +92,256 @@ public class TriplestoreResourceTest {
 
     @Test
     public void testEmptyResource() {
-        final RDFConnection rdfConnection = connect(create());
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+        final TriplestoreResource res = new TriplestoreResource(connect(create()), identifier);
         res.fetchData();
-        assertFalse(res.exists());
+        assertFalse(res.exists(), "Unexpected resource!");
     }
 
     @Test
     public void testPartialResource() {
-        final String time = "2018-01-12T14:02:00Z";
         final JenaDataset dataset = rdf.createDataset();
         dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
         res.fetchData();
-        assertFalse(res.exists());
+        assertFalse(res.exists(), "Unexpected resource!");
     }
 
     @Test
     public void testMinimalResource() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        dataset.add(other, other, SKOS.prefLabel, rdf.createLiteral("other"));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final JenaDataset dataset = buildLdpDataset(LDP.RDFSource);
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.RDFSource, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(4L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.RDFSource, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 2L, 0L, 0L, 0L, 0L));
     }
 
     @Test
     public void testResourceWithAuditQuads() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
+        final JenaDataset dataset = buildLdpDataset(LDP.RDFSource);
         auditService.creation(identifier, mockSession).forEach(q ->
                 dataset.add(auditId, q.getSubject(), q.getPredicate(), q.getObject()));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.RDFSource, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(5L, res.stream(singleton(Trellis.PreferAudit)).count());
-        assertEquals(9L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.RDFSource, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 2L, 0L, 5L, 0L, 0L));
     }
 
     @Test
     public void testResourceWithAclQuads() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        auditService.creation(identifier, mockSession).forEach(q ->
-                dataset.add(auditId, q.getSubject(), q.getPredicate(), q.getObject()));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final JenaDataset dataset = buildLdpDataset(LDP.RDFSource);
         dataset.add(aclId, aclSubject, ACL.mode, ACL.Read);
         dataset.add(aclId, aclSubject, ACL.agentClass, FOAF.Agent);
         dataset.add(aclId, aclSubject, ACL.accessTo, identifier);
+        auditService.creation(identifier, mockSession).forEach(q ->
+                dataset.add(auditId, q.getSubject(), q.getPredicate(), q.getObject()));
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.RDFSource, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertTrue(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(5L, res.stream(singleton(Trellis.PreferAudit)).count());
-        assertEquals(3L, res.stream(singleton(Trellis.PreferAccessControl)).count());
-        assertEquals(12L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.RDFSource, false, true));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 2L, 3L, 5L, 0L, 0L));
     }
 
     @Test
     public void testBinaryResource() {
-        final String time = "2018-01-12T14:02:00Z";
         final String binaryTime = "2018-01-10T14:02:00Z";
         final String size = "2560";
         final String mimeType = "image/jpeg";
         final IRI binaryIdentifier = rdf.createIRI("file:///binary");
-
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        auditService.creation(identifier, mockSession).forEach(q ->
-                dataset.add(auditId, q.getSubject(), q.getPredicate(), q.getObject()));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.NonRDFSource);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final JenaDataset dataset = buildLdpDataset(LDP.NonRDFSource);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.hasPart, binaryIdentifier);
-        dataset.add(Trellis.PreferServerManaged, binaryIdentifier, DC.modified,
-                rdf.createLiteral(binaryTime, XSD.dateTime));
         dataset.add(Trellis.PreferServerManaged, binaryIdentifier, DC.extent, rdf.createLiteral(size, XSD.long_));
         dataset.add(Trellis.PreferServerManaged, binaryIdentifier, DC.format, rdf.createLiteral(mimeType));
+        dataset.add(Trellis.PreferServerManaged, binaryIdentifier, DC.modified,
+                rdf.createLiteral(binaryTime, XSD.dateTime));
+        auditService.creation(identifier, mockSession).forEach(q ->
+                dataset.add(auditId, q.getSubject(), q.getPredicate(), q.getObject()));
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
+
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.NonRDFSource, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertTrue(res.getBinary().isPresent());
+        assertTrue(res.exists(), "Missing resource!");
         res.getBinary().ifPresent(b -> {
-            assertEquals(binaryIdentifier, b.getIdentifier());
-            assertEquals(parse(binaryTime), b.getModified());
-            assertEquals(of(Long.parseLong(size)), b.getSize());
-            assertEquals(of(mimeType), b.getMimeType());
+            assertEquals(binaryIdentifier, b.getIdentifier(), "Incorrect binary identifier!");
+            assertEquals(parse(binaryTime), b.getModified(), "Incorrect binary modified date!");
+            assertEquals(of(Long.parseLong(size)), b.getSize(), "Incorrect binary size!");
+            assertEquals(of(mimeType), b.getMimeType(), "Incorrect binary mime type!");
         });
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(6L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(5L, res.stream(singleton(Trellis.PreferAudit)).count());
-        assertEquals(13L, res.stream().count());
+        assertAll("Check resource", checkResource(res, identifier, LDP.NonRDFSource, true, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 6L, 0L, 5L, 0L, 0L));
     }
 
     @Test
     public void testResourceWithChildren() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        dataset.add(other, other, SKOS.prefLabel, rdf.createLiteral("other"));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.Container);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
-        dataset.add(Trellis.PreferServerManaged, child1, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child2, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child3, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child4, DC.isPartOf, identifier);
+        final JenaDataset dataset = buildLdpDataset(LDP.Container);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.isPartOf, root);
+        getChildIRIs().forEach(c -> dataset.add(Trellis.PreferServerManaged, c, DC.isPartOf, identifier));
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
+
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.Container, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(3L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(4L, res.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(9L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.Container, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 3L, 0L, 0L, 0L, 4L));
     }
 
     @Test
     public void testResourceWithoutChildren() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        dataset.add(other, other, SKOS.prefLabel, rdf.createLiteral("other"));
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
-        dataset.add(Trellis.PreferServerManaged, child1, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child2, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child3, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child4, DC.isPartOf, identifier);
+        final JenaDataset dataset = buildLdpDataset(LDP.RDFSource);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.isPartOf, root);
+        getChildIRIs().forEach(c -> dataset.add(Trellis.PreferServerManaged, c, DC.isPartOf, identifier));
 
-        final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+        final TriplestoreResource res = new TriplestoreResource(connect(wrap(dataset.asJenaDatasetGraph())),
+                identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.RDFSource, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertFalse(res.getMembershipResource().isPresent());
-        assertFalse(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertFalse(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(3L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(0L, res.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(5L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.RDFSource, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 3L, 0L, 0L, 0L, 0L));
     }
 
     @Test
     public void testDirectContainer() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        dataset.add(other, other, SKOS.prefLabel, rdf.createLiteral("other"));
-        dataset.add(Trellis.PreferServerManaged, other, DC.isPartOf, root);
-        dataset.add(Trellis.PreferServerManaged, other, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, other, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final JenaDataset dataset = buildLdpDataset(LDP.DirectContainer);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.isPartOf, root);
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.DirectContainer);
-        dataset.add(Trellis.PreferServerManaged, identifier, LDP.member, other);
-        dataset.add(Trellis.PreferServerManaged, identifier, LDP.membershipResource, other);
+        dataset.add(Trellis.PreferServerManaged, identifier, LDP.member, member);
+        dataset.add(Trellis.PreferServerManaged, identifier, LDP.membershipResource, member);
         dataset.add(Trellis.PreferServerManaged, identifier, LDP.hasMemberRelation, DC.subject);
         dataset.add(Trellis.PreferServerManaged, identifier, LDP.insertedContentRelation, LDP.MemberSubject);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
-        dataset.add(Trellis.PreferServerManaged, child1, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child2, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child3, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child4, DC.isPartOf, identifier);
+        dataset.add(Trellis.PreferServerManaged, member, DC.isPartOf, root);
+        getChildIRIs().forEach(c -> dataset.add(Trellis.PreferServerManaged, c, DC.isPartOf, identifier));
 
         final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
         final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.DirectContainer, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertTrue(res.getMembershipResource().isPresent());
-        assertTrue(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertTrue(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(7L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(4L, res.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(13L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.DirectContainer, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, member, DC.subject, null, LDP.MemberSubject));
+        assertAll("Check RDF stream", checkRdfStream(res, 2L, 7L, 0L, 0L, 0L, 4L));
 
-        final TriplestoreResource res2 = new TriplestoreResource(rdfConnection, other);
-        res2.fetchData();
-        assertTrue(res2.exists());
-        assertEquals(other, res2.getIdentifier());
-        assertEquals(LDP.RDFSource, res2.getInteractionModel());
-        assertEquals(parse(time), res2.getModified());
-        assertFalse(res2.getMembershipResource().isPresent());
-        assertFalse(res2.getMemberRelation().isPresent());
-        assertFalse(res2.getMemberOfRelation().isPresent());
-        assertFalse(res2.getInsertedContentRelation().isPresent());
-        assertFalse(res2.getBinary().isPresent());
-        assertFalse(res2.hasAcl());
-        assertFalse(res2.isDeleted());
-        assertEquals(3L, res2.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(1L, res2.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(0L, res2.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(4L, res2.stream(singleton(LDP.PreferMembership)).count());
-        assertEquals(4L, res2.stream(singleton(LDP.PreferMembership))
-                .filter(t -> DC.subject.equals(t.getPredicate())).count());
-        assertEquals(8L, res2.stream().count());
+        final TriplestoreResource memberRes = new TriplestoreResource(rdfConnection, member);
+        memberRes.fetchData();
+        assertTrue(memberRes.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(memberRes, member, LDP.RDFSource, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(memberRes, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(memberRes, 1L, 3L, 0L, 0L, 4L, 0L));
+        assertEquals(4L, memberRes.stream(singleton(LDP.PreferMembership)).map(Triple::getPredicate)
+                .filter(isEqual(DC.subject)).count(), "Incorrect triple count!");
     }
 
     @Test
     public void testIndirectContainer() {
-        final String time = "2018-01-12T14:02:00Z";
-        final JenaDataset dataset = rdf.createDataset();
-        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
-        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
-        dataset.add(other, other, SKOS.prefLabel, rdf.createLiteral("other"));
-        dataset.add(Trellis.PreferServerManaged, other, DC.isPartOf, root);
-        dataset.add(Trellis.PreferServerManaged, other, RDF.type, LDP.RDFSource);
-        dataset.add(Trellis.PreferServerManaged, other, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        final JenaDataset dataset = buildLdpDataset(LDP.IndirectContainer);
         dataset.add(Trellis.PreferServerManaged, identifier, DC.isPartOf, root);
-        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, LDP.IndirectContainer);
-        dataset.add(Trellis.PreferServerManaged, identifier, LDP.member, other);
-        dataset.add(Trellis.PreferServerManaged, identifier, LDP.membershipResource, other);
+        dataset.add(Trellis.PreferServerManaged, identifier, LDP.member, member);
+        dataset.add(Trellis.PreferServerManaged, identifier, LDP.membershipResource, member);
         dataset.add(Trellis.PreferServerManaged, identifier, LDP.hasMemberRelation, DC.relation);
         dataset.add(Trellis.PreferServerManaged, identifier, LDP.insertedContentRelation, DC.subject);
-        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
-        dataset.add(Trellis.PreferServerManaged, child1, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child2, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child3, DC.isPartOf, identifier);
-        dataset.add(Trellis.PreferServerManaged, child4, DC.isPartOf, identifier);
-        dataset.add(child1, child1, DC.subject, rdf.createIRI("http://example.org/1"));
-        dataset.add(child2, child2, DC.subject, rdf.createIRI("http://example.org/2"));
-        dataset.add(child3, child3, DC.subject, rdf.createIRI("http://example.org/3"));
-        dataset.add(child4, child4, DC.subject, rdf.createIRI("http://example.org/4"));
+        dataset.add(Trellis.PreferServerManaged, member, DC.isPartOf, root);
+        dataset.add(identifier, identifier, DC.alternative, rdf.createLiteral("An LDP-IC resource"));
+        dataset.add(member, member, DC.alternative, rdf.createLiteral("A membership resource"));
+        getChildIRIs().forEach(c -> {
+            dataset.add(Trellis.PreferServerManaged, c, DC.isPartOf, identifier);
+            dataset.add(c, c, DC.subject, rdf.createIRI("http://example.org/" + randomUUID()));
+        });
 
         final RDFConnection rdfConnection = connect(wrap(dataset.asJenaDatasetGraph()));
         final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
         res.fetchData();
-        assertTrue(res.exists());
-        assertEquals(identifier, res.getIdentifier());
-        assertEquals(LDP.IndirectContainer, res.getInteractionModel());
-        assertEquals(parse(time), res.getModified());
-        assertTrue(res.getMembershipResource().isPresent());
-        assertTrue(res.getMemberRelation().isPresent());
-        assertFalse(res.getMemberOfRelation().isPresent());
-        assertTrue(res.getInsertedContentRelation().isPresent());
-        assertFalse(res.getBinary().isPresent());
-        assertFalse(res.hasAcl());
-        assertFalse(res.isDeleted());
-        assertEquals(7L, res.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(2L, res.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(4L, res.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(13L, res.stream().count());
+        assertTrue(res.exists(), "Missing resource!");
+        assertAll("Check resource", checkResource(res, identifier, LDP.IndirectContainer, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res, member, DC.relation, null, DC.subject));
+        assertAll("Check RDF stream", checkRdfStream(res, 3L, 7L, 0L, 0L, 0L, 4L));
 
-        final TriplestoreResource res2 = new TriplestoreResource(rdfConnection, other);
+        final TriplestoreResource res2 = new TriplestoreResource(rdfConnection, member);
         res2.fetchData();
-        assertTrue(res2.exists());
-        assertEquals(other, res2.getIdentifier());
-        assertEquals(LDP.RDFSource, res2.getInteractionModel());
-        assertEquals(parse(time), res2.getModified());
-        assertFalse(res2.getMembershipResource().isPresent());
-        assertFalse(res2.getMemberRelation().isPresent());
-        assertFalse(res2.getMemberOfRelation().isPresent());
-        assertFalse(res2.getInsertedContentRelation().isPresent());
-        assertFalse(res2.getBinary().isPresent());
-        assertFalse(res2.hasAcl());
-        assertFalse(res2.isDeleted());
-        assertEquals(3L, res2.stream(singleton(Trellis.PreferServerManaged)).count());
-        assertEquals(1L, res2.stream(singleton(Trellis.PreferUserManaged)).count());
-        assertEquals(0L, res2.stream(singleton(LDP.PreferContainment)).count());
-        assertEquals(4L, res2.stream(singleton(LDP.PreferMembership)).count());
-        assertEquals(4L, res2.stream(singleton(LDP.PreferMembership))
-                .filter(t -> DC.relation.equals(t.getPredicate())).count());
-        assertEquals(8L, res2.stream().count());
+        assertTrue(res2.exists(), "Missing resource (2)!");
+        assertAll("Check resource", checkResource(res2, member, LDP.RDFSource, false, false));
+        assertAll("Check LDP properties", checkLdpProperties(res2, null, null, null, null));
+        assertAll("Check RDF stream", checkRdfStream(res2, 2L, 3L, 0L, 0L, 4L, 0L));
+        assertEquals(4L, res2.stream(singleton(LDP.PreferMembership)).map(Triple::getPredicate)
+                .filter(isEqual(DC.relation)).count(), "Incorrect triple count!");
+    }
+
+    private static Stream<IRI> getChildIRIs() {
+        return Stream.of(child1, child2, child3, child4);
+    }
+
+    private static JenaDataset buildLdpDataset(final IRI ldpType) {
+        final JenaDataset dataset = rdf.createDataset();
+        dataset.add(identifier, identifier, RDF.type, SKOS.Concept);
+        dataset.add(identifier, identifier, SKOS.prefLabel, rdf.createLiteral("resource"));
+        dataset.add(member, member, SKOS.prefLabel, rdf.createLiteral("member resource"));
+        dataset.add(Trellis.PreferServerManaged, identifier, RDF.type, ldpType);
+        dataset.add(Trellis.PreferServerManaged, identifier, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        dataset.add(Trellis.PreferServerManaged, member, RDF.type, LDP.RDFSource);
+        dataset.add(Trellis.PreferServerManaged, member, DC.modified, rdf.createLiteral(time, XSD.dateTime));
+        return dataset;
+    }
+
+    private static Stream<Executable> checkResource(final Resource res, final IRI identifier, final IRI ldpType,
+            final Boolean hasBinary, final Boolean hasAcl) {
+        return Stream.of(
+                () -> assertEquals(identifier, res.getIdentifier(), "Incorrect identifier!"),
+                () -> assertEquals(ldpType, res.getInteractionModel(), "Incorrect interaction model!"),
+                () -> assertEquals(parse(time), res.getModified(), "Incorrect modified date!"),
+                () -> assertEquals(hasBinary, res.getBinary().isPresent(), "Unexpected binary presence!"),
+                () -> assertEquals(hasAcl, res.hasAcl(), "Unexpected ACL presence!"));
+    }
+
+    private static Stream<Executable> checkLdpProperties(final Resource res, final IRI membershipResource,
+            final IRI hasMemberRelation, final IRI memberOfRelation, final IRI insertedContentRelation) {
+        return Stream.of(
+                () -> assertEquals(nonNull(membershipResource), res.getMembershipResource().isPresent(),
+                                   "unexpected ldp:membershipResource property!"),
+                () -> assertEquals(nonNull(hasMemberRelation), res.getMemberRelation().isPresent(),
+                                   "unexpected ldp:hasMemberRelation property!"),
+                () -> assertEquals(nonNull(memberOfRelation), res.getMemberOfRelation().isPresent(),
+                                   "unexpected ldp:isMemberOfRelation property!"),
+                () -> assertEquals(nonNull(insertedContentRelation), res.getInsertedContentRelation().isPresent(),
+                                   "unexpected ldp::insertedContentRelation property!"),
+                () -> assertEquals(membershipResource, res.getMembershipResource().orElse(null),
+                                   "Incorrect ldp:membershipResource!"),
+                () -> assertEquals(hasMemberRelation, res.getMemberRelation().orElse(null),
+                                   "Incorrect ldp:hasMemeberRelation!"),
+                () -> assertEquals(memberOfRelation, res.getMemberOfRelation().orElse(null),
+                                   "Incorrect ldp:isMemberOfRelation!"),
+                () -> assertEquals(insertedContentRelation, res.getInsertedContentRelation().orElse(null),
+                                   "Incorrect ldp:insertedContentRelation!"));
+    }
+
+    private static Stream<Executable> checkRdfStream(final Resource res, final long userManaged,
+            final long serverManaged, final long acl, final long audit, final long membership, final long containment) {
+        final long total = userManaged + serverManaged + acl + audit + membership + containment;
+        return Stream.of(
+                () -> assertEquals(serverManaged, res.stream(singleton(Trellis.PreferServerManaged)).count(),
+                                   "Incorrect server managed triple count!"),
+                () -> assertEquals(userManaged, res.stream(singleton(Trellis.PreferUserManaged)).count(),
+                                   "Incorrect user managed triple count!"),
+                () -> assertEquals(acl, res.stream(singleton(Trellis.PreferAccessControl)).count(),
+                                   "Incorrect acl triple count!"),
+                () -> assertEquals(audit, res.stream(singleton(Trellis.PreferAudit)).count(),
+                                   "Incorrect audit triple count!"),
+                () -> assertEquals(membership, res.stream(singleton(LDP.PreferMembership)).count(),
+                                   "Incorrect member triple count!"),
+                () -> assertEquals(containment, res.stream(singleton(LDP.PreferContainment)).count(),
+                                   "Incorrect containment triple count!"),
+                () -> assertEquals(total, res.stream().count(), "Incorrect total triple count!"));
     }
 }

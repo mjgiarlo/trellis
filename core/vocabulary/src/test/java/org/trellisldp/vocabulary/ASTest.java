@@ -16,7 +16,9 @@ package org.trellisldp.vocabulary;
 
 import static org.apache.jena.core.graph.Factory.createDefaultGraph;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import org.apache.jena.arq.atlas.web.HttpException;
 import org.apache.jena.arq.riot.RDFParser;
 import org.apache.jena.core.graph.Graph;
 import org.junit.jupiter.api.Test;
@@ -39,27 +41,32 @@ public class ASTest extends AbstractVocabularyTest {
     @Override
     protected Graph getVocabulary(final String url) {
         final Graph graph = createDefaultGraph();
-        RDFParser.source(url).httpAccept("application/ld+json").parse(graph);
+        try {
+            RDFParser.source(url).httpAccept("application/ld+json").parse(graph);
+        } catch (final HttpException ex) {
+            LOGGER.warn("Could not fetch {}: {}", url, ex.getMessage());
+            assumeTrue(false, "Error fetching the URL (" + url + "): skip the test");
+        }
         return graph;
     }
 
     @Test
     @Override
     public void testVocabularyRev() {
-        assertEquals(namespace() + "Create", AS.Create.getIRIString());
-        assertEquals(namespace() + "Delete", AS.Delete.getIRIString());
-        assertEquals(namespace() + "Update", AS.Update.getIRIString());
+        assertEquals(namespace() + "Create", AS.Create.getIRIString(), "as:Create IRIs don't match!");
+        assertEquals(namespace() + "Delete", AS.Delete.getIRIString(), "as:Delete IRIs don't match!");
+        assertEquals(namespace() + "Update", AS.Update.getIRIString(), "as:Update IRIs don't match!");
     }
 
     @Test
     @Override
     public void testVocabulary() {
-        assertEquals(namespace() + "Activity", AS.Activity.getIRIString());
+        assertEquals(namespace() + "Activity", AS.Activity.getIRIString(), "as:Activity IRIs don't match!");
     }
 
     @Test
     public void checkUri() {
         getVocabulary(namespace());
-        assertEquals(namespace(), AS.getNamespace());
+        assertEquals(namespace(), AS.getNamespace(), "AS namespace doesn't match expected value!");
     }
 }

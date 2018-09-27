@@ -16,12 +16,12 @@ package org.trellisldp.amqp;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.trellisldp.api.RDFUtils.findFirst;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
-import java.util.ServiceLoader;
 
 import javax.inject.Inject;
 
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.trellisldp.api.ActivityStreamService;
 import org.trellisldp.api.Event;
 import org.trellisldp.api.EventService;
+import org.trellisldp.api.RuntimeTrellisException;
 
 /**
  * An AMQP message producer capable of publishing messages to an AMQP broker such as
@@ -38,27 +39,26 @@ import org.trellisldp.api.EventService;
  */
 public class AmqpPublisher implements EventService {
 
+    private static final Logger LOGGER = getLogger(AmqpPublisher.class);
+    private static ActivityStreamService service = findFirst(ActivityStreamService.class)
+        .orElseThrow(() -> new RuntimeTrellisException("No ActivityStream service available!"));
+
+    /** The configuration key controlling the AMQP exchange name. **/
     public static final String AMQP_EXCHANGE_NAME = "trellis.amqp.exchangename";
 
+    /** The configuration key controlling the AMQP routing key. **/
     public static final String AMQP_ROUTING_KEY = "trellis.amqp.routingkey";
 
+    /** The configuration key controlling whether publishing is mandatory. **/
     public static final String AMQP_MANDATORY = "trellis.amqp.mandatory";
 
+    /** The configuration key controlling whether publishing is immediate. **/
     public static final String AMQP_IMMEDIATE = "trellis.amqp.immediate";
 
-    private static final Logger LOGGER = getLogger(AmqpPublisher.class);
-
-    // TODO - JDK9 ServiceLoader::findFirst
-    private static ActivityStreamService service = ServiceLoader.load(ActivityStreamService.class).iterator().next();
-
     private final Channel channel;
-
     private final String exchangeName;
-
     private final String routingKey;
-
     private final Boolean mandatory;
-
     private final Boolean immediate;
 
     /**

@@ -29,6 +29,7 @@ module org.trellisldp.jpms.http {
     requires slf4j.api;
     requires tamaya.api;
     requires java.annotation;
+    requires cdi.api;
     uses org.trellisldp.api.ConstraintService;
     uses org.apache.commons.rdf.api.RDF;
 }

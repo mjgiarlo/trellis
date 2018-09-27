@@ -29,6 +29,8 @@ dependencies {
 
     implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {force = true}
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
+    implementation("org.glassfish:javax.el:$javaxElApiVersion")
+
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-http-jpms:$version")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")

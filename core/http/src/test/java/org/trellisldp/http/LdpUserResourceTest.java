@@ -35,16 +35,14 @@ public class LdpUserResourceTest extends AbstractLdpResourceTest {
         final String origin = baseUri.substring(0, baseUri.length() - 1);
 
         final ResourceConfig config = new ResourceConfig();
-        config.register(new LdpResource(mockResourceService, ioService, mockBinaryService, mockAgentService,
-                    mockAuditService));
+        config.register(new TrellisHttpResource(mockBundler));
         config.register(new TestAuthenticationFilter("testUser", "group"));
         config.register(new WebAcFilter(mockAccessControlService));
         config.register(new AgentAuthorizationFilter(mockAgentService));
-        config.register(new MultipartUploader(mockResourceService, mockBinaryResolver));
-        config.register(new CacheControlFilter(86400));
+        config.register(new CacheControlFilter(86400, true, false));
         config.register(new WebSubHeaderFilter(HUB));
         config.register(new CrossOriginResourceSharingFilter(asList(origin), asList("PATCH", "POST", "PUT"),
-                        asList("Link", "Content-Type", "Accept-Datetime"),
+                        asList("Link", "Content-Type", "Accept-Datetime", "Accept"),
                         asList("Link", "Content-Type", "Memento-Datetime"), true, 100));
         return config;
     }

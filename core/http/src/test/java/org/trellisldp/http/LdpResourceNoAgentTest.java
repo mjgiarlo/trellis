@@ -14,6 +14,7 @@
 package org.trellisldp.http;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import javax.ws.rs.core.Application;
@@ -27,22 +28,26 @@ import org.trellisldp.agent.SimpleAgentService;
 public class LdpResourceNoAgentTest extends AbstractLdpResourceTest {
 
     @Override
+    protected String getBaseUrl() {
+        return getBaseUri().toString();
+    }
+
+    @Override
     public Application configure() {
 
         // Junit runner doesn't seem to work very well with JerseyTest
         initMocks(this);
+        when(mockBundler.getAgentService()).thenReturn(new SimpleAgentService());
 
         final String baseUri = getBaseUri().toString();
         final String origin = baseUri.substring(0, baseUri.length() - 1);
 
         final ResourceConfig config = new ResourceConfig();
-        config.register(new LdpResource(mockResourceService, ioService, mockBinaryService,
-                    new SimpleAgentService(), mockAuditService));
-        config.register(new MultipartUploader(mockResourceService, mockBinaryResolver));
-        config.register(new CacheControlFilter(86400));
+        config.register(new TrellisHttpResource(mockBundler, baseUri));
+        config.register(new CacheControlFilter(86400, true, false));
         config.register(new WebSubHeaderFilter(HUB));
         config.register(new CrossOriginResourceSharingFilter(asList(origin), asList("PATCH", "POST", "PUT"),
-                        asList("Link", "Content-Type", "Accept-Datetime"),
+                        asList("Link", "Content-Type", "Accept-Datetime", "Accept"),
                         asList("Link", "Content-Type", "Memento-Datetime"), true, 100));
         return config;
     }

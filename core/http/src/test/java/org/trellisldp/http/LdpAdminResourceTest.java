@@ -26,6 +26,11 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class LdpAdminResourceTest extends AbstractLdpResourceTest {
 
     @Override
+    protected String getBaseUrl() {
+        return getBaseUri().toString();
+    }
+
+    @Override
     public Application configure() {
 
         initMocks(this);
@@ -37,13 +42,11 @@ public class LdpAdminResourceTest extends AbstractLdpResourceTest {
         agentFilter.setAdminUsers(asList("testUser"));
 
         final ResourceConfig config = new ResourceConfig();
-        config.register(new LdpResource(mockResourceService, ioService, mockBinaryService,
-                    mockAgentService, mockAuditService));
+        config.register(new TrellisHttpResource(mockBundler, baseUri));
         config.register(new TestAuthenticationFilter("testUser", ""));
         config.register(new WebAcFilter(mockAccessControlService));
         config.register(agentFilter);
-        config.register(new MultipartUploader(mockResourceService, mockBinaryResolver));
-        config.register(new CacheControlFilter(86400));
+        config.register(new CacheControlFilter(86400, true, false));
         config.register(new WebSubHeaderFilter(HUB));
         config.register(new CrossOriginResourceSharingFilter(asList(origin),
                     asList("PATCH", "POST", "PUT"),

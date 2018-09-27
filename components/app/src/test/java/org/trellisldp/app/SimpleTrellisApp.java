@@ -13,71 +13,26 @@
  */
 package org.trellisldp.app;
 
-import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-import static java.util.Collections.emptySet;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.apache.jena.arq.query.DatasetFactory.createTxnMem;
-import static org.apache.jena.rdfconnection.RDFConnectionFactory.connect;
-import static org.mockito.Mockito.mock;
-
 import io.dropwizard.setup.Environment;
 
-import java.util.Optional;
-
-import org.trellisldp.api.AuditService;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.IOService;
-import org.trellisldp.api.NoopEventService;
-import org.trellisldp.api.NoopMementoService;
-import org.trellisldp.api.NoopNamespaceService;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.app.config.TrellisConfiguration;
-import org.trellisldp.file.FileBinaryService;
-import org.trellisldp.id.UUIDGenerator;
-import org.trellisldp.io.JenaIOService;
-import org.trellisldp.triplestore.TriplestoreResourceService;
 
 /**
  * A simple test app.
  */
 public class SimpleTrellisApp extends AbstractTrellisApplication<TrellisConfiguration> {
 
-    private TriplestoreResourceService resourceService;
-    private FileBinaryService binaryService;
-    private JenaIOService ioService;
+    private ServiceBundler serviceBundler;
 
     @Override
-    protected ResourceService getResourceService() {
-        return resourceService;
-    }
-
-    @Override
-    protected BinaryService getBinaryService() {
-        return binaryService;
-    }
-
-    @Override
-    protected IOService getIOService() {
-        return ioService;
-    }
-
-    @Override
-    protected Optional<AuditService> getAuditService() {
-        return empty();
-    }
-
-    @Override
-    protected Optional<BinaryService.MultipartCapable> getMultipartUploadService() {
-        return of(mock(BinaryService.MultipartCapable.class));
+    protected ServiceBundler getServiceBundler() {
+        return serviceBundler;
     }
 
     @Override
     protected void initialize(final TrellisConfiguration config, final Environment env) {
         super.initialize(config, env);
-        ioService = new JenaIOService(new NoopNamespaceService(), null, null, emptySet(), emptySet());
-        binaryService = new FileBinaryService(new UUIDGenerator(), resourceFilePath("data") + "/binaries", 2, 2);
-        resourceService = new TriplestoreResourceService(connect(createTxnMem()), new UUIDGenerator(),
-                new NoopMementoService(), new NoopEventService());
+        this.serviceBundler = new SimpleServiceBundler();
     }
 }

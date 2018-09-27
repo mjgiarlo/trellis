@@ -17,13 +17,14 @@ module org.trellisldp.jpms.app {
     exports org.trellisldp.app.auth;
     opens org.trellisldp.app.config to hibernate.validator;
     requires com.fasterxml.jackson.annotation;
+    requires com.google.common;
     requires dropwizard.auth;
     requires dropwizard.core;
     requires dropwizard.lifecycle;
     requires java.annotation;
     requires java.naming;
     requires java.ws.rs;
-    requires java.xml.bind;
+    requires javax.el;
     requires jjwt;
     requires metrics.healthchecks;
     requires org.apache.commons.rdf.api;
@@ -34,4 +35,5 @@ module org.trellisldp.jpms.app {
     requires org.trellisldp.jpms.webac;
     requires slf4j.api;
     requires validation.api;
+    requires tamaya.api;
 }

@@ -13,12 +13,13 @@
  */
 package org.trellisldp.app;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.app.TrellisUtils.getAuthFilters;
 import static org.trellisldp.app.TrellisUtils.getCorsConfiguration;
-import static org.trellisldp.app.TrellisUtils.getWebacConfiguration;
+import static org.trellisldp.app.TrellisUtils.getWebacCache;
 
 import io.dropwizard.Application;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
@@ -26,24 +27,18 @@ import io.dropwizard.setup.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import org.apache.tamaya.ConfigurationProvider;
 import org.slf4j.Logger;
-import org.trellisldp.agent.SimpleAgentService;
-import org.trellisldp.api.AgentService;
-import org.trellisldp.api.AuditService;
-import org.trellisldp.api.BinaryService;
-import org.trellisldp.api.IOService;
-import org.trellisldp.api.NoopAuditService;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.api.AccessControlService;
+import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.app.config.BasicAuthConfiguration;
 import org.trellisldp.app.config.JwtAuthConfiguration;
 import org.trellisldp.app.config.TrellisConfiguration;
 import org.trellisldp.http.AgentAuthorizationFilter;
 import org.trellisldp.http.CacheControlFilter;
 import org.trellisldp.http.CrossOriginResourceSharingFilter;
-import org.trellisldp.http.LdpResource;
-import org.trellisldp.http.MultipartUploader;
+import org.trellisldp.http.TrellisHttpResource;
 import org.trellisldp.http.WebAcFilter;
 import org.trellisldp.http.WebSubHeaderFilter;
 import org.trellisldp.webac.WebACService;
@@ -55,44 +50,46 @@ public abstract class AbstractTrellisApplication<T extends TrellisConfiguration>
 
     private static final Logger LOGGER = getLogger(AbstractTrellisApplication.class);
 
-    private final AgentService agentService = new SimpleAgentService();
+    /** The configuration key controlling whether an application should initialize its own root resource. **/
+    public static final String APPLICATION_SELF_INITIALIZE = "trellis.app.initialize.root";
 
     /**
-     * Get the resource service.
-     * @return a resource service
+     * Get the Trellis {@link ServiceBundler}. This object collects the various
+     * Trellis services used in an application.
+     * @return the ServiceBundler
      */
-    protected abstract ResourceService getResourceService();
+    protected abstract ServiceBundler getServiceBundler();
 
     /**
-     * Get the IO Service.
-     * @return an IO service
+     * Get any additional components to register with Jersey.
+     *
+     * @implSpec By default, this returns an empty list.
+     * @return any additional components.
      */
-    protected abstract IOService getIOService();
+    protected List<Object> getComponents() {
+        return emptyList();
+    }
 
     /**
-     * Get the binary service.
-     * @return a binary service
+     * Get the TrellisHttpResource matcher.
+     *
+     * @param config the configuration
+     * @param initialize true if the TrellisHttpResource object should be initialized; false otherwise
+     * @return the LDP resource matcher
      */
-    protected abstract BinaryService getBinaryService();
-
-    /**
-     * Get a multipart uploader service.
-     * @return a multipart uploader service, if one exists
-     */
-    protected abstract Optional<BinaryService.MultipartCapable> getMultipartUploadService();
-
-    /**
-     * Get the audit service.
-     * @return an audit service, if one exists
-     */
-    protected abstract Optional<AuditService> getAuditService();
+    protected Object getLdpComponent(final T config, final Boolean initialize) {
+        final TrellisHttpResource ldpResource = new TrellisHttpResource(getServiceBundler(), config.getBaseUrl());
+        if (initialize) {
+            ldpResource.initialize();
+        }
+        return ldpResource;
+    }
 
     /**
      * Setup the trellis application.
      *
-     * <p>This method is called at the very beginning of the {@link Application#run} method. It can be used
-     * to configure or register any of the Trellis-related services that an implementation instantiates.
-     *
+     * @apiNote This method is called at the very beginning of the {@link Application#run} method. It can be used
+     *          to configure or register any of the Trellis-related services that an implementation instantiates.
      * @param config the configuration
      * @param environment the environment
      */
@@ -112,25 +109,30 @@ public abstract class AbstractTrellisApplication<T extends TrellisConfiguration>
         getAuthFilters(config).ifPresent(filters -> environment.jersey().register(new ChainedAuthFilter<>(filters)));
 
         // Resource matchers
-        environment.jersey().register(new LdpResource(getResourceService(), getIOService(), getBinaryService(),
-                    agentService, getAuditService().orElseGet(NoopAuditService::new), config.getBaseUrl()));
-        getMultipartUploadService().ifPresent(uploader -> environment.jersey()
-                .register(new MultipartUploader(getResourceService(), uploader, config.getBaseUrl())));
+        environment.jersey().register(getLdpComponent(config, ConfigurationProvider.getConfiguration()
+                    .getOrDefault(APPLICATION_SELF_INITIALIZE, Boolean.class, true)));
+
+        // Authentication
+        final AgentAuthorizationFilter agentFilter
+            = new AgentAuthorizationFilter(getServiceBundler().getAgentService());
+        agentFilter.setAdminUsers(config.getAuth().getAdminUsers());
 
         // Filters
-        environment.jersey().register(new AgentAuthorizationFilter(agentService));
-        environment.jersey().register(new CacheControlFilter(config.getCacheMaxAge()));
+        environment.jersey().register(agentFilter);
+        environment.jersey().register(new CacheControlFilter(config.getCache().getMaxAge(),
+                    config.getCache().getMustRevalidate(), config.getCache().getNoCache()));
 
         // Authorization
-        getWebacConfiguration(config).ifPresent(webacCache -> {
-                final WebAcFilter filter = new WebAcFilter(new WebACService(getResourceService(), webacCache));
-                final List<String> challenges = new ArrayList<>();
-                of(config.getAuth().getJwt()).filter(JwtAuthConfiguration::getEnabled)
-                    .map(c -> "Bearer realm=\"" + c.getRealm() + "\"").ifPresent(challenges::add);
-                of(config.getAuth().getBasic()).filter(BasicAuthConfiguration::getEnabled)
-                    .map(c -> "Basic realm=\"" + c.getRealm() + "\"").ifPresent(challenges::add);
-                filter.setChallenges(challenges);
-                environment.jersey().register(filter);
+        getWebacCache(config).ifPresent(cache -> {
+            final AccessControlService webac = new WebACService(getServiceBundler().getResourceService(), cache);
+            final WebAcFilter filter = new WebAcFilter(webac);
+            final List<String> challenges = new ArrayList<>();
+            of(config.getAuth().getJwt()).filter(JwtAuthConfiguration::getEnabled)
+                .map(c -> "Bearer realm=\"" + c.getRealm() + "\"").ifPresent(challenges::add);
+            of(config.getAuth().getBasic()).filter(BasicAuthConfiguration::getEnabled)
+                .map(c -> "Basic realm=\"" + c.getRealm() + "\"").ifPresent(challenges::add);
+            filter.setChallenges(challenges);
+            environment.jersey().register(filter);
         });
 
         // WebSub
@@ -140,5 +142,8 @@ public abstract class AbstractTrellisApplication<T extends TrellisConfiguration>
         getCorsConfiguration(config).ifPresent(cors -> environment.jersey().register(
                 new CrossOriginResourceSharingFilter(cors.getAllowOrigin(), cors.getAllowMethods(),
                     cors.getAllowHeaders(), cors.getExposeHeaders(), cors.getAllowCredentials(), cors.getMaxAge())));
+
+        // Additional components
+        getComponents().forEach(environment.jersey()::register);
     }
 }

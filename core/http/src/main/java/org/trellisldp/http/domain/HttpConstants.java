@@ -47,6 +47,8 @@ public final class HttpConstants {
 
     public static final String EXT = "ext";
 
+    public static final String DESCRIPTION = "description";
+
     public static final String DIGEST = "Digest";
 
     public static final String LINK_TEMPLATE = "Link-Template";
@@ -64,10 +66,6 @@ public final class HttpConstants {
     public static final String SESSION_PROPERTY = "session";
 
     public static final String TIMEMAP = "timemap";
-
-    public static final String UPLOADS = "uploads";
-
-    public static final String UPLOAD_PREFIX = "upload/";
 
     public static final String WANT_DIGEST = "Want-Digest";
 

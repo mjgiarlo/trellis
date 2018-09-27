@@ -17,7 +17,7 @@ javaModule {
 dependencies {
     api("com.rabbitmq:amqp-client:$rabbitMqVersion")
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
-    api("org.trellisldp:trellis-api-jpms:$version")
+    api("org.trellisldp:trellis-api-jpms:$trellisPreviousSnapshotVersion")
 
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
@@ -27,8 +27,8 @@ dependencies {
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.trellisldp:trellis-event-serialization-jpms:$version")
-    testImplementation("org.trellisldp:trellis-vocabulary-jpms:$version")
+    testImplementation("org.trellisldp:trellis-event-serialization-jpms:$trellisPreviousSnapshotVersion")
+    testImplementation("org.trellisldp:trellis-vocabulary-jpms:$trellisPreviousSnapshotVersion")
 }
 
 jar {
@@ -43,13 +43,6 @@ jar {
         instruction 'Export-Package', "$osgiModuleName;version=$projectOsgiVersion"
         instruction 'Require-Capability', '''osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",osgi.serviceloader;
                 filter:="(osgi.serviceloader=org.trellisldp.api.ActivityStreamService)";resolution:=mandatory; cardinality:=mandatory,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.10))'''
-    }
-}
-
-artifacts {
-    archives (file('build/cfg/main/org.trellisldp.amqp.cfg')) {
-        classifier 'configuration'
-        type 'cfg'
     }
 }
 

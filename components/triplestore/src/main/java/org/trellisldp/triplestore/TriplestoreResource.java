@@ -14,13 +14,15 @@
 package org.trellisldp.triplestore;
 
 import static java.util.Objects.nonNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Stream.builder;
 import static java.util.stream.Stream.concat;
 import static org.apache.jena.core.graph.NodeFactory.createURI;
 import static org.apache.jena.core.graph.Triple.create;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.trellisldp.api.RDFUtils.toQuad;
+import static org.trellisldp.api.Resource.SpecialResources.DELETED_RESOURCE;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 import static org.trellisldp.triplestore.TriplestoreUtils.OBJECT;
 import static org.trellisldp.triplestore.TriplestoreUtils.PREDICATE;
 import static org.trellisldp.triplestore.TriplestoreUtils.SUBJECT;
@@ -28,16 +30,17 @@ import static org.trellisldp.triplestore.TriplestoreUtils.getInstance;
 import static org.trellisldp.triplestore.TriplestoreUtils.getObject;
 import static org.trellisldp.triplestore.TriplestoreUtils.getPredicate;
 import static org.trellisldp.triplestore.TriplestoreUtils.getSubject;
+import static org.trellisldp.triplestore.TriplestoreUtils.nodesToTriple;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.api.Quad;
@@ -95,10 +98,17 @@ public class TriplestoreResource implements Resource {
      * @param identifier the identifier
      * @return a Resource, if one exists
      */
-    public static Optional<Resource> findResource(final RDFConnection rdfConnection, final IRI identifier) {
-        final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
-        res.fetchData();
-        return res.exists() ? of(res) : empty();
+    public static CompletableFuture<Resource> findResource(final RDFConnection rdfConnection, final IRI identifier) {
+        return supplyAsync(() -> {
+            final TriplestoreResource res = new TriplestoreResource(rdfConnection, identifier);
+            res.fetchData();
+            if (!res.exists()) {
+                return MISSING_RESOURCE;
+            } else if (res.isDeleted()) {
+                return DELETED_RESOURCE;
+            }
+            return res;
+        });
     }
 
     /**
@@ -107,6 +117,10 @@ public class TriplestoreResource implements Resource {
      */
     protected Boolean exists() {
         return nonNull(getModified()) && nonNull(getInteractionModel());
+    }
+
+    protected Boolean isDeleted() {
+        return graph.contains(identifier, DC.type, Trellis.DeletedResource);
     }
 
     /**
@@ -158,10 +172,7 @@ public class TriplestoreResource implements Resource {
             final RDFNode s = qs.get("binarySubject");
             final RDFNode p = qs.get("binaryPredicate");
             final RDFNode o = qs.get("binaryObject");
-            if (nonNull(s) && nonNull(p) && nonNull(o)) {
-                graph.add((BlankNodeOrIRI) rdf.asRDFTerm(s.asNode()), (IRI) rdf.asRDFTerm(p.asNode()),
-                        rdf.asRDFTerm(o.asNode()));
-            }
+            nodesToTriple(s, p, o).ifPresent(graph::add);
             graph.add(identifier, getPredicate(qs), getObject(qs));
         });
     }
@@ -232,14 +243,8 @@ public class TriplestoreResource implements Resource {
         return fetchAclQuads().findAny().isPresent();
     }
 
-    @Override
-    public Boolean isDeleted() {
-        return graph.contains(identifier, DC.type, Trellis.DeletedResource);
-    }
-
     private Stream<Quad> fetchServerQuads() {
-        return graph.stream().map(triple -> rdf.createQuad(Trellis.PreferServerManaged,
-                    triple.getSubject(), triple.getPredicate(), triple.getObject()));
+        return graph.stream().map(toQuad(Trellis.PreferServerManaged));
     }
 
     /**

@@ -1,0 +1,52 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis Application'
+
+ext {
+    moduleName = 'org.trellisldp.app'
+}
+
+dependencies {
+    api("io.dropwizard:dropwizard-auth:$dropwizardVersion")
+    api("io.dropwizard:dropwizard-core:$dropwizardVersion")
+    api project(':trellis-api')
+
+    implementation("io.jsonwebtoken:jjwt:$jwtVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation project(':trellis-http')
+    implementation project(':trellis-vocabulary')
+    implementation project(':trellis-agent')
+    implementation project(':trellis-webac')
+
+    testRuntime("javax.xml.bind:jaxb-api:$jaxbVersion")
+    testRuntime("javax.activation:javax.activation-api:$activationApiVersion")
+
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
+    testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.jena:jena-osgi:$jenaVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
+    testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation project(':trellis-triplestore')
+    testImplementation project(':trellis-io-jena')
+    testImplementation project(':trellis-file')
+    testImplementation project(':trellis-id')
+}
+
+jar {
+    manifest {
+        description project.description
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+    }
+}
+

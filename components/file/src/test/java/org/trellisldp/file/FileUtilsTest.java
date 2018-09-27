@@ -39,29 +39,30 @@ public class FileUtilsTest {
     public void testParseQuad() {
         final Optional<Quad> quad = FileUtils.parseQuad(
                 "<trellis:data/resource> <http://purl.org/dc/terms/title> "
-                + "\"Some title\" <http://www.trellisldp.org/ns/trellis#PreferUserManaged> .");
-        assertTrue(quad.isPresent());
+                + "\"Some title\" <http://www.trellisldp.org/ns/trellis#PreferUserManaged> .").findFirst();
+        assertTrue(quad.isPresent(), "Quad isn't present in parsed string!");
         quad.ifPresent(q -> {
-            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString());
-            assertEquals(DC.title, q.getPredicate());
-            assertEquals("Some title", ((Literal) q.getObject()).getLexicalForm());
-            assertTrue(q.getGraphName().isPresent());
-            q.getGraphName().ifPresent(g -> assertEquals(Trellis.PreferUserManaged, g));
+            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString(), "Incorrect subject!");
+            assertEquals(DC.title, q.getPredicate(), "Incorrect predicate!");
+            assertEquals("Some title", ((Literal) q.getObject()).getLexicalForm(), "Incorrect literal object!");
+            assertTrue(q.getGraphName().isPresent(), "Graph name isn't present!");
+            q.getGraphName().ifPresent(g -> assertEquals(Trellis.PreferUserManaged, g, "Incorrect graph name!"));
         });
     }
 
     @Test
     public void testParseQuadWithComment() {
         final Optional<Quad> quad = FileUtils.parseQuad(
-                "<trellis:data/resource> <http://purl.org/dc/terms/title> "
-                + "\"Some title\" <http://www.trellisldp.org/ns/trellis#PreferUserManaged> . # some comment");
-        assertTrue(quad.isPresent());
+                "<trellis:data/resource> <http://purl.org/dc/terms/description> "
+                + "\"A description\" <http://www.trellisldp.org/ns/trellis#PreferUserManaged> . # some comment")
+            .findFirst();
+        assertTrue(quad.isPresent(), "Quad isn't present in parsed string!");
         quad.ifPresent(q -> {
-            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString());
-            assertEquals(DC.title, q.getPredicate());
-            assertEquals("Some title", ((Literal) q.getObject()).getLexicalForm());
-            assertTrue(q.getGraphName().isPresent());
-            q.getGraphName().ifPresent(g -> assertEquals(Trellis.PreferUserManaged, g));
+            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString(), "Incorrect subject!");
+            assertEquals(DC.description, q.getPredicate(), "Incorrect predicate!");
+            assertEquals("A description", ((Literal) q.getObject()).getLexicalForm(), "Incorrect literal object!");
+            assertTrue(q.getGraphName().isPresent(), "Graph name isn't present!");
+            q.getGraphName().ifPresent(g -> assertEquals(Trellis.PreferUserManaged, g, "Incorrect graph name!"));
         });
     }
 
@@ -69,19 +70,19 @@ public class FileUtilsTest {
     public void testParseQuadNoGraph() {
         final Optional<Quad> quad = FileUtils.parseQuad(
                 "<trellis:data/resource> <http://purl.org/dc/terms/title> "
-                + "\"Some title\" .");
-        assertTrue(quad.isPresent());
+                + "\"A different title\" .").findFirst();
+        assertTrue(quad.isPresent(), "Quad isn't present in parsed Triple string!");
         quad.ifPresent(q -> {
-            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString());
-            assertEquals(DC.title, q.getPredicate());
-            assertEquals("Some title", ((Literal) q.getObject()).getLexicalForm());
-            assertFalse(q.getGraphName().isPresent());
+            assertEquals("trellis:data/resource", ((IRI) q.getSubject()).getIRIString(), "Incorrect subject!");
+            assertEquals(DC.title, q.getPredicate(), "Incorrect predicate!");
+            assertEquals("A different title", ((Literal) q.getObject()).getLexicalForm(), "Incorrect literal object!");
+            assertFalse(q.getGraphName().isPresent(), "Graph name shouldn't have been present!");
         });
     }
 
     @Test
     public void testParseBadQuad() {
-        assertFalse(FileUtils.parseQuad("blah blah blah").isPresent());
+        assertFalse(FileUtils.parseQuad("blah blah blah").findFirst().isPresent(), "Invalid quad shouldn't parse!");
     }
 
     @Test
@@ -89,7 +90,8 @@ public class FileUtilsTest {
         final Quad quad = rdf.createQuad(Trellis.PreferServerManaged, rdf.createIRI("trellis:data/resource"),
                 DC.subject, rdf.createIRI("http://example.org"));
         assertEquals("<trellis:data/resource> <http://purl.org/dc/terms/subject> <http://example.org> "
-                + "<http://www.trellisldp.org/ns/trellis#PreferServerManaged> .", FileUtils.serializeQuad(quad));
+                + "<http://www.trellisldp.org/ns/trellis#PreferServerManaged> .", FileUtils.serializeQuad(quad),
+                "Quad isn't serialized properly!");
     }
 
     @Test
@@ -97,6 +99,7 @@ public class FileUtilsTest {
         final Quad quad = rdf.createQuad(null, rdf.createIRI("trellis:data/resource"),
                 DC.subject, rdf.createIRI("http://example.org"));
         assertEquals("<trellis:data/resource> <http://purl.org/dc/terms/subject> <http://example.org> .",
-                FileUtils.serializeQuad(quad));
+                FileUtils.serializeQuad(quad),
+                "Triple isn't serialized properly!");
     }
 }

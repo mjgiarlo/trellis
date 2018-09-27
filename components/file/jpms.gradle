@@ -26,6 +26,7 @@ dependencies {
     implementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     implementation("org.apache.commons:commons-collections4:$commonsCollectionsVersion")
     implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    implementation("javax.enterprise:cdi-api:$cdiApiVersion")
     implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")

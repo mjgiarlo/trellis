@@ -46,10 +46,3 @@ jar {
     }
 }
 
-artifacts {
-    archives (file('build/cfg/main/org.trellisldp.kafka.cfg')) {
-        classifier 'configuration'
-        type 'cfg'
-    }
-}
-

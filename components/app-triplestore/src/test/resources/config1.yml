@@ -14,7 +14,8 @@ binaries: /tmp/trellisData/binaries
 mementos: /tmp/trellisData/mementos
 
 baseUrl: http://localhost:8080/
-hubUrl:
+
+hubUrl: http://hub.example.com/
 
 namespaces: /tmp/trellisData/namespaces.json
 
@@ -32,9 +33,17 @@ auth:
         enabled: true
         base64Encoded: false
         key: secret
+        keyStore: /tmp/trellisData/keystore.jks
+        keyStorePassword: password
+        keyIds:
+            - trellis
+            - foo
+            - bar
 
 defaultName: Trellis
-cacheMaxAge: 86400
+
+cache:
+    maxAge: 86400
 
 assets:
     template: org/trellisldp/rdfa/resource.mustache

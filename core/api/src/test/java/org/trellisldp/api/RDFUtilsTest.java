@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.trellisldp.api.RDFUtils.getInstance;
 import static org.trellisldp.api.RDFUtils.toDataset;
 import static org.trellisldp.api.RDFUtils.toGraph;
+import static org.trellisldp.api.RDFUtils.toQuad;
 
 import java.util.Set;
 import java.util.stream.Collector;
@@ -28,10 +29,14 @@ import java.util.stream.Collector;
 import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.text.RandomStringGenerator;
 import org.junit.jupiter.api.Test;
+import org.trellisldp.vocabulary.DC;
+import org.trellisldp.vocabulary.Trellis;
 
 /**
  * @author acoburn
@@ -45,7 +50,7 @@ public class RDFUtilsTest {
 
     @Test
     public void testGetInstance() {
-        assertNotNull(rdf);
+        assertNotNull(rdf, "RDF instance is null!");
     }
 
     @Test
@@ -53,7 +58,7 @@ public class RDFUtilsTest {
         final Graph graph = generate(() -> rdf.createTriple(getIRI(), getIRI(), getIRI()))
             .parallel().limit(size).collect(toGraph());
 
-        assertTrue(size >= graph.size());
+        assertTrue(size >= graph.size(), "Generated graph has too many triples!");
     }
 
     @Test
@@ -61,7 +66,7 @@ public class RDFUtilsTest {
         final Dataset dataset = generate(() -> rdf.createQuad(getIRI(), getIRI(), getIRI(), getIRI()))
             .parallel().limit(size).collect(toDataset().concurrent());
 
-        assertTrue(size >= dataset.size());
+        assertTrue(size >= dataset.size(), "Generated dataset has too many triples!");
     }
 
     @Test
@@ -69,7 +74,7 @@ public class RDFUtilsTest {
         final Dataset dataset = generate(() -> rdf.createQuad(getIRI(), getIRI(), getIRI(), getIRI()))
             .parallel().limit(size).collect(toDataset());
 
-        assertTrue(size >= dataset.size());
+        assertTrue(size >= dataset.size(), "Generated dataset has too many triples!");
     }
 
     @Test
@@ -78,7 +83,7 @@ public class RDFUtilsTest {
             .parallel().limit(size).collect(toDataset());
 
         final RDFUtils.DatasetCollector collector = toDataset();
-        assertEquals(dataset, collector.finisher().apply(dataset));
+        assertEquals(dataset, collector.finisher().apply(dataset), "Dataset finisher returns the wrong object!");
     }
 
     @Test
@@ -89,7 +94,17 @@ public class RDFUtilsTest {
             .parallel().limit(size).collect(toSet());
 
         final Collector<Quad, Set<Quad>, Dataset> collector = toDataset().concurrent();
-        assertEquals(quads1.size() + quads2.size(), collector.combiner().apply(quads1, quads2).size());
+        assertEquals(quads1.size() + quads2.size(), collector.combiner().apply(quads1, quads2).size(),
+                "Dataset combiner produces the wrong number of quads!");
+    }
+
+    @Test
+    public void testToQuad() {
+        final IRI subject = rdf.createIRI("http://example.com/resource");
+        final Literal object = rdf.createLiteral("title");
+        final Triple triple = rdf.createTriple(subject, DC.title, object);
+        final Quad quad = rdf.createQuad(Trellis.PreferUserManaged, subject, DC.title, object);
+        assertEquals(quad, toQuad(Trellis.PreferUserManaged).apply(triple), "Incorrect quad from triple!");
     }
 
     private IRI getIRI() {

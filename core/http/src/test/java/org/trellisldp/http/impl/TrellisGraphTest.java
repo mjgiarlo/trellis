@@ -19,12 +19,11 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.apache.commons.rdf.api.Graph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.trellisldp.api.RuntimeTrellisException;
 
 /**
  * @author acoburn
@@ -42,10 +41,10 @@ public class TrellisGraphTest {
 
     @Test
     public void testCloseGraphError() {
-        assertThrows(WebApplicationException.class, () -> {
+        assertThrows(RuntimeTrellisException.class, () -> {
             try (final TrellisGraph dataset = new TrellisGraph(mockGraph)) {
                 // nothing here
             }
-        });
+        }, "IOException isn't caught when closing the graph!");
     }
 }

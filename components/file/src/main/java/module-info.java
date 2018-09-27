@@ -26,4 +26,5 @@ module org.trellisldp.jpms.file {
     requires tamaya.api;
     requires org.apache.jena.core;
     requires org.apache.jena.arq;
+    requires cdi.api;
 }

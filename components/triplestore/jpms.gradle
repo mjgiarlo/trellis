@@ -31,6 +31,7 @@ dependencies {
     implementation("de.ubleipzig:jena.rdfconnection-jpms:$jenaVersion")
     implementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.trellisldp:trellis-http-jpms:$version")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")

@@ -13,13 +13,12 @@
  */
 package org.trellisldp.http.impl;
 
-import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Stream.concat;
+import static java.util.function.Predicate.isEqual;
 import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 import static org.apache.commons.rdf.api.RDFSyntax.RDFA;
 import static org.apache.commons.rdf.api.RDFSyntax.TURTLE;
@@ -29,13 +28,15 @@ import static org.trellisldp.http.domain.HttpConstants.DEFAULT_REPRESENTATION;
 import static org.trellisldp.vocabulary.JSONLD.expanded;
 import static org.trellisldp.vocabulary.Trellis.PreferUserManaged;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -71,21 +72,7 @@ public final class RdfUtils {
 
     private static final Set<String> ignoredPreferences;
 
-    /**
-     * A mapping of LDP types to their supertype.
-     */
-    public static final Map<IRI, IRI> superClassOf;
-
     static {
-        final Map<IRI, IRI> data = new HashMap<>();
-        data.put(LDP.NonRDFSource, LDP.Resource);
-        data.put(LDP.RDFSource, LDP.Resource);
-        data.put(LDP.Container, LDP.RDFSource);
-        data.put(LDP.BasicContainer, LDP.Container);
-        data.put(LDP.DirectContainer, LDP.Container);
-        data.put(LDP.IndirectContainer, LDP.Container);
-        superClassOf = unmodifiableMap(data);
-
         final Set<String> ignore = new HashSet<>();
         ignore.add(Trellis.PreferUserManaged.getIRIString());
         ignore.add(Trellis.PreferServerManaged.getIRIString());
@@ -95,22 +82,32 @@ public final class RdfUtils {
     /**
      * Get all of the LDP resource (super) types for the given LDP interaction model.
      *
-     * @param interactionModel the interaction model
+     * @param ixnModel the interaction model
      * @return a stream of types
      */
-    public static Stream<IRI> ldpResourceTypes(final IRI interactionModel) {
-        return Stream.of(interactionModel).filter(type -> superClassOf.containsKey(type) || LDP.Resource.equals(type))
-            .flatMap(type -> concat(ldpResourceTypes(superClassOf.get(type)), Stream.of(type)));
+    public static Stream<IRI> ldpResourceTypes(final IRI ixnModel) {
+        final Stream.Builder<IRI> supertypes = Stream.builder();
+        if (nonNull(ixnModel)) {
+            LOGGER.debug("Finding types that subsume {}", ixnModel.getIRIString());
+            supertypes.accept(ixnModel);
+            final IRI superClass = LDP.getSuperclassOf(ixnModel);
+            LOGGER.debug("... including {}", superClass);
+            ldpResourceTypes(superClass).forEach(supertypes::accept);
+        }
+        return supertypes.build();
     }
 
     /**
      * Build a hash value suitable for generating an ETag.
      * @param identifier the resource identifier
      * @param modified the last modified value
+     * @param prefer a prefer header, may be null
      * @return a corresponding hash value
      */
-    public static String buildEtagHash(final String identifier, final Instant modified) {
-        return md5Hex(modified.toEpochMilli() + "." + modified.getNano() + identifier);
+    public static String buildEtagHash(final String identifier, final Instant modified, final Prefer prefer) {
+        final String sep = ".";
+        final String hash = nonNull(prefer) ? prefer.getInclude().hashCode() + sep + prefer.getOmit().hashCode() : "";
+        return md5Hex(modified.toEpochMilli() + sep + modified.getNano() + sep + hash + sep + identifier);
     }
 
     /**
@@ -212,16 +209,12 @@ public final class RdfUtils {
      * @param ioService the I/O service
      * @param acceptableTypes the types from HTTP headers
      * @param mimeType an additional "default" mimeType to match
-     * @return an RDFSyntax
+     * @return an RDFSyntax or null if there was an error
      */
     public static Optional<RDFSyntax> getSyntax(final IOService ioService, final List<MediaType> acceptableTypes,
             final Optional<String> mimeType) {
         if (acceptableTypes.isEmpty()) {
-            // TODO -- JDK9 refactor with Optional::or
-            if (mimeType.isPresent()) {
-                return empty();
-            }
-            return of(TURTLE);
+            return mimeType.isPresent() ? empty() : of(TURTLE);
         }
         final Optional<MediaType> mt = mimeType.map(MediaType::valueOf);
         for (final MediaType type : acceptableTypes) {
@@ -239,6 +232,22 @@ public final class RdfUtils {
     }
 
     /**
+     * Close an input stream in an async chain.
+     * @param input the input stream
+     * @return a bifunction that closes the stream
+     */
+    public static BiConsumer<Object, Throwable> closeInputStreamAsync(final InputStream input) {
+        return (val, err) -> {
+            try {
+                input.close();
+            } catch (final IOException ex) {
+                LOGGER.error("Error closing input stream: {}", ex.getMessage());
+                throw new UncheckedIOException(ex);
+            }
+        };
+    }
+
+    /**
      * Given a list of acceptable media types and an RDF syntax, get the relevant profile data, if
      * relevant.
      *
@@ -248,7 +257,7 @@ public final class RdfUtils {
      */
     public static IRI getProfile(final List<MediaType> acceptableTypes, final RDFSyntax syntax) {
         for (final MediaType type : acceptableTypes) {
-            if (RDFSyntax.byMediaType(type.toString()).filter(syntax::equals).isPresent() &&
+            if (RDFSyntax.byMediaType(type.toString()).filter(isEqual(syntax)).isPresent() &&
                     type.getParameters().containsKey("profile")) {
                 return rdf.createIRI(type.getParameters().get("profile").split(" ")[0].trim());
             }
@@ -276,6 +285,16 @@ public final class RdfUtils {
      */
     public static IRI getDefaultProfile(final RDFSyntax syntax, final IRI identifier) {
         return RDFA.equals(syntax) ? identifier : expanded;
+    }
+
+    /**
+     * Check whether an LDP type is a sort of container.
+     * @param ldpType the LDP type to test
+     * @return true if it is a type of LDP container
+     */
+    public static Boolean isContainer(final IRI ldpType) {
+        return LDP.Container.equals(ldpType) || LDP.BasicContainer.equals(ldpType)
+            || LDP.DirectContainer.equals(ldpType) || LDP.IndirectContainer.equals(ldpType);
     }
 
     private RdfUtils() {

@@ -32,6 +32,7 @@ sonarqube {
 
 dependencies {
     compile("org.apache.jena:jena-osgi:$jenaVersion")
+    compile("org.apache.commons:commons-compress:$commonsCompressVersion")
     compile project(':trellis-api')
     compile project(':trellis-http')
     compile project(':trellis-io-jena')
@@ -40,7 +41,6 @@ dependencies {
     compile project(':trellis-triplestore')
 
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
-    testCompile("org.apache.jena:jena-osgi:$jenaVersion")
     testCompile("org.apache.karaf.features:standard:$karafVersion")
     testCompile("org.apache.karaf.features:org.apache.karaf.features.core:$karafVersion")
     testCompile("org.ops4j.pax.exam:pax-exam:$paxExamVersion")
@@ -124,10 +124,12 @@ jar {
     }
 }
 
-artifacts {
-    archives (file('build/cfg/main/org.trellisldp.osgi.cfg')) {
-        classifier 'configuration'
-        type 'cfg'
+publishing.publications {
+    maven(MavenPublication) {
+        artifact ('build/cfg/main/org.trellisldp.osgi.cfg') {
+            classifier 'configuration'
+            extension 'cfg'
+        }
     }
 }
 
@@ -141,13 +143,6 @@ test {
     systemProperty 'karaf.ssh.port', randomPort()
     systemProperty 'karaf.rmiServer.port', randomPort()
     systemProperty 'karaf.rmiRegistry.port', randomPort()
-
-    // TODO - re-enable testing for JDK 10 once karaf support catches up
-    enabled = ! JavaVersion.current().isJava10Compatible()
-
-    jacoco {
-        enabled = true
-    }
 }
 
 tasks.test.dependsOn tasks.generateDependsFile

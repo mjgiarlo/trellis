@@ -15,5 +15,6 @@ module org.trellisldp.jpms.api {
     exports org.trellisldp.api;
     requires org.apache.commons.lang3;
     requires org.apache.commons.rdf.api;
+    requires javax.inject;
     uses org.apache.commons.rdf.api.RDF;
 }

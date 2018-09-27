@@ -18,19 +18,12 @@ import static org.trellisldp.api.RDFUtils.TRELLIS_BNODE_PREFIX;
 import static org.trellisldp.api.RDFUtils.TRELLIS_DATA_PREFIX;
 import static org.trellisldp.api.RDFUtils.getInstance;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.Quad;
 import org.apache.commons.rdf.api.RDFTerm;
-import org.apache.commons.rdf.api.Triple;
 
 /**
  * The ResourceService provides methods for creating, retrieving and manipulating
@@ -43,8 +36,7 @@ public interface ResourceService extends MutableDataService<Resource>, Immutable
     /**
      * Get the identifier for the structurally-logical container for the resource.
      *
-     * <p>Note: The returned identifier is not guaranteed to exist.
-     *
+     * @apiNote The returned identifier is not guaranteed to exist.
      * @param identifier the identifier
      * @return an identifier for the structurally-logical container
      *
@@ -54,41 +46,6 @@ public interface ResourceService extends MutableDataService<Resource>, Immutable
         return of(path).filter(p -> !p.isEmpty()).map(x -> x.lastIndexOf('/')).map(idx -> idx < 0 ? 0 : idx)
                     .map(idx -> TRELLIS_DATA_PREFIX + path.substring(0, idx)).map(getInstance()::createIRI);
     }
-
-    /**
-     * Retrieve a list of Mementos for this resource.
-     *
-     * @param identifier the resource identifier
-     * @return a {@link List} of {@link Range}s of {@link Instant}s.
-     * Each element of the list can be used to build a link header for a single Memento
-     * (i.e. for the {@code from} and {@code until} parameters)
-     */
-    List<Range<Instant>> getMementos(IRI identifier);
-
-    /**
-     * Compact (rewrite the history) of a resource.
-     *
-     * @param identifier the identifier
-     * @param from a time after which a resource is to be compacted
-     * @param until a time before which a resource is to be compacted
-     * @return a stream of binary IRIs that can be safely purged
-     */
-    Stream<IRI> compact(IRI identifier, Instant from, Instant until);
-
-    /**
-     * Purge a resource from the server.
-     *
-     * @param identifier the identifier
-     * @return a stream of binary IRIs that can be safely purged
-     */
-    Stream<IRI> purge(IRI identifier);
-
-    /**
-     * Scan the resources.
-     *
-     * @return a stream of RDF Triples, containing the resource and its LDP type
-     */
-    Stream<? extends Triple> scan();
 
     /**
      * Skolemize a blank node.
@@ -157,20 +114,6 @@ public interface ResourceService extends MutableDataService<Resource>, Immutable
             }
         }
         return term;
-    }
-
-    /**
-     * Export the server's resources as a stream of {@link Quad}s.
-     *
-     * @param graphNames the graph names to export
-     * @return a stream of quads, where each named graph refers to the resource identifier
-     */
-    default Stream<? extends Quad> export(final Collection<IRI> graphNames) {
-        return scan().map(Triple::getSubject).filter(x -> x instanceof IRI).map(x -> (IRI) x)
-            // TODO - JDK9 optional to stream
-            .flatMap(id -> get(id).map(Stream::of).orElseGet(Stream::empty))
-            .flatMap(resource -> resource.stream(graphNames).map(q ->
-                getInstance().createQuad(resource.getIdentifier(), q.getSubject(), q.getPredicate(), q.getObject())));
     }
 
     /**

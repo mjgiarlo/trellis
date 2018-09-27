@@ -16,10 +16,6 @@ package org.trellisldp.http.impl;
 import static java.util.Date.from;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.GONE;
-import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.trellisldp.api.RDFUtils.getInstance;
 
@@ -31,31 +27,24 @@ import java.util.ServiceLoader;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
-import org.trellisldp.api.AuditService;
 import org.trellisldp.api.ConstraintService;
 import org.trellisldp.api.Resource;
-import org.trellisldp.api.ResourceService;
+import org.trellisldp.api.ServiceBundler;
 import org.trellisldp.http.domain.LdpRequest;
-import org.trellisldp.vocabulary.LDP;
-import org.trellisldp.vocabulary.Trellis;
 
 /**
  * @author acoburn
  */
-public class BaseLdpHandler {
+class BaseLdpHandler {
 
     private static final Logger LOGGER = getLogger(BaseLdpHandler.class);
 
     protected static final RDF rdf = getInstance();
-
-    protected AuditService audit;
 
     protected static final List<ConstraintService> constraintServices = new ArrayList<>();
 
@@ -63,64 +52,54 @@ public class BaseLdpHandler {
         ServiceLoader.load(ConstraintService.class).forEach(constraintServices::add);
     }
 
-    private final String baseUrl;
-    protected final LdpRequest req;
-    protected final ResourceService resourceService;
+    private final String requestBaseUrl;
+    private final LdpRequest request;
+    private final ServiceBundler services;
+
+    private Resource resource;
 
     /**
      * A base class for response handling.
      *
-     * @param req the LDP request
-     * @param resourceService the resource service
-     * @param auditService an audit service
+     * @param request the LDP request
+     * @param services the Trellis service bundle
      * @param baseUrl the base URL
      */
-    public BaseLdpHandler(final LdpRequest req, final ResourceService resourceService, final AuditService auditService,
-                    final String baseUrl) {
-        this.baseUrl = baseUrl;
-        this.req = req;
-        this.resourceService = resourceService;
-        this.audit = auditService;
+    protected BaseLdpHandler(final LdpRequest request, final ServiceBundler services, final String baseUrl) {
+        this.requestBaseUrl = getRequestBaseUrl(request, baseUrl);
+        this.request = request;
+        this.services = services;
     }
 
     /**
-     * Check if this is a deleted resource, and if so return an appropriate response.
-     *
-     * @param res the resource
-     * @param identifier the identifier
-     * @throws WebApplicationException a 410 Gone exception
+     * Set the resource for this request.
+     * @param resource the Trellis resource
      */
-    protected void checkDeleted(final Resource res, final String identifier) {
-        if (res.isDeleted()) {
-            throw new WebApplicationException(status(GONE)
-                    .links(MementoResource.getMementoLinks(identifier, resourceService.getMementos(res.getIdentifier()))
-                    .toArray(Link[]::new)).build());
+    protected void setResource(final Resource resource) {
+        this.resource = resource;
+    }
+
+    /**
+     * Get the resource for this request.
+     * @return the resource or null if not present
+     */
+    protected Resource getResource() {
+        return resource;
+    }
+
+    /**
+     * Check the cache.
+     * @param modified the modification date
+     * @param etag the resource's etag
+     */
+    protected void checkCache(final Instant modified, final EntityTag etag) {
+        ResponseBuilder builder = null;
+        try {
+            builder = getRequest().getRequest().evaluatePreconditions(from(modified), etag);
+        } catch (final Exception ex) {
+            LOGGER.warn("Error processing cache request: {}", ex.getMessage());
+            throw new BadRequestException();
         }
-    }
-
-    /**
-     * Get the baseUrl for the request.
-     *
-     * @return the baseUrl
-     */
-    protected String getBaseUrl() {
-        final String base = ofNullable(baseUrl).orElseGet(req::getBaseUrl);
-        if (base.endsWith("/")) {
-            return base;
-        }
-        return base + "/";
-    }
-
-    /**
-     * Check the request for a cache-related response.
-     *
-     * @param request the request
-     * @param modified the modified time
-     * @param etag the etag
-     * @throws WebApplicationException either a 412 Precondition Failed or a 304 Not Modified, depending on the context.
-     */
-    protected static void checkCache(final Request request, final Instant modified, final EntityTag etag) {
-        final ResponseBuilder builder = request.evaluatePreconditions(from(modified), etag);
         if (nonNull(builder)) {
             throw new WebApplicationException(builder.build());
         }
@@ -131,16 +110,49 @@ public class BaseLdpHandler {
      * underlying persistence layer.
      *
      * @param interactionModel the interaction model
-     * @throws BadRequestException if the interaction model is not supported
+     * @return true if the interaction model is supported; false otherwise
      */
-    protected void checkInteractionModel(final IRI interactionModel) {
-        if (!resourceService.supportedInteractionModels().contains(interactionModel)) {
-            LOGGER.error("Interaction model not supported: {}", interactionModel);
-            throw new BadRequestException("Unsupported interaction model provided: " + interactionModel,
-                    status(BAD_REQUEST)
-                        .link(Trellis.UnsupportedInteractionModel.getIRIString(), LDP.constrainedBy.getIRIString())
-                        .entity("Unsupported interaction model provided").type(TEXT_PLAIN_TYPE).build());
-        }
+    protected Boolean supportsInteractionModel(final IRI interactionModel) {
+        return getServices().getResourceService().supportedInteractionModels().contains(interactionModel);
     }
 
+    /**
+     * Get the base URL for this request.
+     * @return the base URL
+     */
+    protected String getBaseUrl() {
+        return requestBaseUrl;
+    }
+
+    /**
+     * Get an identifier for the resource in question.
+     * @return an identifier string
+     */
+    protected String getIdentifier() {
+        return getBaseUrl() + getRequest().getPath();
+    }
+
+    /**
+     * Get the LDP Request object.
+     * @return the LDP request object
+     */
+    protected LdpRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Get the Trellis service bundles.
+     * @return the services
+     */
+    protected ServiceBundler getServices() {
+        return services;
+    }
+
+    private static String getRequestBaseUrl(final LdpRequest req, final String baseUrl) {
+        final String base = ofNullable(baseUrl).orElseGet(req::getBaseUrl);
+        if (base.endsWith("/")) {
+            return base;
+        }
+        return base + "/";
+    }
 }

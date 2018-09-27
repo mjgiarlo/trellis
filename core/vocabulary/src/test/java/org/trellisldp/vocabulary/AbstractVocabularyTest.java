@@ -19,6 +19,7 @@ import static org.apache.jena.core.graph.Factory.createDefaultGraph;
 import static org.apache.jena.core.graph.Node.ANY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.lang.reflect.Field;
@@ -27,7 +28,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.jena.arq.atlas.web.HttpException;
 import org.apache.jena.arq.riot.RDFParser;
+import org.apache.jena.arq.riot.RiotNotFoundException;
 import org.apache.jena.core.graph.Graph;
 import org.apache.jena.core.graph.Node;
 import org.apache.jena.core.graph.Triple;
@@ -53,7 +56,12 @@ public abstract class AbstractVocabularyTest {
 
     protected Graph getVocabulary(final String url) {
         final Graph graph = createDefaultGraph();
+        try {
             RDFParser.source(url).httpAccept(ACCEPT).parse(graph);
+        } catch (final HttpException | RiotNotFoundException ex) {
+            LOGGER.warn("Could not fetch {}: {}", url, ex.getMessage());
+        }
+        assumeTrue(graph.size() > 0, "Remote vocabulary has no terms! Skip the test for " + url);
         return graph;
     }
 
@@ -64,7 +72,7 @@ public abstract class AbstractVocabularyTest {
         final Set<String> subjects = graph.find(ANY, ANY, ANY).mapWith(Triple::getSubject)
                 .filterKeep(Node::isURI).mapWith(Node::getURI).filterKeep(Objects::nonNull).toSet();
 
-        assertTrue(fields().count() > 0);
+        assertTrue(fields().count() > 0, "No fields found in the vocabulary class!");
         fields().forEach(field -> {
             if (isStrict()) {
                 assertTrue(subjects.contains(namespace() + field),

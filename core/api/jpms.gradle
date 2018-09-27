@@ -16,7 +16,8 @@ javaModule {
 dependencies {
     api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
     api("org.apache.commons:commons-lang3:$commonsLangVersion")
-
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    
     testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("de.ubleipzig:jena.arq-jpms:$jenaVersion")
     testImplementation("de.ubleipzig:jena.core-jpms:$jenaVersion")

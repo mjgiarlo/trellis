@@ -14,39 +14,33 @@
 package org.trellisldp.file;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
-import static java.util.Optional.of;
-import static org.apache.commons.lang3.Range.between;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.junit.jupiter.api.condition.JRE.JAVA_8;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.trellisldp.api.BinaryService;
 import org.trellisldp.api.IdentifierService;
 import org.trellisldp.id.UUIDGenerator;
@@ -66,116 +60,139 @@ public class FileBinaryServiceTest {
     private static final IRI file = rdf.createIRI("file:///" + testDoc);
     private final IdentifierService idService = new UUIDGenerator();
 
-    @Mock
-    private InputStream mockInputStream;
-
     @BeforeAll
     public static void setUpEverything() {
         System.getProperties().setProperty(FileBinaryService.BINARY_BASE_PATH, directory);
     }
 
-    @BeforeEach
-    public void setUp() {
-        initMocks(this);
-    }
-
-    @Test
-    public void testFileExists() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        assertTrue(resolver.exists(file));
-        assertFalse(resolver.exists(rdf.createIRI("file:///fake.txt")));
-    }
-
     @Test
     public void testFilePurge() {
-        final BinaryService resolver = new FileBinaryService(idService);
+        final BinaryService service = new FileBinaryService(idService);
         final IRI fileIRI = rdf.createIRI("file:///" + randomFilename());
         final InputStream inputStream = new ByteArrayInputStream("Some data".getBytes(UTF_8));
-        resolver.setContent(fileIRI, inputStream);
-        assertTrue(resolver.exists(fileIRI));
-        resolver.purgeContent(fileIRI);
-        assertFalse(resolver.exists(fileIRI));
+        assertNull(service.setContent(fileIRI, inputStream).join(), "setContent didn't complete cleanly!");
+        assertEquals("Some data", uncheckedToString(service.getContent(fileIRI).join()),
+                "incorrect value for getContent!");
+        assertNull(service.purgeContent(fileIRI).join(), "purgeContent didn't complete cleanly!");
+        assertNull(service.purgeContent(fileIRI).join(), "purgeContent (2) didn't complete cleanly!");
     }
 
     @Test
     public void testIdSupplier() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        assertTrue(resolver.generateIdentifier().startsWith("file:///"));
-        assertNotEquals(resolver.generateIdentifier(), resolver.generateIdentifier());
+        final BinaryService service = new FileBinaryService(idService);
+        assertTrue(service.generateIdentifier().startsWith("file:///"), "Identifier has incorrect prefix!");
+        assertNotEquals(service.generateIdentifier(), service.generateIdentifier(), "Identifiers are not unique!");
     }
 
     @Test
     public void testFileContent() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        assertTrue(resolver.getContent(file).isPresent());
-        assertEquals("A test document.\n", resolver.getContent(file).map(this::uncheckedToString).get());
+        final BinaryService service = new FileBinaryService(idService);
+        assertEquals("A test document.\n", service.getContent(file).thenApply(this::uncheckedToString).join(),
+                "Incorrect content when fetching from a file!");
     }
 
     @Test
     public void testFileContentSegment() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        final List<Range<Integer>> range = singletonList(between(1, 5));
-        assertTrue(resolver.getContent(file, range).isPresent());
-        assertEquals(" tes", resolver.getContent(file, range).map(this::uncheckedToString).get());
-    }
-
-    @Test
-    public void testFileContentSegments() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        final List<Range<Integer>> ranges = new ArrayList<>();
-        ranges.add(between(1, 5));
-        ranges.add(between(8, 10));
-
-        assertTrue(resolver.getContent(file, ranges).isPresent());
-        assertEquals(" tesoc", resolver.getContent(file, ranges).map(this::uncheckedToString).get());
+        final BinaryService service = new FileBinaryService(idService);
+        assertEquals(" tes", service.getContent(file, 1, 5).thenApply(this::uncheckedToString).join(),
+                "Incorrect segment when fetching from a file!");
+        assertEquals("oc", service.getContent(file, 8, 10).thenApply(this::uncheckedToString).join(),
+                "Incorrect segment when fetching from a file!");
     }
 
     @Test
     public void testFileContentSegmentBeyond() {
-        final BinaryService resolver = new FileBinaryService(idService);
-        final List<Range<Integer>> range = singletonList(between(1000, 1005));
-        assertTrue(resolver.getContent(file, range).isPresent());
-        assertEquals("", resolver.getContent(file, range).map(this::uncheckedToString).get());
+        final BinaryService service = new FileBinaryService(idService);
+        assertEquals("", service.getContent(file, 1000, 1005).thenApply(this::uncheckedToString).join(),
+                "Incorrect out-of-range segment when fetching from a file!");
     }
 
     @Test
     public void testSetFileContent() {
         final String contents = "A new file";
-        final BinaryService resolver = new FileBinaryService(idService);
+        final BinaryService service = new FileBinaryService(idService);
         final IRI fileIRI = rdf.createIRI("file:///" + randomFilename());
         final InputStream inputStream = new ByteArrayInputStream(contents.getBytes(UTF_8));
-        resolver.setContent(fileIRI, inputStream);
-        assertTrue(resolver.getContent(fileIRI).isPresent());
-        assertEquals(contents, resolver.getContent(fileIRI).map(this::uncheckedToString).get());
+        assertNull(service.setContent(fileIRI, inputStream).join(), "Setting content didn't complete cleanly!");
+        assertEquals(contents, service.getContent(fileIRI).thenApply(this::uncheckedToString).join(),
+                "Fetching new content returned incorrect value!");
     }
 
     @Test
     public void testGetFileContentError() throws IOException {
-        final BinaryService resolver = new FileBinaryService(idService);
+        final BinaryService service = new FileBinaryService(idService);
         final IRI fileIRI = rdf.createIRI("file:///" + randomFilename());
-        assertThrows(UncheckedIOException.class, () -> resolver.getContent(fileIRI));
+        assertThrows(CompletionException.class, () -> service.getContent(fileIRI).join(),
+                "Fetching from invalid file should have thrown an exception!");
+        assertThrows(CompletionException.class, () -> service.getContent(fileIRI, 0, 4).join(),
+                "Fetching binary segment from invalid file should have thrown an exception!");
     }
 
     @Test
-    public void testSetFileContentError() throws IOException {
+    public void testBadAlgorithm() throws Exception {
+        final BinaryService service = new FileBinaryService(idService);
+        assertNull(service.calculateDigest(file, "BLAHBLAH").join(), "Unsupported algorithm should return null!");
+    }
+
+    @Test
+    public void testSetFileContentError() throws Exception {
         final InputStream throwingMockInputStream = mock(InputStream.class, inv -> {
                 throw new IOException("Expected error");
         });
-        final BinaryService resolver = new FileBinaryService(idService);
+        final BinaryService service = new FileBinaryService(idService);
         final IRI fileIRI = rdf.createIRI("file:///" + randomFilename());
-        assertThrows(UncheckedIOException.class, () -> resolver.setContent(fileIRI, throwingMockInputStream));
+        assertAll(() -> service.setContent(fileIRI, throwingMockInputStream).handle((val, err) -> {
+                assertNotNull(err, "There should have been an error with the input stream!");
+                return null;
+            }).join());
     }
 
     @Test
     public void testBase64Digest() throws IOException {
-        final byte[] data = "Some data".getBytes(UTF_8);
-        when(mockInputStream.read(any(), anyInt(), anyInt())).thenThrow(new IOException("Expected Error"));
-
         final BinaryService service = new FileBinaryService(idService);
-        assertEquals(of("W4L4v03yv7DmbMqnMG/QJA=="), service.digest("MD5", new ByteArrayInputStream(data)));
-        assertEquals(of("jXJFPxAHmvPfx/z8QQmx7VXhg58="), service.digest("SHA", new ByteArrayInputStream(data)));
-        assertEquals(of("jXJFPxAHmvPfx/z8QQmx7VXhg58="), service.digest("SHA-1", new ByteArrayInputStream(data)));
-        assertFalse(service.digest("MD5", mockInputStream).isPresent());
+        assertEquals("oZ1Y1O/8vs39RH31fh9lrA==", service.calculateDigest(file, "MD5").join(), "Bad MD5 digest!");
+        assertEquals("QJuYLse9SK/As177lt+rSfixyH0=", service.calculateDigest(file, "SHA").join(), "Bad SHA digest!");
+        assertEquals("QJuYLse9SK/As177lt+rSfixyH0=", service.calculateDigest(file, "SHA-1").join(), "Bad SHA1 digest!");
+        assertThrows(CompletionException.class, () ->
+                service.calculateDigest(rdf.createIRI("file:///" + randomFilename()), "MD5").join(),
+                "Computing digest on invalid file should throw an exception!");
+    }
+
+    @Test
+    @DisabledOnJre(JAVA_8)
+    public void testJdk9Digests() throws IOException {
+        final BinaryService service = new FileBinaryService(idService);
+        assertEquals("FQgyH2yU2NhyMTZ7YDDKwV5vcWUBM1zq0uoIYUiHH+4=",
+                service.calculateDigest(file, "SHA3-256").join(), "Bad SHA3-256 digest!");
+        assertEquals("746UDLrFXM61gzI0FnoVT2S0Z7EmQUfhHnoSYwkR2MHzbBe6j9rMigQBfR8ApZUA",
+                service.calculateDigest(file, "SHA3-384").join(), "Bad SHA3-384 digest!");
+        assertEquals("Ecu/R0kV4eL0J/VOpyVA2Lz0T6qsJj9ioQ+QorJDztJeMj6uhf6zqyhZnu9zMYiwrkX8U4oWiZMDT/0fWjOyYg==",
+                service.calculateDigest(file, "SHA3-512").join(), "Bad SHA3-512 digest!");
+    }
+
+    @Test
+    @EnabledOnJre(JAVA_8)
+    public void testJdk9DigestsOnJdk8() throws IOException {
+        final BinaryService service = new FileBinaryService(idService);
+        assertFalse(service.calculateDigest(file, "SHA3-256").handle(this::checkError).join(),
+                "SHA3-256 digest shouldn't be supported on JDK8!");
+        assertFalse(service.calculateDigest(file, "SHA3-384").handle(this::checkError).join(),
+                "SHA3-384 digest shouldn't be supported on JDK8!");
+        assertFalse(service.calculateDigest(file, "SHA3-512").handle(this::checkError).join(),
+                "SHA3-512 digest shouldn't be supported on JDK8!");
+    }
+
+    @Test
+    public void testBadIdentifier() {
+        final BinaryService service = new FileBinaryService(idService);
+        assertFalse(service.getContent(rdf.createIRI("http://example.com/")).handle(this::checkError).join(),
+                "Shouldn't be able to fetch content from a bad IRI!");
+    }
+
+    private Boolean checkError(final Object asyncValue, final Throwable err) {
+        assertNull(asyncValue, "The async value should be null!");
+        assertNotNull(err, "There should be an async error!");
+        return false;
     }
 
     private String uncheckedToString(final InputStream is) {

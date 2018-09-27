@@ -1,0 +1,42 @@
+apply plugin: 'java-library'
+apply plugin: 'osgi'
+
+description = 'Trellis API'
+
+ext {
+    moduleName = 'org.trellisldp.api'
+}
+
+dependencies {
+    api("org.apache.commons:commons-rdf-api:$commonsRdfVersion")
+    api("org.apache.commons:commons-lang3:$commonsLangVersion")
+    api("javax.enterprise:cdi-api:${cdiApiVersion}")
+    api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    testImplementation project(':trellis-vocabulary')
+    testImplementation("commons-io:commons-io:$commonsIoVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.apache.commons:commons-rdf-jena:$commonsRdfVersion")
+    testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
+    testImplementation("org.apache.jena:jena-osgi:$jenaVersion")
+    testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion")
+}
+
+jar {
+    manifest {
+        description project.description
+        docURL project.docURL
+        vendor project.vendor
+        license project.license
+
+        instruction 'Automatic-Module-Name', moduleName
+        instruction 'Import-Package', '*'
+        instruction 'Export-Package', "${moduleName};version=${projectOsgiVersion}"
+        instruction 'Require-Capability', '''\
+            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+            osgi.serviceloader;
+                filter:="(osgi.serviceloader=org.apache.commons.rdf.api.RDF)";
+                resolution:=mandatory; cardinality:=at_least_one
+            '''
+    }
+}
+

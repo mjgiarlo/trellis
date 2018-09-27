@@ -278,102 +278,115 @@ public abstract class AbstractApplicationAuthTests {
             try (final Response res = target().request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response for Auth container");
                 container = res.getLocation().toString();
+            }
+
+            // Add an ACL for this container, with no permissions
+            final String rootAcl = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
+                + prefixAcl
+                + "INSERT DATA { [ acl:accessTo <" + container + ">; acl:agentClass foaf:Agent; \n"
+                + "    acl:default <" + container + ">]}";
+
+            // Add an ACL for the quasi-root container
+            try (final Response res = target(container + EXT_ACL).request().header(AUTHORIZATION, jwt)
+                    .method(PATCH, entity(rootAcl, APPLICATION_SPARQL_UPDATE))) {
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response for ACL to 'root' resource");
             }
 
             // POST a public container
             try (final Response res = target(container).request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check POST response for 'public' container");
                 setPublicContainer(res.getLocation().toString());
             }
 
             // Add a child to the public container
             try (final Response res = target(publicContainer).request().header(AUTHORIZATION, jwt)
                     .post(entity("", TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response for public child");
                 setPublicContainerChild(res.getLocation().toString());
                 final String publicContainerAcl = getLinks(res).stream().filter(link -> link.getRel().equals(acl))
                     .map(link -> link.getUri().toString()).findFirst().orElse("");
-                assertEquals(getPublicContainer() + EXT_ACL, publicContainerAcl);
+                assertEquals(getPublicContainer() + EXT_ACL, publicContainerAcl, "Check ACL location for 'public'");
             }
 
             final String publicAcl = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
                 + prefixAcl
                 + "INSERT DATA { [acl:accessTo <" + publicContainer + ">; acl:mode acl:Read; "
-                + "   acl:agentClass foaf:Agent ] }; \n"
+                + "   acl:agentClass foaf:Agent; acl:default <" + publicContainer + "> ] }; \n"
                 + prefixAcl
                 + "INSERT DATA { [acl:accessTo <" + publicContainer + ">; acl:mode acl:Read, acl:Write;"
-                + "   acl:agentClass acl:AuthenticatedAgent ] }";
+                + "   acl:agentClass acl:AuthenticatedAgent; acl:default <" + publicContainer + ">] }";
 
             // Add an ACL for the public container
             try (final Response res = target(getPublicContainer() + EXT_ACL).request().header(AUTHORIZATION, jwt)
                     .method(PATCH, entity(publicAcl, APPLICATION_SPARQL_UPDATE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response creating ACL for 'public'");
             }
 
             // POST a protected container
             try (final Response res = target(container).request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response for 'protected' container");
                 setProtectedContainer(res.getLocation().toString());
             }
 
             // Add a child to the protected container
             try (final Response res = target(protectedContainer).request().header(AUTHORIZATION, jwt)
                     .post(entity("", TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check add protected child");
                 setProtectedContainerChild(res.getLocation().toString());
                 final String protectedContainerAcl = getLinks(res).stream().filter(link -> link.getRel().equals(acl))
                     .map(link -> link.getUri().toString()).findFirst().orElse("");
-                assertEquals(getProtectedContainer() + EXT_ACL, protectedContainerAcl);
+                assertEquals(getProtectedContainer() + EXT_ACL, protectedContainerAcl, "Check 'protected' ACL URL");
             }
 
             final String protectedAcl = prefixAcl
                 + "INSERT DATA { \n"
                 + "[acl:accessTo  <" + protectedContainer + ">;  acl:mode acl:Read, acl:Write;"
-                + "   acl:agent <https://people.apache.org/~acoburn/#i> ] };"
+                + "   acl:agent <https://people.apache.org/~acoburn/#i>; acl:default <" + protectedContainer + "> ] };"
                 + prefixAcl
                 + "INSERT DATA { \n"
                 + "[acl:accessTo  <" + protectedContainer + ">; acl:mode acl:Read, acl:Append; "
-                + "   acl:agent <https://madison.example.com/profile/#me> ] }";
+                + "   acl:agent <https://madison.example.com/profile/#me>; "
+                + "   acl:default <" + protectedContainer + "> ] }";
 
             // Add an ACL for the protected container
             try (final Response res = target(getProtectedContainer() + EXT_ACL).request().header(AUTHORIZATION, jwt)
                     .method(PATCH, entity(protectedAcl, APPLICATION_SPARQL_UPDATE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'protected' ACL creation");
             }
 
             // POST a private container
             try (final Response res = target(container).request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Create 'private' container");
                 setPrivateContainer(res.getLocation().toString());
             }
 
             // Add a child to the private container
             try (final Response res = target(privateContainer).request().header(AUTHORIZATION, jwt)
                     .post(entity("", TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Add 'private' child");
                 setPrivateContainerChild(res.getLocation().toString());
                 final String privateContainerAcl = getLinks(res).stream().filter(link -> link.getRel().equals(acl))
                     .map(link -> link.getUri().toString()).findFirst().orElse("");
-                assertEquals(getPrivateContainer() + EXT_ACL, privateContainerAcl);
+                assertEquals(getPrivateContainer() + EXT_ACL, privateContainerAcl, "Check 'private' ACL URL");
             }
 
             final String privateAcl = prefixAcl
                 + "INSERT DATA { "
                 + "[acl:accessTo  <" + privateContainer + ">; acl:mode acl:Read, acl:Write; "
-                + "   acl:agent <http://example.com/administrator> ] }";
+                + "   acl:agent <http://example.com/administrator>; acl:default <" + privateContainer + "> ] }";
 
             // Add an ACL for the private container
             try (final Response res = target(getPrivateContainer() + EXT_ACL).request().header(AUTHORIZATION, jwt)
                     .method(PATCH, entity(privateAcl, APPLICATION_SPARQL_UPDATE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check response for 'private' container");
             }
 
             final String groupContent
@@ -391,7 +404,7 @@ public abstract class AbstractApplicationAuthTests {
             // POST a group listing
             try (final Response res = target(container).request()
                     .header(AUTHORIZATION, jwt).post(entity(groupContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'group' resource");
                 groupResource = res.getLocation().toString();
             }
 
@@ -399,51 +412,51 @@ public abstract class AbstractApplicationAuthTests {
             try (final Response res = target(container).request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'group' container");
                 setGroupContainer(res.getLocation().toString());
             }
 
             // Add a child to the group container
             try (final Response res = target(groupContainer).request().header(AUTHORIZATION, jwt)
                     .post(entity("", TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'group' child");
                 setGroupContainerChild(res.getLocation().toString());
                 final String groupContainerAcl = getLinks(res).stream().filter(link -> link.getRel().equals(acl))
                     .map(link -> link.getUri().toString()).findFirst().orElse("");
-                assertEquals(getGroupContainer() + EXT_ACL, groupContainerAcl);
+                assertEquals(getGroupContainer() + EXT_ACL, groupContainerAcl, "Check 'group' ACL URL");
             }
 
             final String groupAcl = prefixAcl
                 + "INSERT DATA {  "
                 + "[acl:accessTo <" + groupContainer + ">; acl:mode acl:Read, acl:Write; "
-                + " acl:agentGroup <" + groupResource + "#Developers> ] };\n"
+                + " acl:agentGroup <" + groupResource + "#Developers>; acl:default <" + groupContainer + "> ] };\n"
                 + prefixAcl
                 + "INSERT DATA {  "
                 + "[acl:accessTo <" + groupContainer + ">; acl:mode acl:Read; "
-                + " acl:agentGroup <" + groupResource + "#Management> ] }";
+                + " acl:agentGroup <" + groupResource + "#Management>; acl:default <" + groupContainer + "> ] }";
 
             // Add an ACL for the private container
             try (final Response res = target(groupContainer + EXT_ACL).request().header(AUTHORIZATION, jwt)
                     .method(PATCH, entity(groupAcl, APPLICATION_SPARQL_UPDATE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check create 'private' ACL");
             }
 
             // POST a container with a default ACL
             try (final Response res = target(container).request()
                     .header(LINK, fromUri(LDP.BasicContainer.getIRIString()).rel(TYPE).build())
                     .header(AUTHORIZATION, jwt).post(entity(containerContent, TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'default' ACL container");
                 defaultContainer = res.getLocation().toString();
             }
 
             // Add a child to the public container
             try (final Response res = target(defaultContainer).request().header(AUTHORIZATION, jwt)
                     .post(entity("", TEXT_TURTLE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check add 'default' child");
                 defaultContainerChild = res.getLocation().toString();
                 final String defaultContainerAcl = getLinks(res).stream().filter(link -> link.getRel().equals(acl))
                     .map(link -> link.getUri().toString()).findFirst().orElse("");
-                assertEquals(getDefaultContainer() + EXT_ACL, defaultContainerAcl);
+                assertEquals(getDefaultContainer() + EXT_ACL, defaultContainerAcl, "Check 'default' ACL URL");
             }
 
             final String defaultAcl = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n"
@@ -452,13 +465,12 @@ public abstract class AbstractApplicationAuthTests {
                 + "[acl:accessTo <" + defaultContainer + ">; acl:mode acl:Read; acl:agentClass foaf:Agent ] }; \n"
                 + prefixAcl
                 + "INSERT DATA { [acl:accessTo <" + defaultContainer + ">; acl:mode acl:Read, acl:Write; \n"
-                + "   acl:default <" + defaultContainer + ">; \n"
                 + "   acl:agent <https://people.apache.org/~acoburn/#i> ] }";
 
             // Add an ACL for the public container
             try (final Response res = target(getDefaultContainer() + EXT_ACL).request().header(AUTHORIZATION, jwt)
                     .method(PATCH, entity(defaultAcl, APPLICATION_SPARQL_UPDATE))) {
-                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily());
+                assertEquals(SUCCESSFUL, res.getStatusInfo().getFamily(), "Check 'public' ACL");
             }
         }
     }

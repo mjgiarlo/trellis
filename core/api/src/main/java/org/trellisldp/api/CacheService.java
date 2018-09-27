@@ -13,12 +13,20 @@
  */
 package org.trellisldp.api;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.util.function.Function;
 
 /**
  * A generalized caching service for Trellis.
  *
  * @author acoburn
+ * @param <K> the type of keys for this cache
+ * @param <V> the type of values for this cache
  */
 public interface CacheService<K, V> {
 
@@ -30,4 +38,15 @@ public interface CacheService<K, V> {
      * @return a value for that key or null
      */
     V get(K key, Function<? super K, ? extends V> mappingFunction);
+
+    /**
+     * A {@link CacheService} used for JSON-LD profiles.
+     *
+     */
+    @java.lang.annotation.Documented
+    @java.lang.annotation.Retention(RUNTIME)
+    @java.lang.annotation.Target({TYPE, METHOD, FIELD, PARAMETER})
+    @javax.inject.Qualifier
+    public @interface TrellisProfileCache { }
+
 }

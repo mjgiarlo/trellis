@@ -26,22 +26,25 @@ import static java.util.Collections.sort;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.of;
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.commons.lang3.Range.between;
-import static org.slf4j.LoggerFactory.getLogger;
+import static org.trellisldp.api.Resource.SpecialResources.MISSING_RESOURCE;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FilenameUtils;
@@ -49,18 +52,17 @@ import org.apache.commons.lang3.Range;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Quad;
 import org.apache.tamaya.ConfigurationProvider;
-import org.slf4j.Logger;
 import org.trellisldp.api.MementoService;
 import org.trellisldp.api.Resource;
 
 /**
  * A file-based versioning system.
  */
+@Alternative
 public class FileMementoService implements MementoService {
 
+    /** The configuration key controlling the base filesystem path for memento storage. **/
     public static final String MEMENTO_BASE_PATH = "trellis.file.memento.basepath";
-
-    private static final Logger LOGGER = getLogger(FileMementoService.class);
 
     private final File directory;
 
@@ -83,39 +85,64 @@ public class FileMementoService implements MementoService {
     }
 
     @Override
-    public void put(final IRI identifier, final Instant time, final Stream<? extends Quad> data) {
-        final File resourceDir = FileUtils.getResourceDirectory(directory, identifier);
-        if (!resourceDir.exists()) {
-            resourceDir.mkdirs();
-        }
-
-        try (final BufferedWriter writer = newBufferedWriter(getNquadsFile(resourceDir, time).toPath(), UTF_8, CREATE,
-                    WRITE, TRUNCATE_EXISTING)) {
-            final Iterator<String> lineIter = data.map(FileUtils::serializeQuad).iterator();
-            while (lineIter.hasNext()) {
-                writer.write(lineIter.next() + lineSeparator());
+    public CompletableFuture<Void> put(final IRI identifier, final Instant time, final Stream<? extends Quad> data) {
+        return runAsync(() -> {
+            final File resourceDir = FileUtils.getResourceDirectory(directory, identifier);
+            if (!resourceDir.exists()) {
+                resourceDir.mkdirs();
             }
-        } catch (final IOException ex) {
-            LOGGER.error("Error writing resource version for " + identifier.getIRIString(), ex);
-        }
+
+            try (final BufferedWriter writer = newBufferedWriter(getNquadsFile(resourceDir, time).toPath(), UTF_8,
+                        CREATE, WRITE, TRUNCATE_EXISTING)) {
+                final Iterator<String> lineIter = data.map(FileUtils::serializeQuad).iterator();
+                while (lineIter.hasNext()) {
+                    writer.write(lineIter.next() + lineSeparator());
+                }
+            } catch (final IOException ex) {
+                throw new UncheckedIOException("Error writing resource version for " + identifier.getIRIString(), ex);
+            }
+        });
     }
 
     @Override
-    public Optional<Resource> get(final IRI identifier, final Instant time) {
-        final File resourceDir = FileUtils.getResourceDirectory(directory, identifier);
-        final File file = getNquadsFile(resourceDir, time);
-        if (file.exists()) {
-            return of(new FileMementoResource(identifier, file));
-        }
-        return list(identifier).stream()
-                .filter(range -> !range.getMinimum().isAfter(time))
-                .max((t1, t2) -> t1.getMinimum().compareTo(t2.getMinimum()))
-                .map(t -> getNquadsFile(resourceDir, t.getMinimum()))
-                .map(f -> new FileMementoResource(identifier, f));
+    public CompletableFuture<Resource> get(final IRI identifier, final Instant time) {
+        return supplyAsync(() -> {
+            final File resourceDir = FileUtils.getResourceDirectory(directory, identifier);
+            final File file = getNquadsFile(resourceDir, time);
+            if (file.exists()) {
+                return new FileResource(identifier, file);
+            }
+            return listMementos(identifier).stream().filter(range -> !range.getMinimum().isAfter(time))
+                    .max((t1, t2) -> t1.getMinimum().compareTo(t2.getMinimum()))
+                    .map(t -> getNquadsFile(resourceDir, t.getMinimum()))
+                    .map(f -> (Resource) new FileResource(identifier, f)).orElse(MISSING_RESOURCE);
+        });
     }
 
     @Override
-    public List<Range<Instant>> list(final IRI identifier) {
+    public CompletableFuture<List<Range<Instant>>> list(final IRI identifier) {
+        return supplyAsync(() -> listMementos(identifier));
+    }
+
+    @Override
+    public CompletableFuture<Void> delete(final IRI identifier, final Instant time) {
+        return runAsync(() -> {
+            try {
+                deleteIfExists(getNquadsFile(FileUtils.getResourceDirectory(directory, identifier),
+                            time).toPath());
+            } catch (final IOException ex) {
+                throw new UncheckedIOException("Could not delete Memento for " + identifier + " at " + time, ex);
+            }
+        });
+    }
+
+    private void init() {
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    }
+
+    private List<Range<Instant>> listMementos(final IRI identifier) {
         final File resourceDir = FileUtils.getResourceDirectory(directory, identifier);
         if (!resourceDir.exists()) {
             return emptyList();
@@ -126,7 +153,7 @@ public class FileMementoService implements MementoService {
             files.map(Path::toString).filter(path -> path.endsWith(".nq")).map(FilenameUtils::getBaseName)
                 .map(Long::parseLong).map(Instant::ofEpochSecond).forEach(instants::add);
         } catch (final IOException ex) {
-            LOGGER.error("Error fetching memento list for " + identifier, ex);
+            throw new UncheckedIOException("Error fetching memento list for " + identifier, ex);
         }
 
         sort(instants);
@@ -143,22 +170,6 @@ public class FileMementoService implements MementoService {
             versions.add(between(last, now()));
         }
         return unmodifiableList(versions);
-    }
-
-    @Override
-    public Boolean delete(final IRI identifier, final Instant time) {
-        try {
-            return deleteIfExists(getNquadsFile(FileUtils.getResourceDirectory(directory, identifier), time).toPath());
-        } catch (final IOException ex) {
-            LOGGER.error("Could not delete Memento for " + identifier + " at " + time, ex);
-        }
-        return false;
-    }
-
-    private void init() {
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
     }
 
     private File getNquadsFile(final File dir, final Instant time) {

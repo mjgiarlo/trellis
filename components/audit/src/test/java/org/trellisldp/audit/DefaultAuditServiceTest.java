@@ -15,6 +15,7 @@ package org.trellisldp.audit;
 
 import static java.time.Instant.now;
 import static java.util.Optional.of;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.trellisldp.vocabulary.RDF.type;
 
 import java.time.Instant;
+import java.util.stream.Stream;
 
 import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.IRI;
@@ -29,6 +31,7 @@ import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.trellisldp.api.AuditService;
 import org.trellisldp.api.Session;
@@ -46,7 +49,7 @@ public class DefaultAuditServiceTest {
 
     private final Instant created = now();
 
-    private final IRI subject = rdf.createIRI("trellis:repository/resource");
+    private final IRI subject = rdf.createIRI("trellis:data/resource");
 
     @Mock
     private Session mockSession;
@@ -64,15 +67,10 @@ public class DefaultAuditServiceTest {
         final Dataset dataset = rdf.createDataset();
         final AuditService svc = new DefaultAuditService() {};
         svc.creation(subject, mockSession).forEach(dataset::add);
-        assertTrue(dataset.getGraph(Trellis.PreferAudit).filter(graph -> graph.size() == dataset.size()).isPresent());
-        assertTrue(dataset.contains(null, null, type, PROV.Activity));
-        assertTrue(dataset.contains(null, null, type, AS.Create));
-        assertTrue(dataset.contains(null, subject, PROV.wasGeneratedBy, null));
-        assertTrue(dataset.contains(null, null, PROV.wasAssociatedWith, Trellis.AnonymousAgent));
-        assertTrue(dataset.contains(null, null, PROV.actedOnBehalfOf, Trellis.AdministratorAgent));
-        assertTrue(dataset.contains(null, null, PROV.atTime,
-                    rdf.createLiteral(created.toString(), XSD.dateTime)));
-        assertEquals(6L, dataset.size());
+        assertTrue(dataset.getGraph(Trellis.PreferAudit).filter(graph -> graph.size() == dataset.size()).isPresent(),
+                "Graph and dataset sizes don't match for creation event!");
+        assertTrue(dataset.contains(null, null, type, AS.Create), "as:Create type not in create dataset!");
+        assertAll("Event property check", checkEventProperties(dataset));
     }
 
     @Test
@@ -80,15 +78,10 @@ public class DefaultAuditServiceTest {
         final Dataset dataset = rdf.createDataset();
         final AuditService svc = new DefaultAuditService() {};
         svc.deletion(subject, mockSession).forEach(dataset::add);
-        assertTrue(dataset.getGraph(Trellis.PreferAudit).filter(graph -> graph.size() == dataset.size()).isPresent());
-        assertTrue(dataset.contains(null, null, type, PROV.Activity));
-        assertTrue(dataset.contains(null, null, type, AS.Delete));
-        assertTrue(dataset.contains(null, subject, PROV.wasGeneratedBy, null));
-        assertTrue(dataset.contains(null, null, PROV.wasAssociatedWith, Trellis.AnonymousAgent));
-        assertTrue(dataset.contains(null, null, PROV.actedOnBehalfOf, Trellis.AdministratorAgent));
-        assertTrue(dataset.contains(null, null, PROV.atTime,
-                    rdf.createLiteral(created.toString(), XSD.dateTime)));
-        assertEquals(6L, dataset.size());
+        assertTrue(dataset.getGraph(Trellis.PreferAudit).filter(graph -> graph.size() == dataset.size()).isPresent(),
+                "Graph and dataset sizes don't match for deletion event!");
+        assertTrue(dataset.contains(null, null, type, AS.Delete), "as:Delete type not in delete dataset!");
+        assertAll("Event property check", checkEventProperties(dataset));
     }
 
     @Test
@@ -97,13 +90,21 @@ public class DefaultAuditServiceTest {
         final AuditService svc = new DefaultAuditService() {};
         svc.update(subject, mockSession).forEach(dataset::add);
         assertTrue(dataset.getGraph(Trellis.PreferAudit).filter(graph -> graph.size() == dataset.size()).isPresent());
-        assertTrue(dataset.contains(null, null, type, PROV.Activity));
         assertTrue(dataset.contains(null, null, type, AS.Update));
-        assertTrue(dataset.contains(null, subject, PROV.wasGeneratedBy, null));
-        assertTrue(dataset.contains(null, null, PROV.wasAssociatedWith, Trellis.AnonymousAgent));
-        assertTrue(dataset.contains(null, null, PROV.actedOnBehalfOf, Trellis.AdministratorAgent));
-        assertTrue(dataset.contains(null, null, PROV.atTime,
-                    rdf.createLiteral(created.toString(), XSD.dateTime)));
-        assertEquals(6L, dataset.size());
+        assertAll("Event property check", checkEventProperties(dataset));
+    }
+
+    private Stream<Executable> checkEventProperties(final Dataset dataset) {
+        return Stream.of(
+                () -> assertTrue(dataset.contains(null, null, type, PROV.Activity), "missing prov:Activity triple!"),
+                () -> assertTrue(dataset.contains(null, subject, PROV.wasGeneratedBy, null),
+                                 "missing prov:wasGeneratedBy triple!"),
+                () -> assertTrue(dataset.contains(null, null, PROV.wasAssociatedWith, Trellis.AnonymousAgent),
+                                 "missing prov:wasAssociatedWith triple!"),
+                () -> assertTrue(dataset.contains(null, null, PROV.actedOnBehalfOf, Trellis.AdministratorAgent),
+                                 "missing prov:actedOnBehalfOf triple!"),
+                () -> assertTrue(dataset.contains(null, null, PROV.atTime,
+                        rdf.createLiteral(created.toString(), XSD.dateTime)), "missing prov:atTime triple!"),
+                () -> assertEquals(6L, dataset.size(), "Incorrect dataset size!"));
     }
 }

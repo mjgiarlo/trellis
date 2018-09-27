@@ -13,7 +13,6 @@
  */
 
 package org.trellisldp.io;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -57,7 +56,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.rdf.api.IRI;
@@ -85,6 +83,7 @@ import org.apache.jena.base.atlas.AtlasException;
 import org.apache.tamaya.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.trellisldp.api.CacheService;
+import org.trellisldp.api.CacheService.TrellisProfileCache;
 import org.trellisldp.api.IOService;
 import org.trellisldp.api.NamespaceService;
 import org.trellisldp.api.RDFaWriterService;
@@ -97,7 +96,10 @@ import org.trellisldp.api.RuntimeTrellisException;
  */
 public class JenaIOService implements IOService {
 
+    /** The configuration key listing valid JSON-LD profile documents. **/
     public static final String IO_JSONLD_PROFILES = "trellis.io.jsonld.profiles";
+
+    /** The configuration key listing valid JSON-LD profile domains. **/
     public static final String IO_JSONLD_DOMAINS = "trellis.io.jsonld.domains";
 
     private static final Logger LOGGER = getLogger(JenaIOService.class);
@@ -155,8 +157,9 @@ public class JenaIOService implements IOService {
      * @param cache            a cache for custom JSON-LD profile resolution
      */
     @Inject
-    public JenaIOService(final NamespaceService namespaceService, final RDFaWriterService htmlSerializer, @Named
-            ("TrellisProfileCache") final CacheService<String, String> cache) {
+    public JenaIOService(final NamespaceService namespaceService,
+            final RDFaWriterService htmlSerializer,
+            @TrellisProfileCache final CacheService<String, String> cache) {
         this(namespaceService, htmlSerializer, cache,
                 ConfigurationProvider.getConfiguration().getOrDefault(IO_JSONLD_PROFILES, ""),
                 ConfigurationProvider.getConfiguration().getOrDefault(IO_JSONLD_DOMAINS, ""));
@@ -267,14 +270,18 @@ public class JenaIOService implements IOService {
         }
     }
 
+    private Boolean canUseCustomJsonLdProfile(final String profile) {
+        return nonNull(profile) && nonNull(cache);
+    }
+
     private void writeJsonLd(final OutputStream output, final DatasetGraph graph, final IRI... profiles) {
         final String profile = getCustomJsonLdProfile(profiles);
-        final RDFFormat format = nonNull(profile) && nonNull(cache) ? JSONLD_COMPACT_FLAT : getJsonLdProfile(profiles);
+        final RDFFormat format = canUseCustomJsonLdProfile(profile) ? JSONLD_COMPACT_FLAT : getJsonLdProfile(profiles);
         final WriterDatasetRIOT writer = RDFDataMgr.createDatasetWriter(format);
         final PrefixMap pm = RiotLib.prefixMap(graph);
         final String base = null;
         final JsonLDWriteContext ctx = new JsonLDWriteContext();
-        if (nonNull(profile) && nonNull(cache)) {
+        if (canUseCustomJsonLdProfile(profile)) {
             LOGGER.debug("Setting JSON-LD context with profile: {}", profile);
             final String c = cache.get(profile, p -> {
                 try (final TypedInputStream res = HttpOp.execHttpGet(profile)) {
@@ -333,7 +340,7 @@ public class JenaIOService implements IOService {
                 });
             }
             return rdf.asGraph(graph).stream();
-        } catch (final RiotException | AtlasException ex) {
+        } catch (final RiotException | AtlasException | IllegalArgumentException ex) {
             throw new RuntimeTrellisException(ex);
         }
     }

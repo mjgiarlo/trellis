@@ -18,4 +18,5 @@ module org.trellisldp.jpms.webac {
     requires org.trellisldp.jpms.api;
     requires org.trellisldp.jpms.vocabulary;
     requires slf4j.api;
+    requires tamaya.api;
 }

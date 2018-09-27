@@ -5,7 +5,7 @@ description = 'Trellis Triplestore Application'
 dependencies {
     compile("javax.ws.rs:javax.ws.rs-api:$jaxrsVersion")
     compile("org.apache.jena:jena-osgi:$jenaVersion")
-    compile("org.apache.jena:jena-tdb2:$jenaVersion")
+    compile("org.apache.commons:commons-compress:$commonsCompressVersion")
     compile("org.apache.tamaya:tamaya-api:$tamayaVersion")
     compile("org.apache.tamaya:tamaya-core:$tamayaVersion")
     compile("org.glassfish.jersey.core:jersey-server:$jerseyVersion")
@@ -23,10 +23,22 @@ dependencies {
     runtime("javax.xml.bind:jaxb-api:$jaxbVersion")
     runtime("javax.activation:javax.activation-api:$activationApiVersion")
     runtime("ch.qos.logback:logback-classic:$logbackVersion")
+
+    testImplementation("org.apache.commons:commons-text:$commonsTextVersion")
+    testImplementation("org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion")
+    testImplementation("org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-jetty:$jerseyVersion")
+    testImplementation("org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion")
+    testImplementation("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
+    testImplementation project(':trellis-test')
+
+    testRuntimeClasspath("javax.xml.bind:jaxb-api:$jaxbVersion")
+    testRuntimeClasspath("javax.activation:javax.activation-api:$activationApiVersion")
+    testRuntimeClasspath("ch.qos.logback:logback-classic:$logbackVersion")
 }
 
-uploadArchives {
-    // There is no need to store these artifacts on maven central
-    enabled = false
+test {
+    systemProperty 'trellis.file.memento.basepath', "$buildDir/data/mementos"
+    systemProperty 'trellis.file.binary.basepath', "$buildDir/data/binaries"
+    systemProperty 'trellis.rdf.location', "$buildDir/data/rdf"
+    systemProperty 'trellis.namespaces.path', "$buildDir/data/namespaces.json"
 }
-
