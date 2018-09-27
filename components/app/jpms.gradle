@@ -30,8 +30,8 @@ dependencies {
     implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {force = true}
     implementation("io.jsonwebtoken:jjwt:$jwtVersion")
     implementation("org.glassfish:javax.el:$javaxElApiVersion")
-
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.trellisldp:trellis-http-jpms:$version")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
     implementation("org.trellisldp:trellis-agent-jpms:$version")
@@ -52,6 +52,7 @@ dependencies {
     testImplementation("io.dropwizard:dropwizard-client:$dropwizardVersion")
     testImplementation("io.dropwizard:dropwizard-testing:$dropwizardVersion")
     testImplementation("javax.activation:javax.activation-api:$activationApiVersion")
+    testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     testImplementation("javax.xml.bind:jaxb-api:$jaxbVersion")
     testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
@@ -61,6 +62,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
     testImplementation("org.trellisldp:trellis-triplestore-jpms:$version")
     testImplementation("org.trellisldp:trellis-io-jena-jpms:$version")
     testImplementation("org.trellisldp:trellis-file-jpms:$version")

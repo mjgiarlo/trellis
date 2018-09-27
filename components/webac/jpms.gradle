@@ -19,8 +19,8 @@ dependencies {
     api("org.glassfish.hk2.external:javax.inject:$javaxInjectVersion")
     api("org.trellisldp:trellis-api-jpms:$version")
     
-    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.apache.tamaya:tamaya-api:$tamayaVersion")
     implementation("org.trellisldp:trellis-vocabulary-jpms:$version")
 
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -36,11 +36,13 @@ dependencies {
     testImplementation("de.ubleipzig:jena.iri-jpms:$jenaVersion")
     testImplementation("org.apache.commons:commons-rdf-simple:$commonsRdfVersion")
     testImplementation("de.ubleipzig:commons-rdf-jena-jpms:$commonsRdfJenaVersion")
+    testImplementation("javax.annotation:javax.annotation-api:$javaxAnnotationsVersion")
     testImplementation("org.apache.thrift:libthrift:$thriftVersion"){
         exclude(module: 'httpclient')
         exclude(module: 'httpcore')
     }
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.apache.tamaya:tamaya-core:$tamayaVersion")
 }
 
 jar {
